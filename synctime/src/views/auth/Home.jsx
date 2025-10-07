@@ -1,0 +1,69 @@
+// Home.jsx
+import { Link } from 'react-router-dom';
+import styles from './Home.module.css';
+import Button from './../../components/button/Button';
+import Logo from '../../assets/logo.svg';
+
+const Home = () => {
+  
+  return (
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <div className={styles.leftSection}>
+          <div className={styles.decorativeCircle1}></div>
+          <div className={styles.decorativeCircle2}></div>
+
+          <h1 className={styles.title}>Seja Bem-Vindo!</h1>
+
+          <div className={styles.logoWrapper}>
+            <img src={Logo} alt="SyncTime Logo" className={styles.logo} />
+          </div>
+
+          <p className={styles.description}>
+            Organize seu tempo de forma eficiente com o SyncTime.
+          </p>
+        </div>
+
+        {/* Right Section */}
+        <div className={styles.rightSection}>
+          <div className={styles.welcomeText}>
+            <h2 className={styles.subtitle}>Comece Agora</h2>
+            <p className={styles.welcomeDescription}>
+              Faça login ou crie sua conta para
+              <br />
+              começar a usar o SyncTime
+            </p>
+          </div>
+
+          <div className={styles.actionButtons}>
+            <Link to="/login">
+              <Button
+                label="Entrar"
+                variant="animated"
+                outline
+              />
+            </Link>
+            <Link to="/register">
+              <Button
+                label="Criar Conta"
+                outline
+                variant="animated"
+              />
+            </Link>
+          </div>
+          
+          {/* #TODO - Add "Termos de Serviço" */}
+          <div className={styles.terms}>
+            <p>
+              Ao continuar, você concorda com nossos
+              <br />
+              <a href="#">Termos de Serviço</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Home;
