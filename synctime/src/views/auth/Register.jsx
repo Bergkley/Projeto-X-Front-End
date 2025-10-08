@@ -1,15 +1,27 @@
+// ⚙️ React e bibliotecas externas
 import { useContext, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import styles from './Register.module.css';
-import Button from './../../components/button/Button';
-import SecurityQuestions from './../../components/securityQuestions/SecurityQuestions';
-import Logo from '../../assets/logo.svg';
-import { Context } from '../../context/UserContext';
-import { Form } from 'reactstrap';
 import { ErrorMessage } from '@hookform/error-message';
-import errorFormMessage from '../../utils/errorFormMessage';
+import { Link } from 'react-router-dom';
+import { Form } from 'reactstrap';
+
+// 💅 Estilos
+import styles from './Register.module.css';
+
+// 🧩 Componentes
+import Button from '../../components/button/Button';
 import Input from '../../components/Input/input';
+import SecurityQuestions from '../../components/securityQuestions/SecurityQuestions';
+
+// 🖼️ Assets
+import Logo from '../../assets/logo.svg';
+
+// 🌐 Contexto
+import { Context } from '../../context/UserContext';
+
+// 🧰 Utilitários
+import errorFormMessage from '../../utils/errorFormMessage';
+
 
 const Register = () => {
   const { register: registerUser } = useContext(Context);
