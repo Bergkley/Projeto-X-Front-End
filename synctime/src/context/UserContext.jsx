@@ -1,7 +1,10 @@
-import  { createContext } from "react";
+// ⚙️ React e bibliotecas externas
+import { createContext } from "react";
 import PropTypes from "prop-types";
 
+// 🧠 Hooks customizados
 import useAuth from "../hooks/userAuth";
+
 
 const Context = createContext();
 
