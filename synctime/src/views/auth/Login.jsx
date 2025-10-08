@@ -1,12 +1,24 @@
+// ⚙️ React e bibliotecas externas
 import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
+
+// 💅 Estilos
 import styles from './Login.module.css';
-import Button from './../../components/button/Button';
+
+// 🧩 Componentes
+import Button from '../../components/button/Button';
+
+// 🖼️ Assets
 import Logo from '../../assets/logo.svg';
-import errorFormMessage from '../../utils/errorFormMessage';
+
+// 🌐 Contexto
 import { Context } from '../../context/UserContext';
+
+// 🧰 Utilitários
+import errorFormMessage from '../../utils/errorFormMessage';
+
 
 const Login = () => {
   const { login } = useContext(Context);
