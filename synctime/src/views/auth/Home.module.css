@@ -180,16 +180,28 @@
   color: #999;
 }
 
-.terms a {
+.termsLink {
+  background: none;
+  border: none;
   color: rgb(20, 18, 129);
   text-decoration: none;
   font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: all 0.3s ease;
 }
 
-.terms a:hover {
+.termsLink:hover {
   text-decoration: underline;
+  color: rgb(30, 28, 180);
+  transform: scale(1.02);
 }
 
+.termsLink:active {
+  transform: scale(0.98);
+}
 /* Responsive */
 @media (max-width: 768px) {
   .content {

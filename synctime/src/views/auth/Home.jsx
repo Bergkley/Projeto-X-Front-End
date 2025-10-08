@@ -1,11 +1,15 @@
-// Home.jsx
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Home.module.css';
 import Button from './../../components/button/Button';
 import Logo from '../../assets/logo.svg';
+import DefaultModal from '../../components/Modal/DefaultModal';
+import TermsContent from './TermsContent';
 
 const Home = () => {
-  
+  const [modalOpen, setModalOpen] = useState(false);
+  const toggleModal = () => setModalOpen(!modalOpen);
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -24,7 +28,6 @@ const Home = () => {
           </p>
         </div>
 
-        {/* Right Section */}
         <div className={styles.rightSection}>
           <div className={styles.welcomeText}>
             <h2 className={styles.subtitle}>Comece Agora</h2>
@@ -37,31 +40,33 @@ const Home = () => {
 
           <div className={styles.actionButtons}>
             <Link to="/login">
-              <Button
-                label="Entrar"
-                variant="animated"
-                outline
-              />
+              <Button label="Entrar" variant="animated" outline />
             </Link>
             <Link to="/register">
-              <Button
-                label="Criar Conta"
-                outline
-                variant="animated"
-              />
+              <Button label="Criar Conta" outline variant="animated" />
             </Link>
           </div>
-          
-          {/* #TODO - Add "Termos de Serviço" */}
+
           <div className={styles.terms}>
             <p>
               Ao continuar, você concorda com nossos
               <br />
-              <a href="#">Termos de Serviço</a>
+              <button onClick={toggleModal} className={styles.termsLink}>
+                Termos de Autorização
+              </button>
             </p>
           </div>
         </div>
       </div>
+
+      <DefaultModal
+        isOpen={modalOpen}
+        toggle={toggleModal}
+        title="Termos de Autorização"
+        cancelLabel="Fechar"
+      >
+        <TermsContent />
+      </DefaultModal>
     </div>
   );
 };
