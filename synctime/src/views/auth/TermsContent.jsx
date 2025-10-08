@@ -1,3 +1,4 @@
+// 💅 Estilos
 import styles from './TermsContent.module.css';
 
 const TermsContent = () => {
