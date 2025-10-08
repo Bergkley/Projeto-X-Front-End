@@ -95,6 +95,7 @@
   text-align: center;
   animation: fadeIn 0.8s ease-out 0.2s backwards;
   z-index: 1;
+  color: #f8f8f8;
 }
 
 .logoWrapper {
