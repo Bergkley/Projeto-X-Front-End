@@ -1,93 +1,72 @@
 .container {
-  margin-bottom: 25px;
+  width: 100%;
+  margin-bottom: 1.5rem;
 }
 
 .mainLabel {
   display: block;
-  margin-bottom: 8px;
-  color: #333;
+  font-size: 1rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
 }
 
 .required {
-  color: #e74c3c;
+  color: #ef4444;
 }
 
 .description {
-  font-size: 0.85rem;
-  color: #666;
-  margin-bottom: 15px;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
 }
 
 .questionItem {
-  background: #f8f9fa;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 15px;
-  transition: all 0.3s ease;
-}
-
-.questionItem:hover {
-  border-color: rgb(20, 18, 129);
-  box-shadow: 0 2px 8px rgba(20, 18, 129, 0.1);
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
 }
 
 .questionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 0.75rem;
 }
 
 .questionNumber {
+  font-size: 0.875rem;
   font-weight: 600;
-  color: rgb(20, 18, 129);
-  font-size: 0.9rem;
+  color: #4f46e5;
 }
 
 .questionContent {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .questionText {
-  font-size: 1rem;
-  color: #333;
+  font-size: 0.938rem;
   font-weight: 500;
-  line-height: 1.5;
-  padding: 8px 0;
+  color: #374151;
 }
 
 .answerInput {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  font-family: inherit;
+  padding: 0.75rem;
+  font-size: 0.938rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  outline: none;
+  transition: all 0.2s;
+  background-color: white;
 }
 
 .answerInput:focus {
-  outline: none;
-  border-color: rgb(20, 18, 129);
-  box-shadow: 0 0 0 3px rgba(20, 18, 129, 0.1);
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-.answerInput::placeholder {
-  color: #999;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .questionItem {
-    padding: 15px;
-  }
-  
-  .questionText {
-    font-size: 0.95rem;
-  }
+.answerInput:hover {
+  border-color: #9ca3af;
 }

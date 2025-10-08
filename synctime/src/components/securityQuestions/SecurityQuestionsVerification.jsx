@@ -23,8 +23,8 @@ const SecurityQuestionsVerification = ({ questions, answers, onAnswerChange }) =
             
             <input
               type="text"
-              value={answers[question.id] || ''}
-              onChange={(e) => onAnswerChange(question.id, e.target.value)}
+              value={answers[index] || ''}
+              onChange={(e) => onAnswerChange(index, e.target.value)}
               placeholder="Sua resposta"
               className={styles.answerInput}
               required
