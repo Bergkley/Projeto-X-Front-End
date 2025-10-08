@@ -1,10 +1,19 @@
+// ⚙️ React e bibliotecas externas
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+
+// 💅 Estilos
 import styles from './Home.module.css';
-import Button from './../../components/button/Button';
-import Logo from '../../assets/logo.svg';
+
+// 🧩 Componentes
+import Button from '../../components/button/Button';
 import DefaultModal from '../../components/Modal/DefaultModal';
+
+// 📄 Conteúdo local
 import TermsContent from './TermsContent';
+
+// 🖼️ Assets
+import Logo from '../../assets/logo.svg';
 
 const Home = () => {
   const [modalOpen, setModalOpen] = useState(false);
