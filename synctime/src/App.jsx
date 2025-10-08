@@ -1,21 +1,20 @@
+// ⚙️ Dependências principais
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { useState } from 'react';
 
-
-// components
+// 🧩 Componentes
 import Message from "./components/flashMessage/Message";
 
-// pages
+// 📄 Páginas
 import Login from './views/auth/Login';
 import Register from './views/auth/Register';
 import Home from './views/auth/Home';
 import LoadingPage from './views/loading/Loading';
 import ForgotPassword from "./views/auth/ForgotPassword";
 
-
-
-// context
+// 🌐 Contexto
 import { UserProvider } from './context/UserContext';
+
 
 
 function App() {
