@@ -1,16 +1,32 @@
+// ⚙️ React e bibliotecas externas
 import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import styles from './ForgotPassword.module.css';
-import Button from '../../components/button/Button';
-import SecurityQuestionsVerification from './../../components/securityQuestions/SecurityQuestionsVerification';
-import Logo from '../../assets/logo.svg';
-import ServiceAUTH from '../../services/ServiceAUTH';
 import { useForm, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
+
+// 💅 Estilos
+import styles from './ForgotPassword.module.css';
+
+// 🧩 Componentes
+import Button from '../../components/button/Button';
+import SecurityQuestionsVerification from '../../components/securityQuestions/SecurityQuestionsVerification';
+
+// 🖼️ Assets
+import Logo from '../../assets/logo.svg';
+
+// 🔐 Serviços
+import ServiceAUTH from '../../services/ServiceAUTH';
+
+// 🌐 Contexto
 import { Context } from '../../context/UserContext';
-import errorFormMessage from '../../utils/errorFormMessage';
+
+// 🧠 Hooks customizados
 import useFlashMessage from '../../hooks/userFlashMessage';
-import { SECURITY_QUESTIONS } from './../../utils/securityQuestions';
+
+// 🧰 Utilitários
+import errorFormMessage from '../../utils/errorFormMessage';
+import { SECURITY_QUESTIONS } from '../../utils/securityQuestions';
+
 
 const ForgotPassword = () => {
   const { forgotPassword } = useContext(Context);
