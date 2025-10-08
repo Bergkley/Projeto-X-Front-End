@@ -1,70 +1,92 @@
-import api from '../utils/api'
-import { useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import useFlashMessage from './userFlashMessage'
-
+import api from '../services/api';
+import { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import useFlashMessage from './userFlashMessage';
+import ServiceAUTH from '../services/ServiceAUTH';
 
 export default function useAuth() {
-  const [authenticated, setAuthenticated] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const history = useHistory()
-  const { setFlashMessage } = useFlashMessage()
-
-
+  // TODO: Validar authUser
+  const [authenticated, setAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const history = useHistory();
+  const { setFlashMessage } = useFlashMessage();
 
   async function register(user) {
-    let msgText = 'Cadastro realizado com sucesso!'
-    let msgType = 'success'
+    let msgText = '';
+    let msgType = '';
 
     try {
-      const data = await api.post('/users/register', user).then((response) => {
-        return response.data
-      })
+      const data = await ServiceAUTH.register(user).then((response) => {
+        msgText = response.data.message;
+        msgType = 'success';
+        return response.data;
+      });
 
-      await authUser(data)
+      // await authUser(data)
     } catch (error) {
-      msgText = error.response.data.message
-      msgType = 'error'
+      msgText = error.response.data.errors[0];
+      msgType = 'error';
     }
 
-    setFlashMessage(msgText, msgType)
+    setFlashMessage(msgText, msgType);
+  }
+
+  async function forgotPassword(user) {
+    let msgText = '';
+    let msgType = '';
+
+    try {
+      await ServiceAUTH.forgotPassword(user).then((response) => {
+        msgText = response.data.message;
+        msgType = 'success';
+        return response.data;
+      });
+
+      // await authUser(data)
+    } catch (error) {
+      msgText = error.response.data.errors[0];
+      msgType = 'error';
+    }
+
+    setFlashMessage(msgText, msgType);
   }
 
   async function login(user) {
-    let msgText = 'Login realizado com sucesso!'
-    let msgType = 'success'
-
+    let msgText = '';
+    let msgType = '';
     try {
-      const data = await api.post('/users/login', user).then((response) => {
-        return response.data
-      })
+      const data = await ServiceAUTH.login(user).then((response) => {
+        msgText = response.data.message;
+        msgType = 'success';
+        return response.data;
+      });
 
-      await authUser(data)
+      // await authUser(data)
     } catch (error) {
-      msgText = error.response.data.message
-      msgType = 'error'
+      msgText = error.response.data.errors[0];
+      msgType = 'error';
     }
 
-    setFlashMessage(msgText, msgType)
+    setFlashMessage(msgText, msgType);
   }
 
   async function authUser(data) {
-    setAuthenticated(true)
-    localStorage.setItem('token', data.token)
-    history.push('/')
+    setAuthenticated(true);
+    localStorage.setItem('token', data.token);
+    history.push('/');
   }
 
   function logout() {
-    const msgText = 'Logout realizado com sucesso!'
-    const msgType = 'success'
+    const msgText = 'Logout realizado com sucesso!';
+    const msgType = 'success';
 
-    setAuthenticated(false)
-    localStorage.removeItem('token')
-    api.defaults.headers.Authorization = undefined
-    history.push('/login')
+    setAuthenticated(false);
+    localStorage.removeItem('token');
+    api.defaults.headers.Authorization = undefined;
+    history.push('/login');
 
-    setFlashMessage(msgText, msgType)
+    setFlashMessage(msgText, msgType);
   }
 
-  return { authenticated, loading, register, login, logout }
+  return { authenticated, loading, register, login, logout, forgotPassword };
 }
