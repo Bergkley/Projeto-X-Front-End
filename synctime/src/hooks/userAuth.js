@@ -1,8 +1,13 @@
-import api from '../services/api';
+// ⚙️ React e bibliotecas externas
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import useFlashMessage from './userFlashMessage';
+
+// 🔐 Serviços / API
+import api from '../services/api';
 import ServiceAUTH from '../services/ServiceAUTH';
+
+// 🧠 Hooks customizados
+import useFlashMessage from './userFlashMessage';
 
 export default function useAuth() {
   // TODO: Validar authUser
