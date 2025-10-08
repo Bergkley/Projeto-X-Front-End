@@ -3,19 +3,19 @@ import { useState } from 'react';
 
 
 // components
+import Message from "./components/flashMessage/Message";
 
 // pages
 import Login from './views/auth/Login';
 import Register from './views/auth/Register';
 import Home from './views/auth/Home';
 import LoadingPage from './views/loading/Loading';
+import ForgotPassword from "./views/auth/ForgotPassword";
 
 
-// Routes
 
 // context
 import { UserProvider } from './context/UserContext';
-import ForgotPassword from "./views/auth/ForgotPassword";
 
 
 function App() {
@@ -28,6 +28,7 @@ function App() {
           <LoadingPage onLoadingComplete={() => setIsLoading(false)} />
         ) : (
           <>
+          <Message />
             <Switch>
             <Route path="/login">
               <Login />
