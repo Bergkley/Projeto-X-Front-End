@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react'
-import styles from "./Message.module.css";
-import bus from "../../utils/bus";
+// ⚙️ React e bibliotecas externas
+import { useEffect, useState } from 'react';
+
+// 💅 Estilos
+import styles from './Message.module.css';
+
+// 🧰 Utilitários
+import bus from '../../utils/bus';
+
 
 
 const Message = () => {
