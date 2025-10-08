@@ -1,9 +1,17 @@
+// ⚙️ Bibliotecas externas
 import { Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
-import SingleSelect from '../select/SingleSelect';
+
+// 💅 Estilos
 import styles from './SecurityQuestions.module.css';
-import { SECURITY_QUESTIONS } from '../../utils/securityQuestions';
+
+// 🧩 Componentes
 import Input from '../Input/input';
+import SingleSelect from '../select/SingleSelect';
+
+// 🧰 Utilitários
+import { SECURITY_QUESTIONS } from '../../utils/securityQuestions';
+
 
 
 const SecurityQuestions = ({ control, errors, value, onChange }) => {
