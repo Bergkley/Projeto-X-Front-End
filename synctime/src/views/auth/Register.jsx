@@ -104,7 +104,7 @@ const Register = () => {
                     className={`${styles.input} ${
                       errors.name ? styles.errorInput : ''
                     }`}
-                    placeholder="João Silva"
+                    placeholder="Digite seu nome"
                   />
                 )}
               />
@@ -131,7 +131,7 @@ const Register = () => {
                     className={`${styles.input} ${
                       errors.login ? styles.errorInput : ''
                     }`}
-                    placeholder="joaosilva"
+                    placeholder="Digite seu nome de usuário"
                   />
                 )}
               />
@@ -164,7 +164,7 @@ const Register = () => {
                     className={`${styles.input} ${
                       errors.email ? styles.errorInput : ''
                     }`}
-                    placeholder="seu@email.com"
+                    placeholder="Digite seu e-mail"
                   />
                 )}
               />

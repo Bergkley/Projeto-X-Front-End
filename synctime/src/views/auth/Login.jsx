@@ -88,7 +88,7 @@ const Login = () => {
                     type="text"
                     id="login"
                     className={`${styles.input} ${errors.login ? styles.errorInput : ''}`}
-                    placeholder="login"
+                    placeholder="Digite seu login"
                     disabled={loading}
                   />
                 )}

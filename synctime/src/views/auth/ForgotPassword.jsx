@@ -179,7 +179,7 @@ const ForgotPassword = () => {
                         className={`${styles.input} ${
                           errors.login ? styles.errorInput : ''
                         }`}
-                        placeholder="joaosilva"
+                        placeholder="Digite seu nome de usuário"
                         disabled={loading}
                       />
                     )}
