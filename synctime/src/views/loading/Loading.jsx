@@ -1,4 +1,6 @@
+// ⚙️ React e bibliotecas externas
 import { useState, useEffect } from 'react';
+// 💅 Estilos
 import styles from './Loading.module.css';
 
 const LoadingPage = ({ onLoadingComplete }) => {
