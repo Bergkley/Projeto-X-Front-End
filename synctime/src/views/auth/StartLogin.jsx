@@ -7,7 +7,7 @@ import styles from './StartLogin.module.css';
 
 // 🧩 Componentes
 import Button from '../../components/button/Button';
-import DefaultModal from '../../components/Modal/DefaultModal';
+import DefaultModal from '../../components/modal/DefaultModal';
 
 // 📄 Conteúdo local
 import TermsContent from './TermsContent';
