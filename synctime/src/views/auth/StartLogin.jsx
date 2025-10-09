@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // 💅 Estilos
-import styles from './Home.module.css';
+import styles from './StartLogin.module.css';
 
 // 🧩 Componentes
 import Button from '../../components/button/Button';
@@ -15,7 +15,7 @@ import TermsContent from './TermsContent';
 // 🖼️ Assets
 import Logo from '../../assets/logo.svg';
 
-const Home = () => {
+const StartLogin = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const toggleModal = () => setModalOpen(!modalOpen);
 
@@ -80,4 +80,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default StartLogin;
