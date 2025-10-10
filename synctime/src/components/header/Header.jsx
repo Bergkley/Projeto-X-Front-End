@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import styles from './Header.module.css';
-import { Bell, Zap} from 'lucide-react';
+import { Bell, Zap } from 'lucide-react';
 import Streak from '../streak/Streak';
+import NotificationsDropdown from '../notification/NotificationsDropdown';
 
 const Header = () => {
   const [notificationCount, setNotificationCount] = useState(3);
@@ -11,12 +12,12 @@ const Header = () => {
 
   const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
   const weekProgress = [true, true, true, true, true, true, true];
-  const completedDaysThisWeek = weekProgress.filter(d => d).length;
+  const completedDaysThisWeek = weekProgress.filter((d) => d).length;
 
   const notifications = [
     { id: 1, text: 'Novo protocolo atribuído', time: '5 min atrás' },
     { id: 2, text: 'Atualização de status', time: '1 hora atrás' },
-    { id: 3, text: 'Mensagem da equipe', time: '2 horas atrás' },
+    { id: 3, text: 'Mensagem da equipe', time: '2 horas atrás' }
   ];
 
   const getFlameColor = () => {
@@ -46,7 +47,12 @@ const Header = () => {
                     className={styles.flameIcon}
                     style={{ color: getFlameColor() }}
                   />
-                  <span className={styles.streakNumber} style={{ color: getFlameColor() }}>{streakDays}</span>
+                  <span
+                    className={styles.streakNumber}
+                    style={{ color: getFlameColor() }}
+                  >
+                    {streakDays}
+                  </span>
                 </button>
               </div>
 
@@ -64,24 +70,9 @@ const Header = () => {
 
                 {/* Notifications Dropdown */}
                 {showNotifications && (
-                  <div className={styles.dropdown}>
-                    <div className={styles.dropdownHeader}>
-                      <h3 className={styles.dropdownTitle}>Notificações</h3>
-                    </div>
-                    <div className={styles.dropdownContent}>
-                      {notifications.map((notif) => (
-                        <div key={notif.id} className={styles.notificationItem}>
-                          <p className={styles.notificationText}>{notif.text}</p>
-                          <p className={styles.notificationTime}>{notif.time}</p>
-                        </div>
-                      ))}
-                    </div>
-                    <div className={styles.dropdownFooter}>
-                      <button className={styles.viewAllButton}>
-                        Ver todas
-                      </button>
-                    </div>
-                  </div>
+                  <NotificationsDropdown
+                    onClose={() => setShowNotifications(false)}
+                  />
                 )}
               </div>
 
