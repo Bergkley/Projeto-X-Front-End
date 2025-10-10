@@ -14,11 +14,7 @@ const Header = () => {
   const weekProgress = [true, true, true, true, true, true, true];
   const completedDaysThisWeek = weekProgress.filter((d) => d).length;
 
-  const notifications = [
-    { id: 1, text: 'Novo protocolo atribuído', time: '5 min atrás' },
-    { id: 2, text: 'Atualização de status', time: '1 hora atrás' },
-    { id: 3, text: 'Mensagem da equipe', time: '2 horas atrás' }
-  ];
+  
 
   const getFlameColor = () => {
     if (streakDays >= 30) return '#ff0000';
@@ -37,22 +33,45 @@ const Header = () => {
 
             {/* Right Side Actions */}
             <div className={styles.actions}>
-              {/* Streak Counter */}
+             {/* Streak Counter */}
               <div className={styles.streakContainer}>
                 <button
                   onClick={() => setShowStreakModal(true)}
                   className={styles.streakButton}
+                  aria-label="Ver progresso de sequência"
                 >
-                  <Zap
-                    className={styles.flameIcon}
-                    style={{ color: getFlameColor() }}
-                  />
-                  <span
-                    className={styles.streakNumber}
-                    style={{ color: getFlameColor() }}
-                  >
-                    {streakDays}
-                  </span>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Zap
+                      className={styles.flameIcon}
+                      style={{ 
+                        color: getFlameColor(),
+                        filter: streakDays >= 7 ? 'drop-shadow(0 0 8px currentColor)' : 'none'
+                      }}
+                      fill={streakDays >= 3 ? getFlameColor() : 'none'}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.125rem' }}>
+                    <span
+                      className={styles.streakNumber}
+                      style={{ 
+                        color: getFlameColor(),
+                        textShadow: streakDays >= 7 ? `0 0 10px ${getFlameColor()}40` : 'none',
+                        lineHeight: '1'
+                      }}
+                    >
+                      {streakDays}
+                    </span>
+                    <span style={{ 
+                      fontSize: '0.625rem', 
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontWeight: '500',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      lineHeight: '1'
+                    }}>
+                      dias
+                    </span>
+                  </div>
                 </button>
               </div>
 
