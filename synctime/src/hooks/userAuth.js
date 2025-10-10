@@ -8,6 +8,7 @@ import ServiceAUTH from '../services/ServiceAUTH';
 
 // 🧠 Hooks customizados
 import useFlashMessage from './userFlashMessage';
+import { useMemorizeFilters,POSSIBLE_FILTERS_ENTITIES } from './useMemorizeInputsFilters';
 
 export default function useAuth() {
   // TODO: Validar authUser
@@ -15,6 +16,8 @@ export default function useAuth() {
   const [loading, setLoading] = useState(true);
   const history = useHistory();
   const { setFlashMessage } = useFlashMessage();
+  const { getMemorizedFilters,memorizeFilters,clearMemorizedFilters } = useMemorizeFilters(POSSIBLE_FILTERS_ENTITIES.USERS);
+
 
   async function register(user) {
     let msgText = '';
@@ -46,7 +49,7 @@ export default function useAuth() {
         msgType = 'success';
         return response.data;
       });
-
+      
       // await authUser(data)
     } catch (error) {
       msgText = error.response.data.errors[0];
@@ -65,6 +68,8 @@ export default function useAuth() {
         msgType = 'success';
         return response.data;
       });
+
+
 
       // await authUser(data)
     } catch (error) {
