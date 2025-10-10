@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 // 🧩 Componentes
 import Message from './components/flashMessage/Message';
+import Header from './components/header/Header';
 
 // 📄 Páginas
 import Login from './views/auth/Login';
@@ -27,7 +28,7 @@ function App() {
           <>
             <Message />
             <Switch>
-              <Route path="/">
+              <Route exact path="/">
                 <StartLogin />
               </Route>
               <Route path="/login">
@@ -38,6 +39,9 @@ function App() {
               </Route>
               <Route path="/forgot-password">
                 <ForgotPassword />
+              </Route>
+              <Route path="/header">
+                <Header />
               </Route>
             </Switch>
           </>
