@@ -5,6 +5,7 @@ import { ErrorMessage } from '@hookform/error-message';
 import useFlashMessage from '../../../hooks/userFlashMessage';
 import { Button } from 'reactstrap';
 import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from './../../../hooks/useMemorizeInputsFilters';
+import errorFormMessage from '../../../utils/errorFormMessage';
 
 const ProfileSection = () => {
   const { setFlashMessage } = useFlashMessage();
@@ -76,7 +77,7 @@ const ProfileSection = () => {
           <ErrorMessage
             errors={errors}
             name="name"
-            render={({ message }) => <span className={styles.error}>{message}</span>}
+            render={({ message }) => errorFormMessage(message)}
           />
         </div>
 
@@ -103,7 +104,7 @@ const ProfileSection = () => {
           <ErrorMessage
             errors={errors}
             name="bio"
-            render={({ message }) => <span className={styles.error}>{message}</span>}
+            render={({ message }) => errorFormMessage(message)}
           />
         </div>
 
