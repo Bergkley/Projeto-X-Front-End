@@ -6,6 +6,7 @@ import {
   POSSIBLE_FILTERS_ENTITIES,
   useMemorizeFilters
 } from '../../../hooks/useMemorizeInputsFilters';
+import errorFormMessage from '../../../utils/errorFormMessage';
 
 const AppearanceSection = () => {
   const { setFlashMessage } = useFlashMessage();
@@ -110,18 +111,16 @@ const AppearanceSection = () => {
           <ErrorMessage
             errors={errors}
             name="theme"
-            render={({ message }) => (
-              <span className={styles.error}>{message}</span>
-            )}
+            render={({ message }) => errorFormMessage(message)}
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Cor de ênfase</label>
+          <label className={styles.label}>Cor do Tema</label>
           <Controller
             name="emphasisColor"
             control={control}
-            rules={{ required: 'Cor de ênfase é obrigatória' }}
+            rules={{ required: 'Cor do Tem é obrigatória' }}
             render={({ field }) => (
               <div className={styles.colorOptions}>
                 {[
@@ -191,9 +190,7 @@ const AppearanceSection = () => {
           <ErrorMessage
             errors={errors}
             name="emphasisColor"
-            render={({ message }) => (
-              <span className={styles.error}>{message}</span>
-            )}
+            render={({ message }) => errorFormMessage(message)}
           />
         </div>
 
