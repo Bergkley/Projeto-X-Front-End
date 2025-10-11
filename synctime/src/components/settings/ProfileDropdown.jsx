@@ -3,15 +3,20 @@ import styles from './ProfileDropdown.module.css';
 import SettingsModal from '../modal/SettingsModal';
 import { useState } from 'react';
 import { useTheme } from '../../hooks/useTheme';
+import NewPassword from '../newPassword/newPassword';
 
 const ProfileDropdown = ({ onClose }) => {
   const [showSettings, setShowSettings] = useState(false);
+  const [showAlterPassword, setShowAlterPassword] = useState(false);
   const { theme } = useTheme();
 
   const handleItemClick = (action) => {
     if (action === 'configuracoes') {
       setShowSettings(true);
-    } else {
+    } else if (action === 'alterar-senha') {
+      setShowAlterPassword(true);
+    } 
+    else {
       console.log(`Ação selecionada: ${action}`);
       onClose();
     }
@@ -54,6 +59,10 @@ const ProfileDropdown = ({ onClose }) => {
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
+      />
+      <NewPassword
+        isOpen={showAlterPassword}
+        onClose={() => setShowAlterPassword(false)}
       />
     </div>
   );

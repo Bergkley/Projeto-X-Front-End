@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import styles from '../../../components/modal/SettingsModal.module.css';
 import useFlashMessage from '../../../hooks/userFlashMessage';
+import NewPassword from '../../newPassword/newPassword';
 
 const AccountSection = () => {
   const { setFlashMessage } = useFlashMessage();
+    const [showAlterPassword, setShowAlterPassword] = useState(false);
+  
   
 
   const onSubmit = (data) => {
@@ -43,6 +47,11 @@ const AccountSection = () => {
         <span className={styles.helpText}>O email não pode ser alterado</span>
       </div>
 
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Alterar senha</label>
+        <button className={styles.dangerButton} onClick={() => setShowAlterPassword(true)}>Alterar senha</button> 
+      </div>
+
       
 
       <div className={styles.divider}></div>
@@ -54,6 +63,10 @@ const AccountSection = () => {
         </p>
         <button className={styles.dangerButton}>Excluir conta</button>
       </div>
+      <NewPassword
+        isOpen={showAlterPassword}
+        onClose={() => setShowAlterPassword(false)}
+      />
     </div>
   );
 };
