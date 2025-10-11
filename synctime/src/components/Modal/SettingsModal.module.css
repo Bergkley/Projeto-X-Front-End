@@ -43,6 +43,16 @@
   transition: background 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  .modalContainer {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+}
+
 /* Dark theme */
 .modalContainer.dark {
   background: #2a2a2a;
@@ -62,6 +72,12 @@
   transition: border-color 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  .modalHeader {
+    padding: 16px;
+  }
+}
+
 .modalContainer.dark .modalHeader {
   border-bottom: 1px solid #3a3a3a;
 }
@@ -75,6 +91,12 @@
   font-size: 20px;
   font-weight: 600;
   transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .modalHeader h2 {
+    font-size: 18px;
+  }
 }
 
 .modalContainer.dark .modalHeader h2 {
@@ -118,12 +140,38 @@
   overflow: hidden;
 }
 
+@media (max-width: 768px) {
+  .modalContent {
+    flex-direction: column;
+  }
+}
+
 /* Sidebar */
 .sidebar {
   width: 200px;
   padding: 16px 0;
   overflow-y: auto;
   transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0;
+    border-right: none !important;
+    border-bottom: 1px solid;
+  }
+  
+  .modalContainer.dark .sidebar {
+    border-bottom-color: #3a3a3a;
+  }
+  
+  .modalContainer.light .sidebar {
+    border-bottom-color: #e5e5e5;
+  }
 }
 
 .modalContainer.dark .sidebar {
@@ -150,6 +198,18 @@
   text-align: left;
 }
 
+@media (max-width: 768px) {
+  .sidebarItem {
+    flex-direction: column;
+    min-width: 80px;
+    padding: 12px 8px;
+    gap: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    justify-content: center;
+  }
+}
+
 .modalContainer.dark .sidebarItem {
   color: #999;
 }
@@ -164,6 +224,15 @@
   color: #fff;
   border-left: 3px solid #fff;
   padding-left: 17px;
+}
+
+@media (max-width: 768px) {
+  .modalContainer.dark .sidebarItem.active {
+    border-left: none;
+    border-bottom: 3px solid #fff;
+    padding-left: 8px;
+    padding-bottom: 9px;
+  }
 }
 
 .modalContainer.light .sidebarItem {
@@ -182,6 +251,15 @@
   padding-left: 17px;
 }
 
+@media (max-width: 768px) {
+  .modalContainer.light .sidebarItem.active {
+    border-left: none;
+    border-bottom: 3px solid #000;
+    padding-left: 8px;
+    padding-bottom: 9px;
+  }
+}
+
 /* Content Area */
 .contentArea {
   flex: 1;
@@ -189,8 +267,20 @@
   overflow-y: auto;
 }
 
+@media (max-width: 768px) {
+  .contentArea {
+    padding: 16px;
+  }
+}
+
 .section {
   max-width: 600px;
+}
+
+@media (max-width: 768px) {
+  .section {
+    max-width: 100%;
+  }
 }
 
 .sectionTitle {
@@ -198,6 +288,13 @@
   font-weight: 600;
   margin: 0 0 24px 0;
   transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .sectionTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
 }
 
 .modalContainer.dark .sectionTitle {
@@ -211,6 +308,12 @@
 /* Form Elements */
 .formGroup {
   margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .formGroup {
+    margin-bottom: 20px;
+  }
 }
 
 .label {
@@ -298,6 +401,13 @@
   gap: 16px;
 }
 
+@media (max-width: 768px) {
+  .avatarContainer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .avatar {
   width: 80px;
   height: 80px;
@@ -306,6 +416,13 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .avatar {
+    width: 60px;
+    height: 60px;
+  }
 }
 
 .modalContainer.dark .avatar {
@@ -325,6 +442,13 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .changeAvatarBtn {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
 }
 
 .modalContainer.dark .changeAvatarBtn {
@@ -356,6 +480,13 @@
   transition: all 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  .saveButton {
+    width: 100%;
+    padding: 12px 24px;
+  }
+}
+
 .modalContainer.dark .saveButton {
   background: #fff;
   color: #000;
@@ -383,6 +514,12 @@
   transition: all 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  .secondaryButton {
+    width: 100%;
+  }
+}
+
 .modalContainer.dark .secondaryButton {
   background: #3a3a3a;
   color: #fff;
@@ -408,6 +545,12 @@
   transition: background 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  .divider {
+    margin: 24px 0;
+  }
+}
+
 .modalContainer.dark .divider {
   background: #3a3a3a;
 }
@@ -421,6 +564,12 @@
   padding: 20px;
   border-radius: 8px;
   transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .dangerZone {
+    padding: 16px;
+  }
 }
 
 .modalContainer.dark .dangerZone {
@@ -440,10 +589,22 @@
   margin: 0 0 8px 0;
 }
 
+@media (max-width: 768px) {
+  .dangerTitle {
+    font-size: 15px;
+  }
+}
+
 .dangerText {
   font-size: 14px;
   margin: 0 0 16px 0;
   transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .dangerText {
+    font-size: 13px;
+  }
 }
 
 .modalContainer.dark .dangerText {
@@ -466,6 +627,13 @@
   transition: background 0.2s;
 }
 
+@media (max-width: 768px) {
+  .dangerButton {
+    width: 100%;
+    padding: 10px 16px;
+  }
+}
+
 .dangerButton:hover {
   background: #dc2626;
 }
@@ -474,6 +642,12 @@
 .themeOptions {
   display: flex;
   gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .themeOptions {
+    flex-direction: column;
+  }
 }
 
 .themeOption {
@@ -524,6 +698,12 @@
   transition: border-color 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  .themePreview {
+    height: 50px;
+  }
+}
+
 .modalContainer.dark .themePreview {
   border: 1px solid #3a3a3a;
 }
@@ -536,6 +716,7 @@
 .colorOptions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .colorOption {
@@ -549,6 +730,13 @@
   align-items: center;
   justify-content: center;
   position: relative;
+}
+
+@media (max-width: 768px) {
+  .colorOption {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 .colorOption:hover {
@@ -575,6 +763,13 @@
   height: 50px;
 }
 
+@media (max-width: 768px) {
+  .customColorWrapper {
+    width: 44px;
+    height: 44px;
+  }
+}
+
 .colorInput {
   position: absolute;
   top: 0;
@@ -597,6 +792,13 @@
   align-items: center;
   padding: 16px 0;
   transition: border-color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .settingItem {
+    padding: 14px 0;
+    gap: 12px;
+  }
 }
 
 .modalContainer.dark .settingItem {
@@ -637,6 +839,12 @@
   transition: color 0.3s ease;
 }
 
+@media (max-width: 768px) {
+  .settingDescription {
+    font-size: 12px;
+  }
+}
+
 .modalContainer.dark .settingDescription {
   color: #999;
 }
@@ -651,6 +859,7 @@
   display: inline-block;
   width: 48px;
   height: 26px;
+  flex-shrink: 0;
 }
 
 .switch input {
