@@ -16,7 +16,6 @@ const ProfileSection = () => {
 
   const onSubmit = (data) => {
     try {
-      // Here you would typically make an API call to save the data
       console.log('Profile data submitted:', data);
       setFlashMessage('Perfil atualizado com sucesso!', 'success');
     } catch (error) {

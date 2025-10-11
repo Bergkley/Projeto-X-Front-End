@@ -11,7 +11,6 @@ const AccountSection = () => {
         setFlashMessage('As senhas não coincidem', 'error');
         return;
       }
-      // Here you would typically make an API call to update the password
       console.log('Password change submitted:', data);
       setFlashMessage('Senha atualizada com sucesso!', 'success');
     } catch (error) {

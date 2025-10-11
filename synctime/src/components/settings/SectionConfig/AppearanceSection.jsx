@@ -14,7 +14,6 @@ const AppearanceSection = () => {
 
   const onSubmit = (data) => {
     try {
-      // Here you would typically make an API call to save the appearance settings
       console.log('Appearance settings submitted:', data);
       setFlashMessage('Configurações de aparência salvas com sucesso!', 'success');
     } catch (error) {
