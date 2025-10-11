@@ -1,10 +1,18 @@
 import { Settings, Key, LogOut } from 'lucide-react';
 import styles from './ProfileDropdown.module.css';
+import SettingsModal from '../modal/SettingsModal';
+import { useState } from 'react';
 
 const ProfileDropdown = ({ onClose }) => {
+  const [showSettings, setShowSettings] = useState(false);
+
   const handleItemClick = (action) => {
-    console.log(`Ação selecionada: ${action}`);
-    onClose();
+    if (action === 'configuracoes') {
+      setShowSettings(true);
+    } else {
+      console.log(`Ação selecionada: ${action}`);
+      onClose();
+    }
   };
 
   return (
@@ -15,7 +23,7 @@ const ProfileDropdown = ({ onClose }) => {
         </div>
 
         <div className={styles.menuItems}>
-          <button 
+          <button
             className={styles.menuItem}
             onClick={() => handleItemClick('configuracoes')}
           >
@@ -23,7 +31,7 @@ const ProfileDropdown = ({ onClose }) => {
             <span>Configurações</span>
           </button>
 
-          <button 
+          <button
             className={styles.menuItem}
             onClick={() => handleItemClick('alterar-senha')}
           >
@@ -33,7 +41,7 @@ const ProfileDropdown = ({ onClose }) => {
 
           <div className={styles.divider}></div>
 
-          <button 
+          <button
             className={styles.menuItem}
             onClick={() => handleItemClick('sair')}
           >
@@ -42,6 +50,10 @@ const ProfileDropdown = ({ onClose }) => {
           </button>
         </div>
       </div>
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   );
 };
