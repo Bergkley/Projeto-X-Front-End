@@ -12,6 +12,7 @@ const PrivacySection = () => {
   const toggleSetting = (key) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
+  // TODO: Atualizar esse componente
 
   return (
     <div className={styles.section}>

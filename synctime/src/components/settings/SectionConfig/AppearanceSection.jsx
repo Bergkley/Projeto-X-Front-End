@@ -2,21 +2,50 @@ import { useForm, Controller } from 'react-hook-form';
 import styles from '../../../components/modal/SettingsModal.module.css';
 import { ErrorMessage } from '@hookform/error-message';
 import useFlashMessage from '../../../hooks/userFlashMessage';
+import {
+  POSSIBLE_FILTERS_ENTITIES,
+  useMemorizeFilters
+} from '../../../hooks/useMemorizeInputsFilters';
 
 const AppearanceSection = () => {
   const { setFlashMessage } = useFlashMessage();
-  const { control, handleSubmit, formState: { errors } } = useForm({
+  const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
+    POSSIBLE_FILTERS_ENTITIES.SYSTEM_CONFIG
+  );
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
     defaultValues: {
-      theme: 'dark',
-      emphasisColor: 'default'
+      theme: getMemorizedFilters()?.theme || 'dark',
+      emphasisColor: getMemorizedFilters()?.emphasisColor || 'rgb(20, 18, 129)'
     }
   });
 
   const onSubmit = (data) => {
     try {
-      console.log('Appearance settings submitted:', data);
-      setFlashMessage('Configurações de aparência salvas com sucesso!', 'success');
+      const currentConfig = getMemorizedFilters() || {};
+
+      const updatedConfig = {
+        ...currentConfig,
+        theme: data.theme || currentConfig.theme || 'dark',
+        emphasisColor:
+          data.emphasisColor ||
+          currentConfig.emphasisColor ||
+          'rgb(20, 18, 129)'
+      };
+
+      memorizeFilters(updatedConfig);
+
+      console.log('Appearance settings submitted:', updatedConfig);
+      setFlashMessage(
+        'Configurações de aparência salvas com sucesso!',
+        'success'
+      );
     } catch (error) {
+      console.error('Error saving appearance settings:', error);
       setFlashMessage('Erro ao salvar configurações de aparência', 'error');
     }
   };
@@ -69,7 +98,8 @@ const AppearanceSection = () => {
                   <div
                     className={styles.themePreview}
                     style={{
-                      background: 'linear-gradient(90deg, #fff 50%, #1a1a1a 50%)'
+                      background:
+                        'linear-gradient(90deg, #fff 50%, #1a1a1a 50%)'
                     }}
                   ></div>
                   <span>Auto</span>
@@ -80,37 +110,39 @@ const AppearanceSection = () => {
           <ErrorMessage
             errors={errors}
             name="theme"
-            render={({ message }) => <span className={styles.error}>{message}</span>}
+            render={({ message }) => (
+              <span className={styles.error}>{message}</span>
+            )}
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Cor do Tema</label>
+          <label className={styles.label}>Cor de ênfase</label>
           <Controller
             name="emphasisColor"
             control={control}
             rules={{ required: 'Cor de ênfase é obrigatória' }}
             render={({ field }) => (
               <div className={styles.colorOptions}>
-                {['default', 'blue', 'green', 'purple', 'red'].map((color) => (
+                {[
+                  { name: 'default', color: '#141281' },
+                  { name: 'blue', color: '#3b82f6' },
+                  { name: 'green', color: '#10b981' },
+                  { name: 'purple', color: '#8b5cf6' },
+                  { name: 'red', color: '#ef4444' }
+                ].map((item) => (
                   <button
-                    key={color}
+                    key={item.name}
                     type="button"
                     className={`${styles.colorOption} ${
-                      field.value === color ? styles.selected : ''
+                      field.value === item.color ? styles.selected : ''
                     }`}
-                    onClick={() => field.onChange(color)}
+                    onClick={() => field.onChange(item.color)}
                     style={{
-                      background: {
-                        default: '#666',
-                        blue: '#3b82f6',
-                        green: '#10b981',
-                        purple: '#8b5cf6',
-                        red: '#ef4444'
-                      }[color]
+                      background: item.color
                     }}
                   >
-                    {field.value === color && (
+                    {field.value === item.color && (
                       <span className={styles.checkmark}>✓</span>
                     )}
                   </button>
@@ -119,18 +151,36 @@ const AppearanceSection = () => {
                   <input
                     type="color"
                     className={styles.colorInput}
-                    value={typeof field.value === 'string' && field.value.startsWith('#') ? field.value : '#666666'}
+                    value={
+                      field.value?.startsWith('#') ? field.value : '#141281'
+                    }
                     onChange={(e) => field.onChange(e.target.value)}
                   />
-                  <div 
+                  <div
                     className={`${styles.colorOption} ${
-                      typeof field.value === 'string' && field.value.startsWith('#') ? styles.selected : ''
+                      ![
+                        '#141281',
+                        '#3b82f6',
+                        '#10b981',
+                        '#8b5cf6',
+                        '#ef4444'
+                      ].includes(field.value)
+                        ? styles.selected
+                        : ''
                     }`}
                     style={{
-                      background: typeof field.value === 'string' && field.value.startsWith('#') ? field.value : '#666666'
+                      background: field.value?.startsWith('#')
+                        ? field.value
+                        : '#141281'
                     }}
                   >
-                    {typeof field.value === 'string' && field.value.startsWith('#') && (
+                    {![
+                      '#141281',
+                      '#3b82f6',
+                      '#10b981',
+                      '#8b5cf6',
+                      '#ef4444'
+                    ].includes(field.value) && (
                       <span className={styles.checkmark}>✓</span>
                     )}
                   </div>
@@ -141,11 +191,15 @@ const AppearanceSection = () => {
           <ErrorMessage
             errors={errors}
             name="emphasisColor"
-            render={({ message }) => <span className={styles.error}>{message}</span>}
+            render={({ message }) => (
+              <span className={styles.error}>{message}</span>
+            )}
           />
         </div>
 
-        <button type="submit" className={styles.saveButton}>Salvar alterações</button>
+        <button type="submit" className={styles.saveButton}>
+          Salvar alterações
+        </button>
       </form>
     </div>
   );

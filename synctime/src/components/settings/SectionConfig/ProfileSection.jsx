@@ -4,6 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import useFlashMessage from '../../../hooks/userFlashMessage';
 import { Button } from 'reactstrap';
+import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from './../../../hooks/useMemorizeInputsFilters';
 
 const ProfileSection = () => {
   const { setFlashMessage } = useFlashMessage();
@@ -13,12 +14,26 @@ const ProfileSection = () => {
       bio: ''
     }
   });
+  const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(POSSIBLE_FILTERS_ENTITIES.USERS);
 
   const onSubmit = (data) => {
     try {
-      console.log('Profile data submitted:', data);
+      const currentUser = getMemorizedFilters();
+      
+      const updatedUser = {
+        ...currentUser, 
+        name: data.name || currentUser.name, 
+        bio: data.bio || currentUser.bio 
+      };
+
+      // Save updated user data to localStorage
+      memorizeFilters(updatedUser);
+      
+      console.log('Profile data submitted:', updatedUser);
       setFlashMessage('Perfil atualizado com sucesso!', 'success');
+      
     } catch (error) {
+      console.error('Error updating profile:', error);
       setFlashMessage('Erro ao atualizar perfil', 'error');
     }
   };
