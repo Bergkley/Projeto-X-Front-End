@@ -7,9 +7,11 @@ import {
   useMemorizeFilters
 } from '../../../hooks/useMemorizeInputsFilters';
 import errorFormMessage from '../../../utils/errorFormMessage';
+import { useTheme } from '../../../hooks/useTheme'; 
 
 const AppearanceSection = () => {
   const { setFlashMessage } = useFlashMessage();
+  const { theme: currentTheme, setTheme } = useTheme();
   const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
     POSSIBLE_FILTERS_ENTITIES.SYSTEM_CONFIG
   );
@@ -20,7 +22,7 @@ const AppearanceSection = () => {
     formState: { errors }
   } = useForm({
     defaultValues: {
-      theme: getMemorizedFilters()?.theme || 'dark',
+      theme: currentTheme || 'dark',
       emphasisColor: getMemorizedFilters()?.emphasisColor || 'rgb(20, 18, 129)'
     }
   });
@@ -39,6 +41,10 @@ const AppearanceSection = () => {
       };
 
       memorizeFilters(updatedConfig);
+
+      if (data.theme) {
+        setTheme(data.theme);
+      }
 
       console.log('Appearance settings submitted:', updatedConfig);
       setFlashMessage(
@@ -72,7 +78,7 @@ const AppearanceSection = () => {
                 >
                   <div
                     className={styles.themePreview}
-                    style={{ background: '#fff' }}
+                    style={{ background: '#f8f8f8' }}
                   ></div>
                   <span>Claro</span>
                 </button>
@@ -89,22 +95,6 @@ const AppearanceSection = () => {
                   ></div>
                   <span>Escuro</span>
                 </button>
-                <button
-                  type="button"
-                  className={`${styles.themeOption} ${
-                    field.value === 'auto' ? styles.selected : ''
-                  }`}
-                  onClick={() => field.onChange('auto')}
-                >
-                  <div
-                    className={styles.themePreview}
-                    style={{
-                      background:
-                        'linear-gradient(90deg, #fff 50%, #1a1a1a 50%)'
-                    }}
-                  ></div>
-                  <span>Auto</span>
-                </button>
               </div>
             )}
           />
@@ -120,7 +110,7 @@ const AppearanceSection = () => {
           <Controller
             name="emphasisColor"
             control={control}
-            rules={{ required: 'Cor do Tem é obrigatória' }}
+            rules={{ required: 'Cor do Tema é obrigatória' }}
             render={({ field }) => (
               <div className={styles.colorOptions}>
                 {[

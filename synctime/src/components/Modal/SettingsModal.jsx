@@ -5,9 +5,11 @@ import ProfileSection from '../settings/SectionConfig/ProfileSection';
 import AccountSection from '../settings/SectionConfig/AccountSection';
 import AppearanceSection from '../settings/SectionConfig/AppearanceSection';
 import PrivacySection from '../settings/SectionConfig/PrivacySection';
+import { useTheme } from '../../hooks/useTheme'; 
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const [activeSection, setActiveSection] = useState('profile');
+  const { theme } = useTheme();
 
   if (!isOpen) return null;
 
@@ -36,7 +38,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div
-        className={styles.modalContainer}
+        className={`${styles.modalContainer} ${styles[theme]}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.modalHeader}>

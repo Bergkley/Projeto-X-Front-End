@@ -2,9 +2,11 @@ import { Settings, Key, LogOut } from 'lucide-react';
 import styles from './ProfileDropdown.module.css';
 import SettingsModal from '../modal/SettingsModal';
 import { useState } from 'react';
+import { useTheme } from '../../hooks/useTheme';
 
 const ProfileDropdown = ({ onClose }) => {
   const [showSettings, setShowSettings] = useState(false);
+  const { theme } = useTheme();
 
   const handleItemClick = (action) => {
     if (action === 'configuracoes') {
@@ -17,11 +19,13 @@ const ProfileDropdown = ({ onClose }) => {
 
   return (
     <div className={styles.dropdownOverlay} onClick={onClose}>
-      <div className={styles.dropdown} onClick={(e) => e.stopPropagation()}>
+      <div 
+        className={`${styles.dropdown} ${styles[theme]}`} 
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={styles.userInfo}>
           <span className={styles.name}>bergxbergx2@gmail.com</span>
         </div>
-
         <div className={styles.menuItems}>
           <button
             className={styles.menuItem}
@@ -30,7 +34,6 @@ const ProfileDropdown = ({ onClose }) => {
             <Settings className={styles.icon} size={18} />
             <span>Configurações</span>
           </button>
-
           <button
             className={styles.menuItem}
             onClick={() => handleItemClick('alterar-senha')}
@@ -38,9 +41,7 @@ const ProfileDropdown = ({ onClose }) => {
             <Key className={styles.icon} size={18} />
             <span>Alterar a senha</span>
           </button>
-
           <div className={styles.divider}></div>
-
           <button
             className={styles.menuItem}
             onClick={() => handleItemClick('sair')}

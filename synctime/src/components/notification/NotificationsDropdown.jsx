@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Filter, Trash2, ExternalLink, X, Check, Bell } from 'lucide-react';
 import styles from './NotificationsDropdown.module.css';
-
+import { useTheme } from '../../hooks/useTheme'; 
 const NotificationsDropdown = ({ onClose }) => {
+  const { theme } = useTheme();
   const [filter, setFilter] = useState('todas');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [typeFilter, setTypeFilter] = useState('todos');
@@ -120,7 +121,7 @@ const NotificationsDropdown = ({ onClose }) => {
       />
       
       {/* Dropdown Panel */}
-      <div className={styles.dropdown}>
+      <div className={`${styles.dropdown} ${styles[theme]}`}>
         {/* Header */}
         <div className={styles.dropdownHeader}>
           <div className={styles.dropdownHeaderInner}>
