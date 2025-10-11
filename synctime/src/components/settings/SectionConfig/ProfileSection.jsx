@@ -26,7 +26,6 @@ const ProfileSection = () => {
         bio: data.bio || currentUser.bio 
       };
 
-      // Save updated user data to localStorage
       memorizeFilters(updatedUser);
       
       console.log('Profile data submitted:', updatedUser);
