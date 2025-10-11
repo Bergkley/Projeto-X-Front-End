@@ -349,6 +349,27 @@
   font-weight: bold;
 }
 
+.customColorWrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.colorInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.customColorWrapper .colorOption {
+  pointer-events: none;
+}
+
 .settingItem {
   display: flex;
   justify-content: space-between;
@@ -423,4 +444,11 @@ input:checked + .slider {
 input:checked + .slider:before {
   background-color: #000;
   transform: translateX(22px);
+}
+
+.error {
+  display: block;
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 6px;
 }

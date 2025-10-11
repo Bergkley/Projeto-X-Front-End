@@ -1,6 +1,24 @@
 import styles from '../../../components/modal/SettingsModal.module.css';
+import useFlashMessage from '../../../hooks/userFlashMessage';
 
 const AccountSection = () => {
+  const { setFlashMessage } = useFlashMessage();
+  
+
+  const onSubmit = (data) => {
+    try {
+      if (data.password !== data.confirmPassword) {
+        setFlashMessage('As senhas não coincidem', 'error');
+        return;
+      }
+      // Here you would typically make an API call to update the password
+      console.log('Password change submitted:', data);
+      setFlashMessage('Senha atualizada com sucesso!', 'success');
+    } catch (error) {
+      setFlashMessage('Erro ao atualizar senha', 'error');
+    }
+  };
+
   return (
     <div className={styles.section}>
       <h3 className={styles.sectionTitle}>Conta</h3>
@@ -15,13 +33,18 @@ const AccountSection = () => {
         />
         <span className={styles.helpText}>O email não pode ser alterado</span>
       </div>
-
       <div className={styles.formGroup}>
-        <label className={styles.label}>Senha</label>
-        <button className={styles.secondaryButton}>
-          Alterar senha
-        </button>
+        <label className={styles.label}>Login</label>
+        <input 
+          type="login" 
+          className={styles.input}
+          defaultValue=""
+          disabled
+        />
+        <span className={styles.helpText}>O email não pode ser alterado</span>
       </div>
+
+      
 
       <div className={styles.divider}></div>
 
@@ -35,4 +58,5 @@ const AccountSection = () => {
     </div>
   );
 };
-export default AccountSection
+
+export default AccountSection;
