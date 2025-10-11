@@ -1,6 +1,6 @@
 /* Header Container */
 .header {
-  background: rgb(20, 18, 129);
+  /* background removido - será aplicado via inline style */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
@@ -132,7 +132,7 @@
   top: -0.25rem;
   right: -0.25rem;
   background: #fbbf24;
-  color: rgb(20, 18, 129);
+  /* color removido - será aplicado via inline style */
   font-size: 0.75rem;
   font-weight: bold;
   border-radius: 9999px;
@@ -179,7 +179,7 @@
 }
 
 .dropdownHeader {
-  background: rgb(20, 18, 129);
+  /* background removido - será aplicado via prop ou context */
   padding: 0.75rem 1rem;
 }
 
@@ -225,7 +225,7 @@
 }
 
 .viewAllButton {
-  color: rgb(20, 18, 129);
+  /* color removido - será aplicado via prop ou context */
   font-size: 0.875rem;
   font-weight: 500;
   background: none;
@@ -235,7 +235,7 @@
 }
 
 .viewAllButton:hover {
-  color: #0f0e7a;
+  opacity: 0.8;
 }
 
 /* User Profile */
@@ -263,5 +263,3 @@
 .profileContainer:hover .avatar {
   transform: scale(1.05);
 }
-
-

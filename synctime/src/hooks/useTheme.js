@@ -16,7 +16,8 @@ export const useTheme = () => {
 
   useEffect(() => {
     try {
-      memorizeFilters({theme})
+      memorizeFilters({...getMemorizedFilters(), theme });
+
       
       window.dispatchEvent(new CustomEvent('themeChange', { detail: { theme } }));
     } catch (error) {
@@ -28,7 +29,7 @@ export const useTheme = () => {
     const handleStorageChange = () => {
       try {
       const storedTheme = getMemorizedFilters()?.theme;
-          setThemeState(storedTheme || 'dark');
+        setThemeState(storedTheme || 'dark');
       } catch (error) {
         console.error('Error reading theme from storage event:', error);
       }

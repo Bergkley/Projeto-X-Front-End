@@ -7,11 +7,15 @@ import {
   useMemorizeFilters
 } from '../../../hooks/useMemorizeInputsFilters';
 import errorFormMessage from '../../../utils/errorFormMessage';
-import { useTheme } from '../../../hooks/useTheme'; 
+import { useTheme } from '../../../hooks/useTheme';
+import { useEmphasisColor } from '../../../hooks/useEmphasisColor';
 
 const AppearanceSection = () => {
   const { setFlashMessage } = useFlashMessage();
   const { theme: currentTheme, setTheme } = useTheme();
+  const { emphasisColor: currentEmphasisColor, setEmphasisColor } =
+    useEmphasisColor();
+
   const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
     POSSIBLE_FILTERS_ENTITIES.SYSTEM_CONFIG
   );
@@ -22,8 +26,11 @@ const AppearanceSection = () => {
     formState: { errors }
   } = useForm({
     defaultValues: {
-      theme: currentTheme || 'dark',
-      emphasisColor: getMemorizedFilters()?.emphasisColor || 'rgb(20, 18, 129)'
+      theme: currentTheme || getMemorizedFilters()?.theme || 'dark',
+      emphasisColor:
+        currentEmphasisColor ||
+        getMemorizedFilters()?.emphasisColor ||
+        'rgb(20, 18, 129)'
     }
   });
 
@@ -39,11 +46,16 @@ const AppearanceSection = () => {
           currentConfig.emphasisColor ||
           'rgb(20, 18, 129)'
       };
+      console.log('Updated Config:', updatedConfig);
 
       memorizeFilters(updatedConfig);
 
       if (data.theme) {
         setTheme(data.theme);
+      }
+
+      if (data.emphasisColor) {
+        setEmphasisColor(data.emphasisColor);
       }
 
       console.log('Appearance settings submitted:', updatedConfig);
@@ -114,7 +126,7 @@ const AppearanceSection = () => {
             render={({ field }) => (
               <div className={styles.colorOptions}>
                 {[
-                  { name: 'default', color: '#141281' },
+                  { name: 'default', color: 'rgb(20, 18, 129)' },
                   { name: 'blue', color: '#3b82f6' },
                   { name: 'green', color: '#10b981' },
                   { name: 'purple', color: '#8b5cf6' },
@@ -148,7 +160,7 @@ const AppearanceSection = () => {
                   <div
                     className={`${styles.colorOption} ${
                       ![
-                        '#141281',
+                        'rgb(20, 18, 129)',
                         '#3b82f6',
                         '#10b981',
                         '#8b5cf6',
@@ -160,11 +172,11 @@ const AppearanceSection = () => {
                     style={{
                       background: field.value?.startsWith('#')
                         ? field.value
-                        : '#141281'
+                        : 'rgb(20, 18, 129)'
                     }}
                   >
                     {![
-                      '#141281',
+                      'rgb(20, 18, 129)',
                       '#3b82f6',
                       '#10b981',
                       '#8b5cf6',

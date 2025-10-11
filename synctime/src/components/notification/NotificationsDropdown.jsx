@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Filter, Trash2, ExternalLink, X, Check, Bell } from 'lucide-react';
 import styles from './NotificationsDropdown.module.css';
-import { useTheme } from '../../hooks/useTheme'; 
+import { useTheme } from '../../hooks/useTheme';
+import { useEmphasisColor } from '../../hooks/useEmphasisColor';
+
 const NotificationsDropdown = ({ onClose }) => {
   const { theme } = useTheme();
+  const { emphasisColor } = useEmphasisColor();
   const [filter, setFilter] = useState('todas');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [typeFilter, setTypeFilter] = useState('todos');
@@ -123,7 +126,10 @@ const NotificationsDropdown = ({ onClose }) => {
       {/* Dropdown Panel */}
       <div className={`${styles.dropdown} ${styles[theme]}`}>
         {/* Header */}
-        <div className={styles.dropdownHeader}>
+        <div 
+          className={styles.dropdownHeader}
+          style={{ background: emphasisColor || 'rgb(20, 18, 129)' }}
+        >
           <div className={styles.dropdownHeaderInner}>
             <div className={styles.dropdownHeaderLeft}>
               <Bell className={styles.dropdownBellIcon} />
@@ -149,6 +155,9 @@ const NotificationsDropdown = ({ onClose }) => {
               <button
                 onClick={() => setFilter('todas')}
                 className={`${styles.filterButton} ${filter === 'todas' ? styles.filterButtonActive : ''}`}
+                style={filter === 'todas' ? { 
+                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)' 
+                } : {}}
               >
                 Todas
                 <span className={`${styles.filterBadge} ${filter === 'todas' ? styles.filterBadgeActive : ''}`}>
@@ -158,6 +167,9 @@ const NotificationsDropdown = ({ onClose }) => {
               <button
                 onClick={() => setFilter('naoLidas')}
                 className={`${styles.filterButton} ${filter === 'naoLidas' ? styles.filterButtonActive : ''}`}
+                style={filter === 'naoLidas' ? { 
+                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)' 
+                } : {}}
               >
                 Não Lidas
                 <span className={`${styles.filterBadge} ${filter === 'naoLidas' ? styles.filterBadgeUnread : ''}`}>
@@ -167,6 +179,9 @@ const NotificationsDropdown = ({ onClose }) => {
               <button
                 onClick={() => setFilter('lidas')}
                 className={`${styles.filterButton} ${filter === 'lidas' ? styles.filterButtonActive : ''}`}
+                style={filter === 'lidas' ? { 
+                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)' 
+                } : {}}
               >
                 Lidas
                 <span className={`${styles.filterBadge} ${filter === 'lidas' ? styles.filterBadgeActive : ''}`}>
@@ -247,9 +262,14 @@ const NotificationsDropdown = ({ onClose }) => {
                   <div className={styles.notificationItemInner}>
                     {/* Unread Indicator */}
                     <div className={styles.indicatorWrapper}>
-                      <div className={`${styles.indicator} ${
-                        !notification.read ? styles.indicatorUnread : styles.indicatorRead
-                      }`} />
+                      <div 
+                        className={`${styles.indicator} ${
+                          !notification.read ? styles.indicatorUnread : styles.indicatorRead
+                        }`}
+                        style={!notification.read ? {
+                          backgroundColor: emphasisColor || '#6366f1'
+                        } : {}}
+                      />
                     </div>
 
                     {/* Content */}
@@ -299,7 +319,12 @@ const NotificationsDropdown = ({ onClose }) => {
             </div>
             <div className={styles.footerStat}>
               <p className={styles.footerStatLabel}>Não Lidas</p>
-              <p className={styles.footerStatValueUnread}>{unreadCount}</p>
+              <p 
+                className={styles.footerStatValueUnread}
+                style={{ color: emphasisColor || '#6366f1' }}
+              >
+                {unreadCount}
+              </p>
             </div>
             <div className={styles.footerStat}>
               <p className={styles.footerStatLabel}>Lidas</p>

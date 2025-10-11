@@ -59,7 +59,7 @@
 
 /* Dropdown Header */
 .dropdownHeader {
-  background: rgb(20, 18, 129);
+  /* background removido - será aplicado via inline style */
   padding: 1rem;
 }
 
@@ -212,7 +212,7 @@
 }
 
 .filterButtonActive {
-  background-color: rgb(20, 18, 129);
+  /* backgroundColor removido - será aplicado via inline style */
   color: white !important;
 }
 
@@ -502,7 +502,7 @@
 }
 
 .indicatorUnread {
-  background-color: #6366f1;
+  /* backgroundColor removido - será aplicado via inline style */
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -699,8 +699,9 @@
 }
 
 .dropdown.light .emptyIcon {
-  background-color: #f3f4f6;
+  background-color: #f3f4f6 
 }
+
 
 .emptyBellIcon {
   width: 1.5rem;
@@ -801,7 +802,7 @@
 .footerStatValueUnread {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #6366f1;
+  /* color removido - será aplicado via inline style */
 }
 
 .footerStatValueRead {

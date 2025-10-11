@@ -4,8 +4,10 @@ import { Bell, Zap } from 'lucide-react';
 import Streak from '../streak/Streak';
 import NotificationsDropdown from '../notification/NotificationsDropdown';
 import ProfileDropdown from '../settings/ProfileDropdown';
+import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 
 const Header = () => {
+  const { emphasisColor } = useEmphasisColor();
   const [notificationCount, setNotificationCount] = useState(3);
   const [streakDays, setStreakDays] = useState(30);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -26,7 +28,10 @@ const Header = () => {
 
   return (
     <>
-      <header className={styles.header}>
+      <header 
+        className={styles.header}
+        style={{ background: emphasisColor || 'rgb(20, 18, 129)' }}
+      >
         <div className={styles.container}>
           <div className={styles.content}>
             <span className={styles.brandName}></span>
@@ -104,7 +109,12 @@ const Header = () => {
                 >
                   <Bell className={styles.bellIcon} />
                   {notificationCount > 0 && (
-                    <span className={styles.badge}>{notificationCount}</span>
+                    <span 
+                      className={styles.badge}
+                      style={{ color: emphasisColor || 'rgb(20, 18, 129)' }}
+                    >
+                      {notificationCount}
+                    </span>
                   )}
                 </button>
 
