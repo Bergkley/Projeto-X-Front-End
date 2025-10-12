@@ -51,7 +51,7 @@ useEffect(() => {
       });
       setFlashMessage('Email atualizado com sucesso!', 'success');
     } catch (error) {
-      console.log('error AccountSection',error)
+      console.error('error AccountSection',error)
       setFlashMessage('Erro ao atualizar email', 'error');
     }
   };
@@ -63,14 +63,14 @@ useEffect(() => {
       setShowDeleteModal(false);
       logout(false,true);
     } catch (error) {
-      console.log('error deleting account', error);
+      console.error('error deleting account', error);
       setFlashMessage('Erro ao excluir conta', 'error');
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);
     }
   };
-
+// TODO: EDITAR PERGUNTA DE SEGURANÇA
 
   return (
     <div className={styles.section}>

@@ -46,7 +46,6 @@ const AppearanceSection = () => {
           currentConfig.emphasisColor ||
           'rgb(20, 18, 129)'
       };
-      console.log('Updated Config:', updatedConfig);
 
       memorizeFilters(updatedConfig);
 
@@ -58,7 +57,6 @@ const AppearanceSection = () => {
         setEmphasisColor(data.emphasisColor);
       }
 
-      console.log('Appearance settings submitted:', updatedConfig);
       setFlashMessage(
         'Configurações de aparência salvas com sucesso!',
         'success'

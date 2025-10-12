@@ -41,7 +41,6 @@ const Login = () => {
     login: data.login,
     password: data.password
    }
-       console.log('login data',formatData);
 
 
    login(formatData)

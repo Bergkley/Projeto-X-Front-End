@@ -32,7 +32,6 @@ const ProfileSection = () => {
   useEffect(() => {
     async function fetchUser() {
       const response = await ServiceUsers.getByUser(getMemorizedFilters()?.id);
-      console.log('data user', response.data);
       memorizeFilters({
         ...getMemorizedFilters(),
         name: response.data.data.user.name
@@ -69,7 +68,7 @@ const ProfileSection = () => {
       setFlashMessage('Erro ao atualizar perfil', 'error');
     }
   };
-
+// TODO: LIDAR COM FOTO
   return (
     <div className={styles.section}>
       <h3 className={styles.sectionTitle}>Perfil</h3>

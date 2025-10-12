@@ -56,7 +56,7 @@ const Register = () => {
         answer: q.answer
       }))
     };
-    console.log('userData', userData);
+    console.error('userData', userData);
     registerUser(userData);
   };
 

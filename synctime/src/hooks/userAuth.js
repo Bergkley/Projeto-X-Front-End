@@ -45,7 +45,7 @@ export default function useAuth() {
       setLoading(false);
       return true;
     } catch (error) {
-      console.log('Token expirado ou inválido', error);
+      console.error('Token expirado ou inválido', error);
       await logout(true); 
       return false;
     }
@@ -60,7 +60,6 @@ export default function useAuth() {
       (response) => response,
       async (error) => {
         if (error.response?.status === 401) {
-          console.log('Token expirado - fazendo logout automático');
           await logout(true);
         }
         return Promise.reject(error);
@@ -134,7 +133,6 @@ export default function useAuth() {
 
   async function authUser(data) {
     setAuthenticated(true);
-    console.log('authenticated auth', authenticated);
     api.defaults.headers.Authorization = `Bearer ${data.token}`;
     memorizeFiltersUsers({
       ...getMemorizedFiltersUsers(),

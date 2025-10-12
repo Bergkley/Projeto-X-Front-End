@@ -4,20 +4,24 @@ import SettingsModal from '../modal/SettingsModal';
 import { useState } from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import NewPassword from '../newPassword/newPassword';
+import useAuth from '../../hooks/userAuth';
 
 const ProfileDropdown = ({ onClose }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showAlterPassword, setShowAlterPassword] = useState(false);
   const { theme } = useTheme();
+  const {logout} = useAuth();
 
   const handleItemClick = (action) => {
     if (action === 'configuracoes') {
       setShowSettings(true);
     } else if (action === 'alterar-senha') {
       setShowAlterPassword(true);
-    } 
+    } else if (action === 'sair'){
+      logout();
+    }
     else {
-      console.log(`Ação selecionada: ${action}`);
+      console.error(`Ação selecionada: ${action}`);
       onClose();
     }
   };
