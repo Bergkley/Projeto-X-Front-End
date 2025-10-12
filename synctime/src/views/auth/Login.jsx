@@ -140,7 +140,7 @@ const Login = () => {
             </div>
 
             <div className={styles.options}>
-              <Link to="/forgot-password" className={styles.forgotLink}>
+              <Link to="/esqueceu-senha" className={styles.forgotLink}>
                 Esqueceu a senha?
               </Link>
             </div>

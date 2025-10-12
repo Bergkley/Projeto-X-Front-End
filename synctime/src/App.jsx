@@ -1,5 +1,4 @@
-// ⚙️ Dependências principais
-import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Redirect, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 
 // 🧩 Componentes
@@ -17,6 +16,43 @@ import Home from './views/home/Home';
 
 // 🌐 Contexto
 import { UserProvider } from './context/UserContext';
+
+function ProtectedRoute({ children, ...rest }) {
+  const token = localStorage.getItem('token');
+  return (
+    <Route
+      {...rest}
+      render={({ location }) =>
+        token ? (
+          children
+        ) : (
+          <Redirect
+            to={{
+              pathname: '/',
+              state: { from: location },
+            }}
+          />
+        )
+      }
+    />
+  );
+}
+
+function PublicRoute({ children, ...rest }) {
+  const token = localStorage.getItem('token');
+  return (
+    <Route
+      {...rest}
+      render={() =>
+        token ? (
+          <Redirect to="/inicio" />
+        ) : (
+          children
+        )
+      }
+    />
+  );
+}
 
 function Layout({ children }) {
   const location = useLocation();
@@ -43,31 +79,31 @@ function App() {
           <>
             <Message />
             <Switch>
-              <Route exact path="/">
+              <PublicRoute exact path="/">
                 <Layout>
                   <StartLogin />
                 </Layout>
-              </Route>
-              <Route path="/login">
+              </PublicRoute>
+              <PublicRoute path="/login">
                 <Layout>
                   <Login />
                 </Layout>
-              </Route>
-              <Route path="/register">
+              </PublicRoute>
+              <PublicRoute path="/register">
                 <Layout>
                   <Register />
                 </Layout>
-              </Route>
-              <Route path="/esqueceu-senha">
+              </PublicRoute>
+              <PublicRoute path="/esqueceu-senha">
                 <Layout>
                   <ForgotPassword />
                 </Layout>
-              </Route>
-              <Route path="/inicio">
+              </PublicRoute>
+              <ProtectedRoute path="/inicio">
                 <Layout>
                   <Home />
                 </Layout>
-              </Route>
+              </ProtectedRoute>
             </Switch>
           </>
         )}
