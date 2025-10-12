@@ -25,34 +25,78 @@
   justify-content: center;
   z-index: 50;
   padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Modal Content */
 .modalContent {
-  background: #1f2937;
   border-radius: 1rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   max-width: 28rem;
   width: 100%;
   overflow: hidden;
   position: relative;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalContent.dark {
+  background: #1f2937;
+  border: 1px solid #374151;
+}
+
+.modalContent.light {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
 }
 
 .closeButton {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  color: white;
   background: transparent;
   border: none;
   border-radius: 9999px;
   padding: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  z-index: 10;
 }
 
-.closeButton:hover {
+.modalContent.dark .closeButton {
+  color: white;
+}
+
+.modalContent.dark .closeButton:hover {
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modalContent.light .closeButton {
+  color: #4b5563;
+}
+
+.modalContent.light .closeButton:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .closeIcon {
@@ -63,8 +107,6 @@
 .modalBody {
   padding: 2rem;
 }
-
-
 
 /* Title */
 .titleContainer {
@@ -77,8 +119,16 @@
 .title {
   font-size: 2.25rem;
   font-weight: bold;
-  color: white;
   margin: 0;
+  transition: color 0.3s ease;
+}
+
+.modalContent.dark .title {
+  color: white;
+}
+
+.modalContent.light .title {
+  color: #111827;
 }
 
 .titleFlame {
@@ -90,16 +140,32 @@
 
 /* Subtitle */
 .subtitle {
-  color: white;
   font-size: 1.125rem;
   margin: 0 0 2rem 0;
+  transition: color 0.3s ease;
+}
+
+.modalContent.dark .subtitle {
+  color: #e5e7eb;
+}
+
+.modalContent.light .subtitle {
+  color: #4b5563;
 }
 
 /* Calendar */
 .calendar {
-  background-color: rgba(17, 24, 39, 0.6);
   border-radius: 1rem;
   padding: 1.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.modalContent.dark .calendar {
+  background-color: rgba(17, 24, 39, 0.6);
+}
+
+.modalContent.light .calendar {
+  background-color: rgba(243, 244, 246, 0.8);
 }
 
 .weekDays {
@@ -117,8 +183,16 @@
 .day {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #9ca3af;
   margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.modalContent.dark .day {
+  color: #9ca3af;
+}
+
+.modalContent.light .day {
+  color: #6b7280;
 }
 
 .dayActive {
@@ -132,9 +206,17 @@
 .progressBar {
   position: relative;
   height: 2rem;
-  background-color: #374151;
   border-radius: 9999px;
   overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+
+.modalContent.dark .progressBar {
+  background-color: #374151;
+}
+
+.modalContent.light .progressBar {
+  background-color: #d1d5db;
 }
 
 .progressFill {
@@ -166,20 +248,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 
 .dayCompleted {
   background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modalContent.light .dayCompleted {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .dayCurrent {
   background-color: white;
   border: 4px solid #fb923c;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modalContent.light .dayCurrent {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .dayIncomplete {
+  transition: background-color 0.3s ease;
+}
+
+.modalContent.dark .dayIncomplete {
   background-color: #4b5563;
+}
+
+.modalContent.light .dayIncomplete {
+  background-color: #9ca3af;
 }
 
 .dayFlame {
@@ -190,6 +292,18 @@
 
 /* Responsive */
 @media (max-width: 640px) {
+  .modalOverlay {
+    padding: 0.5rem;
+  }
+
+  .modalContent {
+    max-width: 100%;
+  }
+
+  .modalBody {
+    padding: 1.5rem;
+  }
+
   .title {
     font-size: 1.75rem;
   }
@@ -201,5 +315,30 @@
 
   .subtitle {
     font-size: 1rem;
+  }
+
+  .calendar {
+    padding: 1rem;
+  }
+
+  .day,
+  .dayActive {
+    font-size: 0.75rem;
+  }
+
+  .progressBar {
+    height: 1.75rem;
+  }
+
+  .dayCompleted,
+  .dayCurrent,
+  .dayIncomplete {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .dayFlame {
+    width: 0.875rem;
+    height: 0.875rem;
   }
 }

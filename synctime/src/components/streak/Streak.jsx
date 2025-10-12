@@ -1,5 +1,6 @@
 import { Zap, X } from 'lucide-react';
 import styles from './Streak.module.css';
+import { useTheme } from '../../hooks/useTheme'; 
 
 const Streak = ({
   streakDays,
@@ -9,9 +10,14 @@ const Streak = ({
   onClose,
   getFlameColor,
 }) => {
+  const { theme } = useTheme();
+
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div 
+        className={`${styles.modalContent} ${styles[theme]}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button onClick={onClose} className={styles.closeButton}>
           <X className={styles.closeIcon} />
         </button>
@@ -35,7 +41,7 @@ const Streak = ({
               {weekDays.map((day, index) => (
                 <div key={index} className={styles.dayColumn}>
                   <span
-                    className={index === 4 ? styles.dayActive : styles.day} // Highlight Thursday as current day
+                    className={index === 4 ? styles.dayActive : styles.day} 
                   >
                     {day}
                   </span>
@@ -47,7 +53,7 @@ const Streak = ({
             <div className={styles.progressBar}>
               <div
                 className={styles.progressFill}
-                style={{ width: `${(completedDaysThisWeek / 7) * 100}%` }} // 5/7 = 71.43%
+                style={{ width: `${(completedDaysThisWeek / 7) * 100}%` }}
               ></div>
 
               {/* Indicadores dos dias */}
@@ -59,7 +65,7 @@ const Streak = ({
                       completed
                         ? styles.dayCompleted
                         : index === completedDaysThisWeek && !completed
-                        ? styles.dayCurrent // Highlight the next incomplete day if it's the current count
+                        ? styles.dayCurrent 
                         : styles.dayIncomplete
                     }
                   >
