@@ -29,7 +29,6 @@ export default function useAuth() {
   } = useMemorizeFilters(POSSIBLE_FILTERS_ENTITIES.SYSTEM_CONFIG);
 
   async function validateToken() {
-    console.log('Validando token...');
     const token = localStorage.getItem('token');
     
     if (!token) {
@@ -40,12 +39,13 @@ export default function useAuth() {
 
     try {
       api.defaults.headers.Authorization = `Bearer ${token}`;
+      await api.get('/auth/validate')
       
       setAuthenticated(true);
       setLoading(false);
       return true;
     } catch (error) {
-      console.log('Token expirado ou inválido');
+      console.log('Token expirado ou inválido', error);
       await logout(true); 
       return false;
     }
@@ -139,7 +139,8 @@ export default function useAuth() {
     memorizeFiltersUsers({
       ...getMemorizedFiltersUsers(),
       login: data?.user?.login,
-      email: data?.user?.email
+      email: data?.user?.email,
+      id: data?.user?.id
     });
     memorizeFiltersSystem({
       ...getMemorizedFiltersSystem(),

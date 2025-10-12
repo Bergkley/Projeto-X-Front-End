@@ -19,18 +19,6 @@ class ServiceAUTH {
   
   }
 
-  getByUser(id){
-    return api.get(`/user/find-user/${id}`);
-  }
-
-  editUser(id, data){
-    return api.put(`/user/edit/${id}`, data);
-  }
-
-  deleteUser(id){
-    return api.delete(`/user/delete/${id}`);
-  }
-  
 }
 
 export default new ServiceAUTH();

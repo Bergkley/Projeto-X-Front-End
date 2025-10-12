@@ -5,11 +5,14 @@ import { useTheme } from '../../hooks/useTheme';
 import styles from './NewPassword.module.css';
 import useFlashMessage from '../../hooks/userFlashMessage';
 import errorFormMessage from '../../utils/errorFormMessage';
+import { useMemorizeFilters , POSSIBLE_FILTERS_ENTITIES} from '../../hooks/useMemorizeInputsFilters';
+import api from '../../services/api';
 
 const NewPassword = ({ isOpen, onClose }) => {
   const { theme } = useTheme();
   const { setFlashMessage } = useFlashMessage();
   const [isLoading, setIsLoading] = useState(false);
+  const {getMemorizedFilters} = useMemorizeFilters(POSSIBLE_FILTERS_ENTITIES.USERS)
 
   const {
     control,
@@ -27,8 +30,14 @@ const NewPassword = ({ isOpen, onClose }) => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      // Simulating API call
-      // await apiChangePassword(data);
+      const formatData = {
+        oldPassword: data.oldPassword,
+        newPassword: data.newPassword,
+        confirmNewPassword: data.confirmPassword,
+        id: getMemorizedFilters()?.id,
+        login: getMemorizedFilters()?.login
+      }
+      await api.patch('/user/reset-password', formatData);
       setFlashMessage('Senha alterada com sucesso!', 'success');
       reset();
       onClose();
@@ -97,7 +106,7 @@ const NewPassword = ({ isOpen, onClose }) => {
               <Controller
                 name="newPassword"
                 control={control}
-                rules={{ required: 'Nova senha é obrigatória' }}
+                rules={{ required: 'Nova senha é obrigatória', minLength: { value: 6, message: 'A senha deve ter pelo menos 6 caracteres' } }}
                 render={({ field }) => (
                   <input
                     type='password'
@@ -114,7 +123,6 @@ const NewPassword = ({ isOpen, onClose }) => {
               name="newPassword"
               render={({ message }) => errorFormMessage(message)}
             />
-            <small className={styles.hint}>Mínimo de 8 caracteres</small>
           </div>
 
           <div className={styles.inputGroup}>
@@ -123,7 +131,7 @@ const NewPassword = ({ isOpen, onClose }) => {
               <Controller
                 name="confirmPassword"
                 control={control}
-                rules={{ required: 'Confirmação de senha é obrigatória' }}
+                rules={{ required: 'Confirmação de senha é obrigatória', minLength: { value: 6, message: 'A senha deve ter pelo menos 6 caracteres' } }}
                 render={({ field }) => (
                   <input
                     type='password'

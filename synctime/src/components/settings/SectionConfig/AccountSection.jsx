@@ -1,24 +1,53 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import styles from '../../../components/modal/SettingsModal.module.css';
 import useFlashMessage from '../../../hooks/userFlashMessage';
 import NewPassword from '../../newPassword/newPassword';
+import { ErrorMessage } from '@hookform/error-message';
+import errorFormMessage from '../../../utils/errorFormMessage';
+import ServiceUsers from '../../../services/ServiceUsers';
+import {
+  useMemorizeFilters,
+  POSSIBLE_FILTERS_ENTITIES
+} from './../../../hooks/useMemorizeInputsFilters';
 
 const AccountSection = () => {
   const { setFlashMessage } = useFlashMessage();
-    const [showAlterPassword, setShowAlterPassword] = useState(false);
-  
-  
+  const [showAlterPassword, setShowAlterPassword] = useState(false);
+   const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
+    POSSIBLE_FILTERS_ENTITIES.USERS
+  );
+  const { control, handleSubmit, formState: { errors },reset } = useForm({
+    defaultValues: {
+      email: ''
+    }
+  });
+useEffect(() => {
+    async function fetchUser() {
+      const response = await ServiceUsers.getByUser(getMemorizedFilters()?.id);
+      memorizeFilters({
+        ...getMemorizedFilters(),
+         email: response.data.data.user.email
+      });
+      reset({
+        email: response.data.data.user.email || ''
+      });
+    }
+    fetchUser();
+  }, []);
+ 
 
-  const onSubmit = (data) => {
+  const onSubmitEmail = async(data) => {
     try {
-      if (data.password !== data.confirmPassword) {
-        setFlashMessage('As senhas não coincidem', 'error');
-        return;
-      }
-      console.log('Password change submitted:', data);
-      setFlashMessage('Senha atualizada com sucesso!', 'success');
+      await ServiceUsers.editUser(getMemorizedFilters()?.id, { email: data.email });
+      memorizeFilters({
+        ...getMemorizedFilters(),
+        email: data.email
+      });
+      setFlashMessage('Email atualizado com sucesso!', 'success');
     } catch (error) {
-      setFlashMessage('Erro ao atualizar senha', 'error');
+      console.log('error AccountSection',error)
+      setFlashMessage('Erro ao atualizar email', 'error');
     }
   };
 
@@ -27,32 +56,50 @@ const AccountSection = () => {
       <h3 className={styles.sectionTitle}>Conta</h3>
       
       <div className={styles.formGroup}>
-        <label className={styles.label}>Email</label>
-        <input 
-          type="email" 
-          className={styles.input}
-          defaultValue="bergxbergx2@gmail.com"
-          disabled
-        />
-        <span className={styles.helpText}>O email não pode ser alterado</span>
-      </div>
-      <div className={styles.formGroup}>
         <label className={styles.label}>Login</label>
         <input 
           type="login" 
           className={styles.input}
-          defaultValue=""
+          defaultValue={getMemorizedFilters()?.login || ''}
           disabled
         />
-        <span className={styles.helpText}>O email não pode ser alterado</span>
+        <span className={styles.helpText}>O login não pode ser alterado</span>
+      </div>
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Email</label>
+        <form onSubmit={handleSubmit(onSubmitEmail)}>
+          <Controller
+            name="email"
+            control={control}
+            rules={{
+              required: 'Email é obrigatório',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Email inválido'
+              }
+            }}
+            render={({ field }) => (
+              <input
+                {...field}
+                type="email"
+                className={`${styles.input} ${errors.email ? styles.error : ''}`}
+              />
+            )}
+          />
+           <ErrorMessage
+            errors={errors}
+            name="email"
+            render={({ message }) => errorFormMessage(message)}
+          />
+          <button type="submit" className={styles.dangerButton} style={{marginTop: '10px'}}>Salvar Email</button>
+        </form>
       </div>
 
       <div className={styles.formGroup}>
         <label className={styles.label}>Alterar senha</label>
         <button className={styles.dangerButton} onClick={() => setShowAlterPassword(true)}>Alterar senha</button> 
       </div>
-
-      
 
       <div className={styles.divider}></div>
 
