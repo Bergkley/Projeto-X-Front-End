@@ -28,7 +28,7 @@ const Header = () => {
 
   return (
     <>
-      <header 
+      <header
         className={styles.header}
         style={{ background: emphasisColor || 'rgb(20, 18, 129)' }}
       >
@@ -109,7 +109,7 @@ const Header = () => {
                 >
                   <Bell className={styles.bellIcon} />
                   {notificationCount > 0 && (
-                    <span 
+                    <span
                       className={styles.badge}
                       style={{ color: emphasisColor || 'rgb(20, 18, 129)' }}
                     >

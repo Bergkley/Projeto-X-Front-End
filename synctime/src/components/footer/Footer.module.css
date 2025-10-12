@@ -1,0 +1,27 @@
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
+  padding: 1rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.copyright {
+  font-size: 0.875rem;
+  color: #050505;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .copyright {
+    font-size: 0.9rem;
+  }
+}
