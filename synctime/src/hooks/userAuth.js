@@ -152,19 +152,23 @@ export default function useAuth() {
     history.push('/inicio');
   }
 
-  function logout(silent = false) {
+  function logout(silent = false, deleteAccount = false) {
     setAuthenticated(false);
     clearMemorizedFiltersUsers();
     localStorage.removeItem('token');
     api.defaults.headers.Authorization = undefined;
     
-    if (!silent) {
+    if (!silent && !deleteAccount) {
       const msgText = 'Logout realizado com sucesso!';
       const msgType = 'success';
       setFlashMessage(msgText, msgType);
-    } else {
+    } else if (silent && !deleteAccount) {
       const msgText = 'Sua sessão expirou. Faça login novamente.';
       const msgType = 'warning';
+      setFlashMessage(msgText, msgType);
+    } else {
+      const msgText = 'Conta excluída com sucesso!';
+      const msgType = 'success';
       setFlashMessage(msgText, msgType);
     }
     

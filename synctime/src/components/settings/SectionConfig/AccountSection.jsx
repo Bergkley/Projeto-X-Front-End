@@ -10,10 +10,15 @@ import {
   useMemorizeFilters,
   POSSIBLE_FILTERS_ENTITIES
 } from './../../../hooks/useMemorizeInputsFilters';
+import ConfirmModal from '../../modal/ConfirmModal';
+import useAuth from '../../../hooks/userAuth';
 
 const AccountSection = () => {
   const { setFlashMessage } = useFlashMessage();
   const [showAlterPassword, setShowAlterPassword] = useState(false);
+   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { logout } = useAuth();
    const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
     POSSIBLE_FILTERS_ENTITIES.USERS
   );
@@ -50,6 +55,22 @@ useEffect(() => {
       setFlashMessage('Erro ao atualizar email', 'error');
     }
   };
+
+    const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await ServiceUsers.deleteUser(getMemorizedFilters()?.id);
+      setShowDeleteModal(false);
+      logout(false,true);
+    } catch (error) {
+      console.log('error deleting account', error);
+      setFlashMessage('Erro ao excluir conta', 'error');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
 
   return (
     <div className={styles.section}>
@@ -108,11 +129,22 @@ useEffect(() => {
         <p className={styles.dangerText}>
           Esta ação é irreversível e removerá permanentemente sua conta.
         </p>
-        <button className={styles.dangerButton}>Excluir conta</button>
+        <button className={styles.dangerButton} onClick={() => setShowDeleteModal(true)}>Excluir conta</button>
       </div>
       <NewPassword
         isOpen={showAlterPassword}
         onClose={() => setShowAlterPassword(false)}
+      />
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteAccount}
+        title="Confirmar exclusão de conta"
+        message="Tem certeza que deseja excluir sua conta? Esta ação é irreversível e todos os seus dados serão permanentemente removidos."
+        confirmText="Sim, excluir conta"
+        cancelText="Cancelar"
+        danger={true}
+        loading={isDeleting}
       />
     </div>
   );
