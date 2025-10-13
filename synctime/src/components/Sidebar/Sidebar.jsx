@@ -111,7 +111,6 @@ function Sidebar({ onToggle }) {
       const sidebar = e.currentTarget;
       const rect = sidebar.getBoundingClientRect();
       
-      // Adiciona uma margem de tolerância para evitar flickering
       if (e.clientX <= rect.left || e.clientX >= rect.right + 10) {
         setIsHovered(false);
       }
