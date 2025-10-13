@@ -1,11 +1,10 @@
 import { BrowserRouter as Router, Switch, Route, Redirect, useLocation } from 'react-router-dom';
-import { useState } from 'react';
-
+import { useState, useEffect } from 'react';
 // 🧩 Componentes
 import Message from './components/flashMessage/Message';
 import Header from './components/header/Header';
 import Footer from './components/footer/footer';
-
+import Sidebar from './components/sidebar/Sidebar';
 // 📄 Páginas
 import Login from './views/auth/Login';
 import Register from './views/auth/Register';
@@ -13,7 +12,6 @@ import LoadingPage from './views/loading/Loading';
 import ForgotPassword from './views/auth/ForgotPassword';
 import StartLogin from './views/auth/StartLogin';
 import Home from './views/home/Home';
-
 // 🌐 Contexto
 import { UserProvider } from './context/UserContext';
 
@@ -56,20 +54,57 @@ function PublicRoute({ children, ...rest }) {
 
 function Layout({ children }) {
   const location = useLocation();
-  const showHeaderFooter = location.pathname === '/inicio';
+  const token = localStorage.getItem('token');
+  const [sidebarState, setSidebarState] = useState({ isMinimized: false, isMobile: false });
+  
+  // Páginas protegidas que mostram sidebar, header e footer
+  const protectedPages = ['/inicio', '/dashboard', '/relatorios', '/anotacoes', '/configuracoes', '/conta'];
+  const showSidebar = token && protectedPages.includes(location.pathname);
+
+  // Callback para receber o estado da sidebar
+  const handleSidebarToggle = (isMinimized, isMobile) => {
+    setSidebarState({ isMinimized, isMobile });
+  };
+
+  // Calcula a margem dinamicamente baseado no estado da sidebar
+  const getMarginLeft = () => {
+    if (!showSidebar) return '0';
+    if (sidebarState.isMobile) return '0';
+    if (sidebarState.isMinimized) return '80px';
+    return '260px';
+  };
+
+  const getWidth = () => {
+    if (!showSidebar) return '100%';
+    if (sidebarState.isMobile) return '100%';
+    if (sidebarState.isMinimized) return 'calc(100% - 80px)';
+    return 'calc(100% - 260px)';
+  };
 
   return (
     <>
-      {showHeaderFooter && <Header />}
-      {children}
-      {showHeaderFooter && <Footer />}
+      {showSidebar && <Sidebar onToggle={handleSidebarToggle} />}
+      <div style={{ 
+        marginLeft: getMarginLeft(), 
+        minHeight: '100vh',
+        transition: 'margin-left 0.3s ease, width 0.3s ease',
+        width: getWidth()
+      }}>
+        {showSidebar && <Header />}
+        <main style={{ 
+          padding: showSidebar ? '20px' : '0',
+          paddingTop: sidebarState.isMobile && showSidebar ? '70px' : '20px' 
+        }}>
+          {children}
+        </main>
+        {showSidebar && <Footer />}
+      </div>
     </>
   );
 }
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-
   return (
     <Router>
       <UserProvider>
@@ -78,33 +113,41 @@ function App() {
         ) : (
           <>
             <Message />
-            <Switch>
-              <PublicRoute exact path="/">
-                <Layout>
+            <Layout>
+              <Switch>
+                <PublicRoute exact path="/">
                   <StartLogin />
-                </Layout>
-              </PublicRoute>
-              <PublicRoute path="/login">
-                <Layout>
+                </PublicRoute>
+                <PublicRoute path="/login">
                   <Login />
-                </Layout>
-              </PublicRoute>
-              <PublicRoute path="/register">
-                <Layout>
+                </PublicRoute>
+                <PublicRoute path="/register">
                   <Register />
-                </Layout>
-              </PublicRoute>
-              <PublicRoute path="/esqueceu-senha">
-                <Layout>
+                </PublicRoute>
+                <PublicRoute path="/esqueceu-senha">
                   <ForgotPassword />
-                </Layout>
-              </PublicRoute>
-              <ProtectedRoute path="/inicio">
-                <Layout>
+                </PublicRoute>
+                <ProtectedRoute path="/inicio">
                   <Home />
-                </Layout>
-              </ProtectedRoute>
-            </Switch>
+                </ProtectedRoute>
+                {/* Adicione aqui as outras rotas protegidas */}
+                {/* <ProtectedRoute path="/dashboard">
+                  <Dashboard />
+                </ProtectedRoute>
+                <ProtectedRoute path="/relatorios">
+                  <Relatorios />
+                </ProtectedRoute>
+                <ProtectedRoute path="/anotacoes">
+                  <Anotacoes />
+                </ProtectedRoute>
+                <ProtectedRoute path="/configuracoes">
+                  <Configuracoes />
+                </ProtectedRoute>
+                <ProtectedRoute path="/conta">
+                  <Conta />
+                </ProtectedRoute> */}
+              </Switch>
+            </Layout>
           </>
         )}
       </UserProvider>
