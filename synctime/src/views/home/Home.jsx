@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets, Calendar, Filter, BarChart3, CheckCircle2 } from 'lucide-react';
 import styles from './Home.module.css';
 
@@ -13,18 +13,44 @@ const Home = () => {
     { id: 4, title: 'AGO000-Organização do projeto', category: 'Protocolos', time: '1 dia atrás', type: 'update' },
     { id: 5, title: 'Lembrete importante', category: 'Anotações', time: '2 dias atrás', type: 'note' }
   ]);
-  
 
-  // Dados do gráfico de presença (últimos 7 dias)
-  const [presenceData] = useState([
-    { day: 'Seg', present: true, sessions: 3 },
-    { day: 'Ter', present: true, sessions: 5 },
-    { day: 'Qua', present: true, sessions: 4 },
-    { day: 'Qui', present: false, sessions: 0 },
-    { day: 'Sex', present: true, sessions: 6 },
-    { day: 'Sáb', present: true, sessions: 2 },
-    { day: 'Dom', present: false, sessions: 0 }
-  ]);
+  const [selectedMonth, setSelectedMonth] = useState('10');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+
+  const months = [
+    { value: '1', label: 'Janeiro' },
+    { value: '2', label: 'Fevereiro' },
+    { value: '3', label: 'Março' },
+    { value: '4', label: 'Abril' },
+    { value: '5', label: 'Maio' },
+    { value: '6', label: 'Junho' },
+    { value: '7', label: 'Julho' },
+    { value: '8', label: 'Agosto' },
+    { value: '9', label: 'Setembro' },
+    { value: '10', label: 'Outubro' },
+    { value: '11', label: 'Novembro' },
+    { value: '12', label: 'Dezembro' }
+  ];
+
+  const years = [2023, 2024, 2025, 2026];
+
+  const presenceData = useMemo(() => {
+    const year = parseInt(selectedYear);
+    const month = parseInt(selectedMonth);
+    const date = new Date(year, month, 0);
+    const daysInMonth = date.getDate();
+    const data = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const present = Math.random() > 0.2; // 80% chance of being present
+      const sessions = present ? Math.floor(Math.random() * 7) + 1 : 0;
+      data.push({ day: day.toString().padStart(2, '0'), present, sessions });
+    }
+    return data;
+  }, [selectedMonth, selectedYear]);
+
+  const presentDays = presenceData.filter(d => d.present).length;
+  const totalSessions = presenceData.reduce((acc, d) => acc + d.sessions, 0);
+  const rate = Math.round((presentDays / presenceData.length) * 100);
 
   useEffect(() => {
     fetchWeather();
@@ -208,23 +234,46 @@ const Home = () => {
 
           {/* Gráfico de Presença */}
           <div className={styles.presenceCard}>
-            <h2 className={styles.cardTitle}>
-              <BarChart3 className={styles.iconGreen} />
-              Gráfico de Presença
-            </h2>
+            <div className={styles.cardHeader}>
+              <h2 className={styles.cardTitle}>
+                <BarChart3 className={styles.iconGreen} />
+                Gráfico de Presença
+              </h2>
+              <div className={styles.filterContainer}>
+                <Filter className={styles.filterIcon} />
+                <select 
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className={styles.filterSelect}
+                >
+                  {months.map(m => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+                <select 
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className={styles.filterSelect}
+                >
+                  {years.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
             
             <div className={styles.presenceContent}>
               <div className={styles.statsGrid}>
                 <div className={styles.statBox}>
                   <p className={styles.statLabel}>Dias Presentes</p>
                   <p className={styles.statValueGreen}>
-                    {presenceData.filter(d => d.present).length}
+                    {presentDays}
                   </p>
                 </div>
                 <div className={styles.statBoxBlue}>
                   <p className={styles.statLabel}>Total Sessões</p>
                   <p className={styles.statValueBlue}>
-                    {presenceData.reduce((acc, d) => acc + d.sessions, 0)}
+                    {totalSessions}
                   </p>
                 </div>
               </div>
@@ -237,7 +286,7 @@ const Home = () => {
                       {day.present && (
                         <div 
                           className={styles.progressFill}
-                          style={{ width: `${(day.sessions / 6) * 100}%` }}
+                          style={{ width: `${(day.sessions / 7) * 100}%` }}
                         >
                           <span className={styles.sessionCount}>{day.sessions}</span>
                         </div>
@@ -254,7 +303,7 @@ const Home = () => {
               
               <div className={styles.presenceFooter}>
                 <p className={styles.presenceRate}>
-                  Taxa de presença: <span className={styles.rateValue}>71%</span>
+                  Taxa de presença: <span className={styles.rateValue}>{rate}%</span>
                 </p>
               </div>
             </div>
