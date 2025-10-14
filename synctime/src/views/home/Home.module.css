@@ -1,0 +1,416 @@
+/* Container Principal */
+.container {
+  min-height: 100vh;
+  background-color: transparent;
+}
+
+.wrapper {
+  width: 130%;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2rem;
+}
+
+/* Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto auto;
+  }
+  
+  .presenceCard {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Card Base */
+.weatherCard,
+.inboxCard,
+.presenceCard {
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+/* Weather Card */
+.weatherCard {
+  background: linear-gradient(to bottom right, #3b82f6, #2563eb);
+  color: white;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.iconPurple {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9333ea;
+}
+
+.iconGreen {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #16a34a;
+}
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 12rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 9999px;
+  height: 3rem;
+  width: 3rem;
+  border-bottom: 2px solid white;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.weatherContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.weatherMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cityName {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.temperature {
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.condition {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  text-transform: capitalize;
+}
+
+.weatherDetails {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(96, 165, 250, 0.5);
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detailIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.detailValue {
+  font-weight: 600;
+}
+
+/* Inbox Card */
+.inboxCard,
+.presenceCard {
+  background-color: white;
+  color: #1f2937;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.filterContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterIcon {
+  width: 1rem;
+  height: 1rem;
+  color: #9ca3af;
+}
+
+.filterSelect {
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.filterSelect:focus {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
+
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.notificationItem {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.notificationItem:hover {
+  background-color: #f9fafb;
+}
+
+.notificationContent {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.notificationMain {
+  flex: 1;
+}
+
+.notificationTitle {
+  font-weight: 500;
+  color: #1f2937;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notificationMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.update {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.issue {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.note {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.time {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.notificationDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #9333ea;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.cardFooter {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.viewAllButton {
+  font-size: 0.875rem;
+  color: #9333ea;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.viewAllButton:hover {
+  color: #7e22ce;
+}
+
+/* Presence Card */
+.presenceContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.statBox {
+  background-color: #dcfce7;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.statBoxBlue {
+  background-color: #dbeafe;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.statValueGreen {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.statValueBlue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.presenceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.presenceRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dayLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  width: 3rem;
+}
+
+.progressBar {
+  flex: 1;
+  background-color: #f3f4f6;
+  border-radius: 9999px;
+  height: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(to right, #4ade80, #22c55e);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.5rem;
+}
+
+.sessionCount {
+  font-size: 0.75rem;
+  color: white;
+  font-weight: 600;
+}
+
+.checkIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.emptyCheck {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  border: 2px solid #d1d5db;
+  flex-shrink: 0;
+}
+
+.presenceFooter {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.presenceRate {
+  font-size: 0.875rem;
+  color: #4b5563;
+  text-align: center;
+}
+
+.rateValue {
+  font-weight: 700;
+  color: #16a34a;
+}
