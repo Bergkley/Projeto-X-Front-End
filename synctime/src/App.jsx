@@ -1,10 +1,11 @@
 import { BrowserRouter as Router, Switch, Route, Redirect, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 // 🧩 Componentes
 import Message from './components/flashMessage/Message';
 import Header from './components/header/Header';
 import Footer from './components/footer/footer';
 import Sidebar from './components/sidebar/Sidebar';
+import Container from './components/layout/Container';
 // 📄 Páginas
 import Login from './views/auth/Login';
 import Register from './views/auth/Register';
@@ -92,10 +93,14 @@ function Layout({ children }) {
       }}>
         {showSidebar && <Header />}
         <main style={{ 
-          padding: showSidebar ? '20px' : '0',
-          paddingTop: sidebarState.isMobile && showSidebar ? '70px' : '20px' 
+          padding: showSidebar ? '0' : '0',
+          paddingTop: sidebarState.isMobile && showSidebar ? '70px' : '0'
         }}>
-          {children}
+          {showSidebar ? (
+            <Container>{children}</Container>
+          ) : (
+            children
+          )}
         </main>
         {showSidebar && <Footer />}
       </div>
