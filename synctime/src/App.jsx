@@ -13,6 +13,10 @@ import LoadingPage from './views/loading/Loading';
 import ForgotPassword from './views/auth/ForgotPassword';
 import StartLogin from './views/auth/StartLogin';
 import Home from './views/home/Home';
+import SectionConfigSystem from './views/SectionConfigSystem/SectionConfigSystem';
+
+
+
 // 🌐 Contexto
 import { UserProvider } from './context/UserContext';
 
@@ -134,6 +138,9 @@ function App() {
                 </PublicRoute>
                 <ProtectedRoute path="/inicio">
                   <Home />
+                </ProtectedRoute>
+                <ProtectedRoute path="/configuracoes">
+                  <SectionConfigSystem />
                 </ProtectedRoute>
                 {/* Adicione aqui as outras rotas protegidas */}
                 {/* <ProtectedRoute path="/dashboard">
