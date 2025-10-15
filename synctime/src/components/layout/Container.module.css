@@ -1,14 +1,25 @@
 .container {
-  width: 80%;
+  width: 100%;
   min-height: calc(100vh - 140px);
   padding: 1em 1.5em 3em;
-  padding-bottom: 80px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container.dark {
+  background: #111827;
+  color: #f3f4f6;
+}
+
+.container.light {
+  background-color: #f9fafb;
+  color: #111827;
 }
 
 .content {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  
 }
 
 /* Responsividade */
@@ -16,13 +27,15 @@
   .container {
     padding: 1.5rem 2rem;
     padding-bottom: 80px;
-  }
+
+ }
 }
 
 @media (min-width: 768px) {
   .container {
     padding: 2rem 2.5rem;
     padding-bottom: 80px;
+
   }
 }
 
@@ -30,6 +43,8 @@
   .container {
     padding: 2rem 3rem;
     padding-bottom: 80px;
+
+
   }
 }
 
@@ -37,9 +52,17 @@
   .container {
     padding: 2rem 4rem;
     padding-bottom: 80px;
+
   }
   
   .content {
     max-width: 1300px;
+
+  }
+  
+}
+@media (max-width: 768px) {
+  .container {
+      margin-top: -70px;
   }
 }
