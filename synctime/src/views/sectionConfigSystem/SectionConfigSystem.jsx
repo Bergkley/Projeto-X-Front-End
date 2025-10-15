@@ -1,7 +1,12 @@
-import { User,  Settings, PaintBucket, ClipboardList } from 'lucide-react';
+import { User, Settings, PaintBucket, ClipboardList } from 'lucide-react';
 import styles from './SectionConfigSystem.module.css';
+import { useTheme } from '../../hooks/useTheme';
+import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 
 const SectionConfigSystem = () => {
+  const { theme } = useTheme();
+  const { emphasisColor } = useEmphasisColor();
+
   const configSections = [
     {
       id: 'geral',
@@ -31,11 +36,10 @@ const SectionConfigSystem = () => {
       items: ['Configuração da conta', 'Alterar senha', 'Esqueceu senha'],
       subtitle: 'Gerencie as informações da sua conta'
     },
-    
   ];
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${styles[theme]}`}>
       <div className={styles.header}>
         <h1 className={styles.title}>Configurações</h1>
         <p className={styles.description}>Gerencie as configurações do sistema</p>
@@ -47,7 +51,13 @@ const SectionConfigSystem = () => {
           return (
             <div key={section.id} className={styles.card}>
               <div className={styles.cardHeader}>
-                <div className={styles.iconWrapper}>
+                <div 
+                  className={styles.iconWrapper}
+                  style={{
+                    background: `linear-gradient(135deg, ${emphasisColor || '#ff6fa3'} 0%, ${emphasisColor || '#e91e63'} 100%)`,
+                    boxShadow: `0 2px 6px ${emphasisColor ? `${emphasisColor}40` : 'rgba(233, 30, 99, 0.25)'}`
+                  }}
+                >
                   <Icon size={20} />
                 </div>
                 <h3 className={styles.cardTitle}>{section.title}</h3>
@@ -56,7 +66,14 @@ const SectionConfigSystem = () => {
               {section.items.length > 0 && (
                 <ul className={styles.itemList}>
                   {section.items.map((item, index) => (
-                    <li key={index} className={styles.item}>
+                    <li 
+                      key={index} 
+                      className={styles.item}
+                      style={{
+                        '--hover-color': emphasisColor || '#e91e63',
+                        '--hover-bg-opacity': theme === 'dark' ? '0.1' : '0.05'
+                      }}
+                    >
                       {item}
                     </li>
                   ))}

@@ -5,28 +5,61 @@
   min-height: 100vh;
   border-radius: 16px;
   border-style: groove;
-  width: 130%;
+  width: 100%;
   margin: 0 auto;
+  transition: border-color 0.3s ease;
+}
+
+.container.dark {
+  border-color: #374151;
+}
+
+.container.light {
+  border-color: #e5e7eb;
 }
 
 /*  HEADER */
 .header {
   margin-bottom: 2.5rem;
   padding-bottom: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.container.dark .header {
+  border-bottom: 1px solid #374151;
+}
+
+.container.light .header {
   border-bottom: 1px solid #e5e7eb;
 }
 
 .title {
   font-size: 1.875rem;
   font-weight: 600;
-  color: #1a1a1a;
   margin: 0 0 0.5rem 0;
+  transition: color 0.3s ease;
+}
+
+.container.dark .title {
+  color: #f3f4f6;
+}
+
+.container.light .title {
+  color: #1a1a1a;
 }
 
 .description {
   font-size: 0.875rem;
-  color: #6b7280;
   margin: 0;
+  transition: color 0.3s ease;
+}
+
+.container.dark .description {
+  color: #9ca3af;
+}
+
+.container.light .description {
+  color: #6b7280;
 }
 
 /*  GRID RESPONSIVO */
@@ -38,19 +71,36 @@
 
 /*  CARD */
 .card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
   border-radius: 14px;
   padding: 1.75rem;
-  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.05);
   transition: all 0.25s ease;
   display: flex;
   flex-direction: column;
   min-height: 200px;
 }
 
+.container.dark .card {
+  background: #1f2937;
+  border: 1px solid #374151;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.container.light .card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.05);
+}
+
 .card:hover {
   transform: translateY(-6px);
+}
+
+.container.dark .card:hover {
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+  border-color: #4b5563;
+}
+
+.container.light .card:hover {
   box-shadow: 0 14px 36px rgba(31, 41, 55, 0.08);
   border-color: #d1d5db;
 }
@@ -69,17 +119,25 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  background: linear-gradient(135deg, #ff6fa3 0%, #e91e63 100%);
+  /* background e box-shadow removidos - serão aplicados via inline style */
   border-radius: 10px;
   color: white;
-  box-shadow: 0 2px 6px rgba(233, 30, 99, 0.25);
+  transition: all 0.3s ease;
 }
 
 .cardTitle {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #1f2937;
   margin: 0;
+  transition: color 0.3s ease;
+}
+
+.container.dark .cardTitle {
+  color: #f3f4f6;
+}
+
+.container.light .cardTitle {
+  color: #1f2937;
 }
 
 /*  LISTA DE ITENS */
@@ -96,10 +154,18 @@
 .item {
   position: relative;
   padding: 0.5rem 0 0.5rem 1.25rem;
-  color: #4b5563;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.25s ease;
+}
+
+.container.dark .item {
+  color: #d1d5db;
+  border-bottom: 1px solid #374151;
+}
+
+.container.light .item {
+  color: #4b5563;
   border-bottom: 1px solid #f3f4f6;
 }
 
@@ -116,19 +182,34 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #d1d5db;
   transition: background 0.3s ease;
 }
 
+.container.dark .item::before {
+  background: #4b5563;
+}
+
+.container.light .item::before {
+  background: #d1d5db;
+}
+
 .item:hover {
-  color: #e91e63;
-  background: rgba(233, 30, 99, 0.05);
+  color: var(--hover-color, #e91e63);
   border-radius: 8px;
   padding-left: 1.5rem;
 }
 
+
+.container.dark .item:hover {
+  background: var(--hover-color, #e91e63)
+}
+
+.container.light .item:hover {
+  background: var(--hover-color, #e91e63)
+}
+
 .item:hover::before {
-  background: #e91e63;
+  background: var(--hover-color, #e91e63);
 }
 
 /*  RODAPÉ DO CARD */
@@ -138,9 +219,18 @@
   gap: 0.5rem;
   margin-top: auto;
   padding-top: 1rem;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.container.dark .subtitle {
+  border-top: 1px solid #374151;
+  color: #9ca3af;
+}
+
+.container.light .subtitle {
   border-top: 1px solid #f3f4f6;
   color: #6b7280;
-  font-size: 0.8rem;
 }
 
 .subtitleIcon {
@@ -150,17 +240,25 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #f3f4f6;
   font-size: 0.7rem;
   font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.container.dark .subtitleIcon {
+  background: #374151;
+  color: #9ca3af;
+}
+
+.container.light .subtitleIcon {
+  background: #f3f4f6;
   color: #6b7280;
 }
 
-
+/* MEDIA QUERIES */
 @media (max-width: 1440px) {
   .container {
-    width: 130%;
-
+    width: 100%;
     padding: 2rem;
   }
   .grid {
@@ -171,8 +269,7 @@
 @media (max-width: 1024px) {
   .container {
     padding: 2rem;
-    width: 130%;
-
+    width: 100%;
   }
 
   .title {
@@ -187,9 +284,7 @@
 @media (max-width: 768px) {
   .container {
     padding: 1.5rem;
-        width: 130%;
-
-    
+    width: 100%;
   }
 
   .title {
@@ -220,7 +315,7 @@
 @media (max-width: 480px) {
   .container {
     padding: 1rem;
-    width: 130%;
+    width: 100%;
   }
 
   .title {
