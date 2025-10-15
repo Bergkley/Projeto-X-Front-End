@@ -464,10 +464,9 @@
 
 /* Mobile */
 .mobileToggle {
-  position: fixed;
+  position: absolute;
   top: 10px;
   left: 16px;
-  z-index: 1100;
   background-color: transparent;
   border: none;
   color: #fff;
@@ -477,7 +476,6 @@
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .mobileToggle:hover {
   background-color: #334155;
   transform: scale(1.05);
