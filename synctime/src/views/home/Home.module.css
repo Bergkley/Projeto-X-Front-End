@@ -1,54 +1,68 @@
-/* Container Principal */
+/* 🌐 CONTAINER PRINCIPAL */
 .container {
   min-height: 100vh;
   background-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .wrapper {
-  width: 130%;
+  width: 100%;
   margin: 0 auto;
+  padding: 1rem;
 }
 
 .title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #1f2937;
   margin-bottom: 2rem;
+  text-align: center;
+  transition: color 0.3s ease;
 }
 
-/* Grid Layout */
+.container.dark .title {
+  color: #f3f4f6;
+}
+
+.container.light .title {
+  color: #1f2937;
+}
+
+/* 🧩 GRID BASE */
 .grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
+/* 🖥️ DESKTOP (>=1024px) */
 @media (min-width: 1024px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: auto auto;
   }
-  
+
   .presenceCard {
     grid-column: 1 / -1;
   }
 }
 
-/* Card Base */
+/* 💎 BASE DOS CARDS */
 .weatherCard,
 .inboxCard,
 .presenceCard {
   border-radius: 1rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
+  transition: all 0.3s ease;
 }
 
-/* Weather Card */
+/* ☀️ WEATHER CARD */
 .weatherCard {
   background: linear-gradient(to bottom right, #3b82f6, #2563eb);
   color: white;
 }
 
+/* 🏷️ TÍTULO DO CARD */
 .cardTitle {
   font-size: 1.25rem;
   font-weight: 600;
@@ -56,25 +70,36 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: color 0.3s ease;
 }
 
-.icon {
+.container.dark .inboxCard .cardTitle,
+.container.dark .presenceCard .cardTitle {
+  color: #f3f4f6;
+}
+
+.container.light .inboxCard .cardTitle,
+.container.light .presenceCard .cardTitle {
+  color: #1f2937;
+}
+
+/* 🧭 ÍCONES */
+.icon,
+.iconPurple,
+.iconGreen {
   width: 1.25rem;
   height: 1.25rem;
 }
 
 .iconPurple {
-  width: 1.25rem;
-  height: 1.25rem;
   color: #9333ea;
 }
 
 .iconGreen {
-  width: 1.25rem;
-  height: 1.25rem;
   color: #16a34a;
 }
 
+/* 🔄 ANIMAÇÃO DE CARREGAMENTO */
 .loadingContainer {
   display: flex;
   align-items: center;
@@ -96,6 +121,7 @@
   }
 }
 
+/* 🌤️ CONTEÚDO DO CLIMA */
 .weatherContent {
   display: flex;
   flex-direction: column;
@@ -152,20 +178,35 @@
   font-weight: 600;
 }
 
-/* Inbox Card */
+/* 📬 INBOX & PRESENCE CARD */
 .inboxCard,
 .presenceCard {
+  transition: all 0.3s ease;
+}
+
+.container.dark .inboxCard,
+.container.dark .presenceCard {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.container.light .inboxCard,
+.container.light .presenceCard {
   background-color: white;
   color: #1f2937;
 }
 
+/* 🧱 CABEÇALHO DOS CARDS */
 .cardHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
+/* 🎚️ FILTRO */
 .filterContainer {
   display: flex;
   align-items: center;
@@ -175,16 +216,35 @@
 .filterIcon {
   width: 1rem;
   height: 1rem;
+  transition: color 0.3s ease;
+}
+
+.container.dark .filterIcon {
+  color: #9ca3af;
+}
+
+.container.light .filterIcon {
   color: #9ca3af;
 }
 
 .filterSelect {
   font-size: 0.875rem;
-  border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
   outline: none;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+}
+
+.container.dark .filterSelect {
+  border: 1px solid #374151;
+  background-color: #111827;
+  color: #f3f4f6;
+}
+
+.container.light .filterSelect {
+  border: 1px solid #d1d5db;
+  background-color: white;
+  color: #1f2937;
 }
 
 .filterSelect:focus {
@@ -192,6 +252,7 @@
   outline-offset: 2px;
 }
 
+/* 🔔 NOTIFICAÇÕES */
 .notificationsList {
   display: flex;
   flex-direction: column;
@@ -200,18 +261,60 @@
   overflow-y: auto;
 }
 
+/* Scrollbar para notificações */
+.container.dark .notificationsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.container.dark .notificationsList::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+.container.dark .notificationsList::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+
+.container.light .notificationsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.container.light .notificationsList::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.container.light .notificationsList::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
 .notificationItem {
   padding: 0.75rem;
-  border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 
-.notificationItem:hover {
+.container.dark .notificationItem {
+  border: 1px solid #374151;
+  background-color: #111827;
+}
+
+.container.light .notificationItem {
+  border: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.container.dark .notificationItem:hover {
+  background-color: #1f2937;
+  border-color: #4b5563;
+}
+
+.container.light .notificationItem:hover {
   background-color: #f9fafb;
 }
 
+/* 📄 CONTEÚDO DA NOTIFICAÇÃO */
 .notificationContent {
   display: flex;
   align-items: flex-start;
@@ -225,11 +328,19 @@
 
 .notificationTitle {
   font-weight: 500;
-  color: #1f2937;
   font-size: 0.875rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.container.dark .notificationTitle {
+  color: #f3f4f6;
+}
+
+.container.light .notificationTitle {
+  color: #1f2937;
 }
 
 .notificationMeta {
@@ -262,6 +373,14 @@
 
 .time {
   font-size: 0.75rem;
+  transition: color 0.3s ease;
+}
+
+.container.dark .time {
+  color: #9ca3af;
+}
+
+.container.light .time {
   color: #6b7280;
 }
 
@@ -293,7 +412,7 @@
   color: #7e22ce;
 }
 
-/* Presence Card */
+/* 👥 PRESENCE CARD */
 .presenceContent {
   display: flex;
   flex-direction: column;
@@ -307,20 +426,30 @@
   margin-bottom: 1.5rem;
 }
 
-.statBox {
-  background-color: #dcfce7;
+.statBox,
+.statBoxBlue {
   border-radius: 0.5rem;
   padding: 0.75rem;
+}
+
+.statBox {
+  background-color: #dcfce7;
 }
 
 .statBoxBlue {
   background-color: #dbeafe;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
 }
 
 .statLabel {
   font-size: 0.875rem;
+  transition: color 0.3s ease;
+}
+
+.container.dark .statLabel {
+  color: #9ca3af;
+}
+
+.container.light .statLabel {
   color: #4b5563;
 }
 
@@ -344,6 +473,33 @@
   overflow-y: auto;
 }
 
+/* Scrollbar para presença */
+.container.dark .presenceList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.container.dark .presenceList::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+.container.dark .presenceList::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+
+.container.light .presenceList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.container.light .presenceList::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.container.light .presenceList::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
 .presenceRow {
   display: flex;
   align-items: center;
@@ -353,18 +509,34 @@
 .dayLabel {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #4b5563;
   width: 3rem;
   flex-shrink: 0;
+  transition: color 0.3s ease;
+}
+
+.container.dark .dayLabel {
+  color: #9ca3af;
+}
+
+.container.light .dayLabel {
+  color: #4b5563;
 }
 
 .progressBar {
   flex: 1;
-  background-color: #f3f4f6;
   border-radius: 9999px;
   height: 2rem;
   position: relative;
   overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+
+.container.dark .progressBar {
+  background-color: #111827;
+}
+
+.container.light .progressBar {
+  background-color: #f3f4f6;
 }
 
 .progressFill {
@@ -397,23 +569,134 @@
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 9999px;
-  border: 2px solid #d1d5db;
   flex-shrink: 0;
+  transition: border-color 0.3s ease;
+}
+
+.container.dark .emptyCheck {
+  border: 2px solid #374151;
+}
+
+.container.light .emptyCheck {
+  border: 2px solid #d1d5db;
 }
 
 .presenceFooter {
   margin-top: 1rem;
   padding-top: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.container.dark .presenceFooter {
+  border-top: 1px solid #374151;
+}
+
+.container.light .presenceFooter {
   border-top: 1px solid #e5e7eb;
 }
 
 .presenceRate {
   font-size: 0.875rem;
-  color: #4b5563;
   text-align: center;
+  transition: color 0.3s ease;
+}
+
+.container.dark .presenceRate {
+  color: #9ca3af;
+}
+
+.container.light .presenceRate {
+  color: #4b5563;
 }
 
 .rateValue {
   font-weight: 700;
   color: #16a34a;
+}
+
+/* ======================================
+   📱 MEDIA QUERIES - RESPONSIVIDADE
+   ====================================== */
+
+/* 📲 Tablets médios (<=1024px) */
+@media (max-width: 1024px) {
+  .wrapper {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .weatherMain {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .temperature {
+    font-size: 2.5rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .presenceCard {
+    grid-column: auto;
+  }
+}
+
+/* 📱 Celulares grandes (<=768px) */
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.4rem;
+  }
+ 
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+
+  .filterContainer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .progressBar {
+    height: 1.5rem;
+  }
+}
+
+/* 📱📱 Celulares pequenos (<=480px) */
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .cardTitle {
+    font-size: 1rem;
+  }
+
+  .temperature {
+    font-size: 2rem;
+  }
+
+  .weatherDetails {
+    grid-template-columns: 1fr;
+  }
+
+  .presenceList {
+    gap: 0.5rem;
+  }
+
+  .presenceRow {
+    gap: 0.5rem;
+  }
 }

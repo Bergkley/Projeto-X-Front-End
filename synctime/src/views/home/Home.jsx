@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets, Calendar, Filter, BarChart3, CheckCircle2 } from 'lucide-react';
 import styles from './Home.module.css';
+import { useTheme } from '../../hooks/useTheme'; // Ajuste o caminho conforme necessário
 
 const Home = () => {
+  const { theme } = useTheme();
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('todos');
@@ -58,12 +60,10 @@ const Home = () => {
 
   const fetchWeather = async () => {
     try {
-      // Usando OpenWeatherMap API - Fortaleza, CE
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=Fortaleza,BR&units=metric&lang=pt_br&appid=4f4b4e8c8f9c8e0b3c5c5f0c5c5c5c5c`
       );
       
-      // Simulando dados caso a API não responda (substitua a chave API acima por uma válida)
       if (!response.ok) {
         setWeather({
           temp: 28,
@@ -128,17 +128,8 @@ const Home = () => {
     return true;
   });
 
-  const getTypeColor = (type) => {
-    const colors = {
-      update: 'bg-blue-100 text-blue-700',
-      issue: 'bg-red-100 text-red-700',
-      note: 'bg-green-100 text-green-700'
-    };
-    return colors[type] || 'bg-gray-100 text-gray-700';
-  };
-
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${styles[theme]}`}>
       <div className={styles.wrapper}>
         <h1 className={styles.title}>Bom dia, Bergkley</h1>
         
