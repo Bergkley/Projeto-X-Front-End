@@ -5,7 +5,7 @@
 }
 
 .tableContainer.dark {
-  background-color: #111827;
+  background-color: #1f2937;
 }
 
 .tableContainer.light {
@@ -128,7 +128,7 @@
 }
 
 .tableContainer.dark .tableHeaderRow {
-  background-color: #1f2937;
+  background-color: #111827;
 }
 
 .tableContainer.light .tableHeaderRow {
