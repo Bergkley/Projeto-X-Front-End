@@ -4,6 +4,7 @@ import TableHeader from "../../../../../components/header/TableHeader/TableHeade
 import Table from "../../../../../components/table/Table";
 import Pagination from "../../../../../components/pagination/Pagination";
 import styles from './CategoryList.module.css';
+import ActionHeader from "../../../../../components/header/ActionHeader/ActionHeader";
 
 const CategoryList = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,7 +15,14 @@ const CategoryList = () => {
   const usersData = [
     { id: 1, name: 'teste', role: 'Admin', login: 'teste', code: '000001', profile: 'A', enabled: true },
     { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
-    
+    { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
+    { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
+    { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
+    { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
+    { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
+    { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
+    { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
+    { id: 5, name: 'Bergkley Ferreira Brasil', role: 'Admin', login: 'bergkley', code: '000002', profile: 'A', enabled: true },
   ];
 
   const columns = [
@@ -86,12 +94,29 @@ const CategoryList = () => {
     console.log('Edit user:', userId);
   };
 
+  const handleBack = () => {
+    console.log('Voltar');
+    // Implementar navegação para voltar
+  };
+
+  const handleCreate = () => {
+    console.log('Criar novo usuário');
+    // Implementar navegação para criar novo usuário
+  };
+
   const handleSelectionChange = (selectedItems) => {
     console.log('Selected items:', selectedItems);
   };
 
   return (
     <div className={styles.container}>
+      <ActionHeader
+        onBack={handleBack}
+        onCreate={handleCreate}
+        backButtonLabel="Voltar"
+        createButtonLabel="Criar"
+      />
+
       <TableHeader
         title="Usuários"
         searchPlaceholder="Insira seu nome de usuário ou login"
