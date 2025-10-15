@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets, Calendar, Filter, BarChart3, CheckCircle2 } from 'lucide-react';
 import styles from './Home.module.css';
-import { useTheme } from '../../hooks/useTheme'; // Ajuste o caminho conforme necessário
+import { useTheme } from '../../hooks/useTheme'; 
 
 const Home = () => {
   const { theme } = useTheme();
