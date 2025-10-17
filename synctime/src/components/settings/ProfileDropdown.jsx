@@ -1,10 +1,18 @@
-import { Settings, Key, LogOut } from 'lucide-react';
-import styles from './ProfileDropdown.module.css';
-import SettingsModal from '../modal/SettingsModal';
+// ⚙️ React e bibliotecas externas
 import { useState } from 'react';
-import { useTheme } from '../../hooks/useTheme';
+import { Settings, Key, LogOut } from 'lucide-react';
+
+// 💅 Estilos
+import styles from './ProfileDropdown.module.css';
+
+// 🧩 Componentes
+import SettingsModal from '../modal/SettingsModal';
 import NewPassword from '../newPassword/newPassword';
+
+// 🧠 Hooks customizados
+import { useTheme } from '../../hooks/useTheme';
 import useAuth from '../../hooks/userAuth';
+
 
 const ProfileDropdown = ({ onClose }) => {
   const [showSettings, setShowSettings] = useState(false);
