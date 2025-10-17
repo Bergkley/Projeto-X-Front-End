@@ -1,10 +1,16 @@
-import { Edit2 } from "lucide-react";
+// ⚙️ Bibliotecas externas
 import { useState } from "react";
+import { Edit2 } from "lucide-react";
+
+// 💅 Estilos
+import styles from './CategoryList.module.css';
+
+// 🧩 Componentes
 import TableHeader from "../../../../../components/header/TableHeader/TableHeader";
+import ActionHeader from "../../../../../components/header/ActionHeader/ActionHeader";
 import Table from "../../../../../components/table/Table";
 import Pagination from "../../../../../components/pagination/Pagination";
-import styles from './CategoryList.module.css';
-import ActionHeader from "../../../../../components/header/ActionHeader/ActionHeader";
+
 
 const CategoryList = () => {
   const [currentPage, setCurrentPage] = useState(1);
