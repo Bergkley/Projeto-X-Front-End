@@ -6,8 +6,10 @@ import ActionHeader from '../../../../../../components/header/ActionHeader/Actio
 import errorFormMessage from '../../../../../../utils/errorFormMessage';
 import { ErrorMessage } from '@hookform/error-message';
 import { Row, Col } from 'reactstrap';
+import { useTheme } from '../../../../../../hooks/useTheme'; 
 
 const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
+  const { theme } = useTheme();
   const {
     control,
     handleSubmit,
@@ -67,7 +69,7 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
         backButtonLabel="Voltar"
         isOnlyBack={true}
       />
-      <div className={styles.container}>
+      <div className={`${styles.container} ${styles[theme]}`}>
         <h5 className={styles.title}>Categoria</h5>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
@@ -138,7 +140,6 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Selecione..."
-                        
                       />
                       <ErrorMessage
                         errors={errors}
