@@ -1,8 +1,14 @@
-import { Filter, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
-import { useState, useMemo } from "react";
+// ⚙️ React e bibliotecas externas
+import { useState, useMemo } from 'react';
+import { Filter, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+
+// 💅 Estilos
 import styles from './Table.module.css';
+
+// 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
+
 
 const Table = ({ 
   columns, 
