@@ -1,13 +1,29 @@
 .container {
   padding: 2rem;
-  background-color: #f8f9fa;
   border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.container.dark {
+  background-color: #1f2937;
+}
+
+.container.light {
+  background-color: #f8f9fa;
 }
 
 .title {
   margin-bottom: 2rem;
   font-weight: bold;
   font-size: 1.25rem;
+  transition: color 0.3s ease;
+}
+
+.container.dark .title {
+  color: #f3f4f6;
+}
+
+.container.light .title {
   color: #333;
 }
 
@@ -26,27 +42,60 @@
   margin-bottom: 0.5rem;
   font-weight: bold;
   font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+.container.dark .label {
+  color: #f3f4f6;
+}
+
+.container.light .label {
   color: #333;
 }
 
 .input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #dee2e6;
   border-radius: 4px;
   font-size: 1rem;
   font-family: inherit;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.input:focus {
+.container.dark .input {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  color: #f3f4f6;
+}
+
+.container.dark .input::placeholder {
+  color: #6b7280;
+}
+
+.container.dark .input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.container.light .input {
+  background-color: white;
+  border: 1px solid #dee2e6;
+  color: #333;
+}
+
+.container.light .input::placeholder {
+  color: #9ca3af;
+}
+
+.container.light .input:focus {
   outline: none;
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .input.error {
-  border-color: #dc3545;
+  border-color: #dc3545 !important;
 }
 
 .errorMessage {
@@ -67,6 +116,15 @@
   cursor: pointer;
   font-weight: 500;
   user-select: none;
+  transition: color 0.3s ease;
+}
+
+.container.dark .checkboxLabel {
+  color: #f3f4f6;
+}
+
+.container.light .checkboxLabel {
+  color: #333;
 }
 
 .checkboxLabel input {
@@ -77,9 +135,18 @@
 
 /* Seção de Opções */
 .optionsSection {
-  border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.container.dark .optionsSection {
+  border: 1px solid #374151;
+  background-color: #1f2937;
+}
+
+.container.light .optionsSection {
+  border: 1px solid #dee2e6;
   background-color: #fff;
 }
 
@@ -94,6 +161,14 @@
   margin: 0;
   font-weight: 600;
   font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.container.dark .optionsTitle {
+  color: #f3f4f6;
+}
+
+.container.light .optionsTitle {
   color: #333;
 }
 
@@ -101,7 +176,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #20c997;
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -109,7 +183,8 @@
   font-weight: 500;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  background-color: #20c997;
 }
 
 .buttonAddOption:hover {
@@ -118,20 +193,38 @@
 
 /* Tabela de Opções */
 .optionsTable {
-  border: 1px solid #dee2e6;
   border-radius: 6px;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.container.dark .optionsTable {
+  border: 1px solid #374151;
+}
+
+.container.light .optionsTable {
+  border: 1px solid #dee2e6;
 }
 
 .tableHeader {
   display: grid;
   grid-template-columns: 1fr 2fr 200px;
   gap: 1rem;
-  background-color: #f1f3f5;
   padding: 1rem;
   font-weight: 600;
-  color: #495057;
   font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.container.dark .tableHeader {
+  background-color: #111827;
+  color: #9ca3af;
+  border-bottom: 2px solid #374151;
+}
+
+.container.light .tableHeader {
+  background-color: #f1f3f5;
+  color: #495057;
   border-bottom: 2px solid #dee2e6;
 }
 
@@ -141,11 +234,24 @@
   gap: 1rem;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid #dee2e6;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
-.tableRow:hover {
+.container.dark .tableRow {
+  border-bottom: 1px solid #374151;
+  color: #e5e7eb;
+}
+
+.container.dark .tableRow:hover {
+  background-color: #1f2937;
+}
+
+.container.light .tableRow {
+  border-bottom: 1px solid #dee2e6;
+  color: #495057;
+}
+
+.container.light .tableRow:hover {
   background-color: #f8f9fa;
 }
 
@@ -157,7 +263,6 @@
   display: flex;
   align-items: center;
   font-size: 0.95rem;
-  color: #495057;
 }
 
 .recordTypeTags {
@@ -168,12 +273,21 @@
 
 .tag {
   display: inline-block;
-  background-color: #e7f1ff;
-  color: #004085;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.container.dark .tag {
+  background-color: #374151;
+  color: #93c5fd;
+}
+
+.container.light .tag {
+  background-color: #e7f1ff;
+  color: #004085;
 }
 
 .tableCol:last-child {
@@ -183,7 +297,6 @@
 }
 
 .buttonEdit {
-  background-color: #6366f1;
   color: white;
   border: none;
   padding: 0.5rem;
@@ -193,6 +306,7 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease;
+  background-color: #6366f1;
 }
 
 .buttonEdit:hover {
@@ -200,7 +314,6 @@
 }
 
 .buttonDelete {
-  background-color: #dc3545;
   color: white;
   border: none;
   padding: 0.5rem;
@@ -210,6 +323,7 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease;
+  background-color: #dc3545;
 }
 
 .buttonDelete:hover {
@@ -219,16 +333,49 @@
 .emptyState {
   padding: 2rem;
   text-align: center;
-  color: #6c757d;
-  background-color: #f8f9fa;
   border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.container.dark .emptyState {
+  background-color: #1f2937;
+  color: #9ca3af;
+}
+
+.container.light .emptyState {
+  background-color: #f8f9fa;
+  color: #6c757d;
 }
 
 /* Modal */
 .modalHeader {
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.container.dark .modalHeader {
+  background-color: #1f2937;
+  border-bottom: 1px solid #374151;
+  color: #f3f4f6;
+}
+
+.container.light .modalHeader {
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
-  font-weight: 600;
+  color: #333;
+}
+
+.modalBody {
+  transition: background-color 0.3s ease;
+}
+
+.container.dark .modalBody {
+  background-color: #111827;
+  color: #f3f4f6;
+}
+
+.container.light .modalBody {
+  background-color: white;
   color: #333;
 }
 
@@ -240,7 +387,6 @@
 }
 
 .buttonSave {
-  background-color: #20c997;
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -248,7 +394,8 @@
   font-weight: 500;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  background-color: #20c997;
 }
 
 .buttonSave:hover {
@@ -256,7 +403,6 @@
 }
 
 .buttonCancel {
-  background-color: #6c757d;
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -264,7 +410,8 @@
   font-weight: 500;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  background-color: #6c757d;
 }
 
 .buttonCancel:hover {
@@ -272,7 +419,6 @@
 }
 
 .buttonCreate {
-  background-color: #20c997;
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -280,15 +426,25 @@
   font-weight: 500;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  background-color: #20c997;
 }
 
 .buttonCreate:hover {
   background-color: #18a373;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
 .buttonCreate:active {
   background-color: #117a56;
+  transform: translateY(0);
+}
+
+.buttonCreate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .buttonContainer {
@@ -296,4 +452,53 @@
   gap: 1rem;
   justify-content: flex-end;
   margin-top: 2rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+  }
+
+  .buttonCreate,
+  .buttonCancel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .input {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+
+  .buttonCreate,
+  .buttonCancel {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9rem;
+  }
 }

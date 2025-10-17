@@ -9,8 +9,10 @@ import errorFormMessage from '../../../../../../utils/errorFormMessage';
 import { ErrorMessage } from '@hookform/error-message';
 import { Row, Col } from 'reactstrap';
 import { Edit2, Trash2, Plus } from 'lucide-react';
+import { useTheme } from '../../../../../../hooks/useTheme'; // Ajuste o caminho conforme necessário
 
 const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOptions = [], recordTypeOptions = [] }) => {
+  const { theme } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [options, setOptions] = useState(initialData?.options || []);
   const [editingOption, setEditingOption] = useState(null);
@@ -100,11 +102,11 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
     };
 
     return (
-      <Modal isOpen={isModalOpen} toggle={() => handleCloseModal()} centered>
+      <Modal isOpen={isModalOpen} toggle={() => handleCloseModal()} centered className={styles[`modal_${theme}`]}>
         <ModalHeader toggle={() => handleCloseModal()} className={styles.modalHeader}>
           {editingOption ? 'Editar Opção' : 'Adicionar Opção'}
         </ModalHeader>
-        <ModalBody>
+        <ModalBody className={styles.modalBody}>
           <form onSubmit={handleModalSubmit(onModalSubmit)}>
             <div className="mb-4">
               <Controller
@@ -213,7 +215,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
         backButtonLabel="Voltar"
         isOnlyBack={true}
       />
-      <div className={styles.container}>
+      <div className={`${styles.container} ${styles[theme]}`}>
         <h5 className={styles.title}>Campo Personalizado</h5>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
@@ -348,6 +350,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
               </div>
             </Col>
           </Row>
+
           <Row>
             <Col md={6}>
               <div className={styles.checkboxGroup}>
@@ -437,7 +440,6 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
             </Row>
           )}
 
-          {/* Botões */}
           <div className={styles.buttonContainer}>
             <button type="submit" className={styles.buttonCreate}>
               Criar
