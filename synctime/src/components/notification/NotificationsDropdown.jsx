@@ -1,8 +1,14 @@
+// ⚙️ React e bibliotecas externas
 import { useState } from 'react';
 import { Filter, Trash2, ExternalLink, X, Check, Bell } from 'lucide-react';
+
+// 💅 Estilos
 import styles from './NotificationsDropdown.module.css';
+
+// 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
+
 
 const NotificationsDropdown = ({ onClose }) => {
   const { theme } = useTheme();
