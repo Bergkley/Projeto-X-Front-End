@@ -1,17 +1,25 @@
+// ⚙️ React e bibliotecas externas
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import styles from '../../../components/modal/SettingsModal.module.css';
-import useFlashMessage from '../../../hooks/userFlashMessage';
-import NewPassword from '../../newPassword/newPassword';
 import { ErrorMessage } from '@hookform/error-message';
-import errorFormMessage from '../../../utils/errorFormMessage';
-import ServiceUsers from '../../../services/ServiceUsers';
-import {
-  useMemorizeFilters,
-  POSSIBLE_FILTERS_ENTITIES
-} from './../../../hooks/useMemorizeInputsFilters';
+
+// 💅 Estilos
+import styles from '../../../components/modal/SettingsModal.module.css';
+
+// 🧩 Componentes
+import NewPassword from '../../newPassword/newPassword';
 import ConfirmModal from '../../modal/ConfirmModal';
+
+// 🧠 Hooks customizados
+import useFlashMessage from '../../../hooks/userFlashMessage';
+import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from '../../../hooks/useMemorizeInputsFilters';
 import useAuth from '../../../hooks/userAuth';
+
+// 🔐 Serviços / API
+import ServiceUsers from '../../../services/ServiceUsers';
+
+// 🧰 Utilitários
+import errorFormMessage from '../../../utils/errorFormMessage';
 
 const AccountSection = () => {
   const { setFlashMessage } = useFlashMessage();
