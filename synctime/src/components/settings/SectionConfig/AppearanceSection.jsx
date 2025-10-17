@@ -1,14 +1,19 @@
+// ⚙️ Bibliotecas externas
 import { useForm, Controller } from 'react-hook-form';
-import styles from '../../../components/modal/SettingsModal.module.css';
 import { ErrorMessage } from '@hookform/error-message';
+
+// 💅 Estilos
+import styles from '../../../components/modal/SettingsModal.module.css';
+
+// 🧠 Hooks customizados
 import useFlashMessage from '../../../hooks/userFlashMessage';
-import {
-  POSSIBLE_FILTERS_ENTITIES,
-  useMemorizeFilters
-} from '../../../hooks/useMemorizeInputsFilters';
-import errorFormMessage from '../../../utils/errorFormMessage';
+import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from '../../../hooks/useMemorizeInputsFilters';
 import { useTheme } from '../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../hooks/useEmphasisColor';
+
+// 🧰 Utilitários
+import errorFormMessage from '../../../utils/errorFormMessage';
+
 
 const AppearanceSection = () => {
   const { setFlashMessage } = useFlashMessage();
