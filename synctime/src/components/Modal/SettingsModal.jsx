@@ -1,11 +1,19 @@
+// ⚙️ React e bibliotecas externas
 import { useState } from 'react';
 import { X, User, Shield, Palette, Lock } from 'lucide-react';
+
+// 💅 Estilos
 import styles from './SettingsModal.module.css';
+
+// 🧩 Componentes
 import ProfileSection from '../settings/SectionConfig/ProfileSection';
 import AccountSection from '../settings/SectionConfig/AccountSection';
 import AppearanceSection from '../settings/SectionConfig/AppearanceSection';
 import PrivacySection from '../settings/SectionConfig/PrivacySection';
-import { useTheme } from '../../hooks/useTheme'; 
+
+// 🧠 Hooks customizados
+import { useTheme } from '../../hooks/useTheme';
+
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const [activeSection, setActiveSection] = useState('profile');
