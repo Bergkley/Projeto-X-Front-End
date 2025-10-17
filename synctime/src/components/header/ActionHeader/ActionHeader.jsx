@@ -1,6 +1,12 @@
+// ⚙️ Bibliotecas externas
 import { ChevronLeft } from "lucide-react";
+
+// 💅 Estilos
 import styles from './ActionHeader.module.css';
+
+// 🧠 Hooks customizados
 import { useEmphasisColor } from "../../../hooks/useEmphasisColor";
+
 
 const ActionHeader = ({ onBack, onCreate, backButtonLabel = "Voltar", createButtonLabel = "Criar" }) => {
   const { emphasisColor } = useEmphasisColor();
