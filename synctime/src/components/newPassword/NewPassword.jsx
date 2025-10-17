@@ -1,12 +1,21 @@
+// ⚙️ React e bibliotecas externas
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
+
+// 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
-import styles from './NewPassword.module.css';
 import useFlashMessage from '../../hooks/userFlashMessage';
-import errorFormMessage from '../../utils/errorFormMessage';
-import { useMemorizeFilters , POSSIBLE_FILTERS_ENTITIES} from '../../hooks/useMemorizeInputsFilters';
+import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from '../../hooks/useMemorizeInputsFilters';
+
+// 💅 Estilos
+import styles from './NewPassword.module.css';
+
+// 🔐 Serviços / API
 import api from '../../services/api';
+
+// 🧰 Utilitários
+import errorFormMessage from '../../utils/errorFormMessage';
 
 const NewPassword = ({ isOpen, onClose }) => {
   const { theme } = useTheme();
