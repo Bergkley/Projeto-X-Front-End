@@ -1,7 +1,13 @@
+// ⚙️ Bibliotecas externas
 import { Search } from 'lucide-react';
+
+// 💅 Estilos
 import styles from './TableHeader.module.css';
+
+// 🧠 Hooks customizados
 import { useTheme } from '../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../hooks/useEmphasisColor';
+
 
 const TableHeader = ({ 
   title, 
