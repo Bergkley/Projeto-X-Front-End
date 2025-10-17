@@ -1,10 +1,18 @@
+// ⚙️ React e bibliotecas externas
 import { useState } from 'react';
-import styles from './Header.module.css';
 import { Bell, Zap } from 'lucide-react';
+
+// 💅 Estilos
+import styles from './Header.module.css';
+
+// 🧩 Componentes
 import Streak from '../streak/Streak';
 import NotificationsDropdown from '../notification/NotificationsDropdown';
 import ProfileDropdown from '../settings/ProfileDropdown';
+
+// 🧠 Hooks customizados
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
+
 
 const Header = () => {
   const { emphasisColor } = useEmphasisColor();
