@@ -1,6 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
+// ⚙️ React e bibliotecas externas
 import { useState, useEffect } from 'react';
-import styles from './Sidebar.module.css';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   FaHome, 
   FaChartBar, 
@@ -14,6 +14,11 @@ import {
   FaChevronDown,
   FaChevronRight
 } from 'react-icons/fa';
+
+// 💅 Estilos
+import styles from './Sidebar.module.css';
+
+// 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 
