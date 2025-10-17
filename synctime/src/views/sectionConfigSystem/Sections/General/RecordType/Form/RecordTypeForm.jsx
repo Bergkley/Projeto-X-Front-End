@@ -23,8 +23,11 @@ import {
   Briefcase,
   ShoppingCart
 } from 'lucide-react';
+import { useTheme } from '../../../../../../hooks/useTheme';
 
 const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
+  const { theme } = useTheme();
+
   const iconLabels = {
     Home: 'Início',
     FileText: 'Arquivo',
@@ -96,7 +99,7 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
       <div
         {...innerProps}
         ref={innerRef}
-        style={{ display: 'flex', alignItems: 'center' }}
+        style={{ display: 'flex', alignItems: 'center', background:theme === 'dark' ? '#1f2937' : '#ffffff', color: theme === 'dark' ? '#f1f5f9' : '#1f2937' }}
       >
         <IconComponent size={20} style={{ marginRight: '8px' }} />
         <span>{iconLabels[data.value]}</span>
@@ -118,7 +121,7 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
     return (
       <div
         {...props.innerProps}
-        style={{ display: 'flex', alignItems: 'center' }}
+        style={{ display: 'flex', alignItems: 'center',  }}
       >
         <IconComponent size={20} style={{ marginRight: '8px' }} />
         <span>{iconLabels[selectedIcon.value]}</span>
@@ -140,6 +143,8 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
     // Implementar navegação para voltar
   };
 
+  // TODO: VER O BOTÃO DE  ICONE
+
   return (
     <>
       <ActionHeader
@@ -147,7 +152,7 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
         backButtonLabel="Voltar"
         isOnlyBack={true}
       />
-      <div className={styles.container}>
+      <div className={`${styles.container} ${styles[theme]}`}>
         <h5 className={styles.title}>Tipo de Registro</h5>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
@@ -203,7 +208,9 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
                           control: (base) => ({
                             ...base,
                             minHeight: '50px',
-                            height: '50px'
+                            height: '50px',
+                            background:theme === 'dark' ? '#111827' : 'transparent',
+                            border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb',
                           })
                         }}
                       />
