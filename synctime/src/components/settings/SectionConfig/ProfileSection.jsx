@@ -1,16 +1,23 @@
-import { User } from 'lucide-react';
-import styles from '../../../components/modal/SettingsModal.module.css';
+// ⚙️ React e bibliotecas externas
+import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
-import useFlashMessage from '../../../hooks/userFlashMessage';
 import { Button } from 'reactstrap';
-import {
-  useMemorizeFilters,
-  POSSIBLE_FILTERS_ENTITIES
-} from './../../../hooks/useMemorizeInputsFilters';
-import errorFormMessage from '../../../utils/errorFormMessage';
-import { useEffect } from 'react';
+import { User } from 'lucide-react';
+
+// 💅 Estilos
+import styles from '../../../components/modal/SettingsModal.module.css';
+
+// 🧠 Hooks customizados
+import useFlashMessage from '../../../hooks/userFlashMessage';
+import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from '../../../hooks/useMemorizeInputsFilters';
+
+// 🔐 Serviços / API
 import ServiceUsers from '../../../services/ServiceUsers';
+
+// 🧰 Utilitários
+import errorFormMessage from '../../../utils/errorFormMessage';
+
 
 const ProfileSection = () => {
   const { setFlashMessage } = useFlashMessage();
