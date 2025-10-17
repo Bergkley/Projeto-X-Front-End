@@ -1,5 +1,10 @@
+// ⚙️ Bibliotecas externas
 import { User, Settings, PaintBucket, ClipboardList } from 'lucide-react';
+
+// 💅 Estilos
 import styles from './SectionConfigSystem.module.css';
+
+// 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 
