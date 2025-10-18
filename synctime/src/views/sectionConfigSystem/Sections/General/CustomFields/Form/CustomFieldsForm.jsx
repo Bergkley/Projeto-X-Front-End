@@ -107,7 +107,6 @@ const CustomFieldForm = () => {
           ]);
 
         if (responseCustomFields.data.status === 'OK') {
-
           const fieldData = responseCustomFields.data.data;
           if (!fieldData) {
             throw new Error('Campo personalizado não encontrado');
@@ -119,7 +118,6 @@ const CustomFieldForm = () => {
               recordTypeMap[rt.id] = rt.name;
             });
           }
-
 
           let categoryName = '';
           if (
@@ -244,10 +242,21 @@ const CustomFieldForm = () => {
         <ModalHeader
           toggle={() => handleCloseModal()}
           className={styles.modalHeader}
+          style={{
+            backgroundColor: theme === 'dark' ? '#1a202c' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#1a202c',
+            borderBottom: theme === 'dark' ? '1px solid #374151' : '1px solid #dee2e6'
+          }}
         >
           {editingOption ? 'Editar Opção' : 'Adicionar Opção'}
         </ModalHeader>
-        <ModalBody className={styles.modalBody}>
+        <ModalBody
+          className={styles.modalBody}
+          style={{
+            backgroundColor: theme === 'dark' ? '#1a202c' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#1a202c'
+          }}
+        >
           <form onSubmit={handleModalSubmit(onModalSubmit)}>
             <div className="mb-4">
               <Controller
@@ -256,7 +265,11 @@ const CustomFieldForm = () => {
                 rules={{ required: 'Nome da opção é obrigatório' }}
                 render={({ field }) => (
                   <div>
-                    <label className={styles.label}>Nome da Opção *</label>
+                    <label
+                      className={styles.label}
+                    >
+                      Nome da Opção *
+                    </label>
                     <input
                       {...field}
                       type="text"
@@ -264,6 +277,11 @@ const CustomFieldForm = () => {
                       className={`${styles.input} ${
                         modalErrors.optionName ? styles.error : ''
                       }`}
+                      style={{
+                        backgroundColor: theme === 'dark' ? '#1a202c' : '#fff',
+                        color: theme === 'dark' ? '#fff' : '#1a202c',
+                        border: theme === 'dark' ? '1px solid #374151' : '1px solid #dee2e6'
+                      }}
                     />
                     {modalErrors.optionName && (
                       <div className={styles.errorMessage}>
