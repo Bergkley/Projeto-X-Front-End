@@ -18,6 +18,9 @@ import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 
 // 📡 Services
 import ServiceCategory from '../services/ServiceCategory';
+import ServiceRecordType from '../../../General/RecordType/services/ServiceRecordType';
+
+
 
 const CategoryForm = () => {
   const { id } = useParams();
@@ -27,6 +30,8 @@ const CategoryForm = () => {
   
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(!!id);
+
+  const [recordTypes, setRecordTypes] = useState([]);
 
   const {
     control,
@@ -42,48 +47,70 @@ const CategoryForm = () => {
     }
   });
 
-  useEffect(() => {
-    const fetchCategoryData = async () => {
-      if (!id) return;
-
-      try {
-        setIsLoadingData(true);
-        const response = await ServiceCategory.getByIdCategory(id);
-        
-        if (response.data.status === 'OK') {
-          const categoryData = response.data.data;
-          // TODO: AJUSTAR O RECORD TYPE
-          reset({
-            name: categoryData.name || '',
-            description: categoryData.description || '',
-            type: categoryData.type ? { value: categoryData.type, label: categoryData.type } : null,
-            recordType: categoryData.recordType ? { value: categoryData.recordTypeId, label: categoryData.recordTypeId } : null
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao buscar categoria:', error);
-        setFlashMessage('Erro ao carregar dados da categoria', 'error');
-        history.push('/categoria');
-      } finally {
-        setIsLoadingData(false);
-      }
-    };
-
-    fetchCategoryData();
-  }, [id]);
-
   const typeOptions = [
     { value: 'educacao', label: 'Educação' },
     { value: 'financeiro', label: 'Financeiro' },
     { value: 'atividade_domestica', label: 'Atividade Doméstica' },
     { value: 'outros', label: 'Outros' }
   ];
+  useEffect(() => {
+  const fetchCategoryData = async () => {
+    if (!id) return;
 
-  const recordTypeOptions = [
-    { value: 'tipo1', label: 'Tipo 1' },
-    { value: '2', label: 'Tipo 2' },
-    { value: 'tipo3', label: 'Tipo 3' }
-  ];
+    try {
+      setIsLoadingData(true);
+      const [responseCategory, responseRecordTypes] = await Promise.all([
+        ServiceCategory.getByIdCategory(id),
+        ServiceRecordType.getByAllRecordType(1, '', '', '')
+      ]);
+
+      if (responseCategory.data.status === 'OK') {
+        const categoryData = responseCategory.data.data;
+        if (!categoryData) {
+          throw new Error('Categoria não encontrada');
+        }
+
+        const recordTypeMap = {};
+        if (responseRecordTypes.data.status === 'OK') {
+          responseRecordTypes.data.data.forEach(rt => {
+            recordTypeMap[rt.id] = rt.name;
+          });
+        }
+
+        let recordTypeValue = null;
+
+        if (categoryData?.record_type_id) {
+          const recordTypeName = recordTypeMap[categoryData.record_type_id] || `Tipo de Registro ${categoryData.record_type_id}`;
+          recordTypeValue = {
+            value: categoryData.record_type_id,
+            label: recordTypeName
+          };
+        }
+
+        setRecordTypes(responseRecordTypes.data.data.map(rt => ({ value: rt.id, label: rt.name })));
+
+        reset({
+          name: categoryData.name || '',
+          description: categoryData.description || '',
+          type: categoryData.type ? { value: categoryData.type, label: typeOptions.find(t => t.value === categoryData.type)?.label } : null,
+          recordType: recordTypeValue
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao buscar categoria:', error);
+      setFlashMessage('Erro ao carregar dados da categoria', 'error');
+      history.push('/categoria');
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  fetchCategoryData();
+}, [id]);
+
+  
+
+  
 
   const onSubmit = async (data) => {
     try {
@@ -237,7 +264,7 @@ const CategoryForm = () => {
                     <>
                       <label className={styles.label}>Tipo de Registro *</label>
                       <SingleSelect
-                        options={recordTypeOptions}
+                        options={recordTypes}
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Selecione..."

@@ -72,7 +72,7 @@ const CustomFieldsList = () => {
   }, [currentPage, debouncedSearchTerm, sortBy, order]);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-
+// TODO: Implementar coluna de record types
   const columns = [
     {
       key: 'label',
