@@ -1,5 +1,5 @@
 // ⚙️ React e bibliotecas externas
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Filter, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 
 // 💅 Estilos
@@ -9,7 +9,6 @@ import styles from './Table.module.css';
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 
-
 const Table = ({ 
   columns, 
   data, 
@@ -17,7 +16,10 @@ const Table = ({
   reorderable = false,
   onSelectionChange,
   onEdit,
-  onToggleStatus
+  onToggleStatus,
+  onDelete,
+  sortConfig,
+  onSort
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
@@ -28,7 +30,6 @@ const Table = ({
   const [columnOrder, setColumnOrder] = useState(columns.map(col => col.key));
   const [showColumnFilter, setShowColumnFilter] = useState(false);
   const [draggedColumn, setDraggedColumn] = useState(null);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -53,6 +54,7 @@ const Table = ({
   };
 
   const toggleColumnVisibility = (columnKey) => {
+    if (columnKey === 'actions') return;
     setVisibleColumns(prev =>
       prev.includes(columnKey)
         ? prev.filter(k => k !== columnKey)
@@ -60,26 +62,25 @@ const Table = ({
     );
   };
 
-  const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+  const handleSortAsc = (key) => {
+    if (!onSort) return;
+    if (sortConfig?.key === key && sortConfig?.direction === 'asc') {
+      onSort(key, null);
+    } else {
+      onSort(key, 'asc');
     }
-    setSortConfig({ key, direction });
   };
 
-  const sortedData = useMemo(() => {
-    if (!sortConfig.key) return data;
-    return [...data].sort((a, b) => {
-      let aVal = a[sortConfig.key];
-      let bVal = b[sortConfig.key];
-      if (aVal == null) aVal = '';
-      if (bVal == null) bVal = '';
-      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [data, sortConfig]);
+  const handleSortDesc = (key) => {
+    if (!onSort) return;
+    if (sortConfig?.key === key && sortConfig?.direction === 'desc') {
+      onSort(key, null);
+    } else {
+      onSort(key, 'desc');
+    }
+  };
+
+  const sortedData = data;
 
   const handleDragStart = (e, columnKey) => {
     setDraggedColumn(columnKey);
@@ -126,7 +127,9 @@ const Table = ({
         
         {showColumnFilter && (
           <div className={styles.columnFilterDropdown}>
-            {columns.map(column => (
+            {columns
+              .filter(column => column.key !== 'actions')
+              .map(column => (
               <label key={column.key} className={styles.columnFilterItem}>
                 <input
                   type="checkbox"
@@ -161,47 +164,57 @@ const Table = ({
                   />
                 </th>
               )}
-              {orderedColumns.map(column => (
-                <th
-                  key={column.key}
-                  className={styles.tableHeaderCell}
-                  draggable={reorderable}
-                  onDragStart={(e) => handleDragStart(e, column.key)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, column.key)}
-                >
-                  <div className={styles.headerCellContent}>
-                    {reorderable && <GripVertical size={14} className={styles.dragHandle} />}
-                    <div 
-                      className={`${styles.sortableHeader} ${sortConfig.key === column.key ? styles.sortedHeader : ''}`} 
-                      onClick={() => handleSort(column.key)}
-                    >
-                      {column.label}
-                      <div className={styles.sortIcons}>
-                        <ChevronUp 
-                          size={12} 
-                          className={`${styles.sortIcon} ${sortConfig.key === column.key && sortConfig.direction === 'asc' ? styles.active : ''}`}
-                          style={sortConfig.key === column.key && sortConfig.direction === 'asc' ? {
-                            color: emphasisColor || '#ec1109'
-                          } : {}}
-                        />
-                        <ChevronDown 
-                          size={12} 
-                          className={`${styles.sortIcon} ${sortConfig.key === column.key && sortConfig.direction === 'desc' ? styles.active : ''}`}
-                          style={sortConfig.key === column.key && sortConfig.direction === 'desc' ? {
-                            color: emphasisColor || '#ec1109'
-                          } : {}}
-                        />
-                      </div>
+              {orderedColumns.map(column => {
+                const isSortable = column.sortable !== false;
+                return (
+                  <th
+                    key={column.key}
+                    className={styles.tableHeaderCell}
+                    draggable={reorderable}
+                    onDragStart={(e) => handleDragStart(e, column.key)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, column.key)}
+                  >
+                    <div className={styles.headerCellContent}>
+                      {reorderable && <GripVertical size={14} className={styles.dragHandle} />}
+                      {!isSortable ? (
+                        <div className={styles.unsortableHeader}>
+                          {column.label}
+                        </div>
+                      ) : (
+                        <div 
+                          className={`${styles.sortableHeader} ${sortConfig?.key === column.key ? styles.sortedHeader : ''}`} 
+                        >
+                          {column.label}
+                          <div className={styles.sortIcons}>
+                            <ChevronUp 
+                              size={12} 
+                              className={`${styles.sortIcon} ${sortConfig?.key === column.key && sortConfig?.direction === 'asc' ? styles.active : ''}`}
+                              style={sortConfig?.key === column.key && sortConfig?.direction === 'asc' ? {
+                                color: emphasisColor || '#ec1109'
+                              } : {}}
+                              onClick={() => handleSortAsc(column.key)}
+                            />
+                            <ChevronDown 
+                              size={12} 
+                              className={`${styles.sortIcon} ${sortConfig?.key === column.key && sortConfig?.direction === 'desc' ? styles.active : ''}`}
+                              style={sortConfig?.key === column.key && sortConfig?.direction === 'desc' ? {
+                                color: emphasisColor || '#ec1109'
+                              } : {}}
+                              onClick={() => handleSortDesc(column.key)}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </th>
-              ))}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {sortedData.map((row, rowIdx) => (
-              <tr key={rowIdx} className={styles.tableRow}>
+            {sortedData.map((row) => (
+              <tr key={row.id} className={styles.tableRow}>
                 {selectable && (
                   <td className={styles.tableCell}>
                     <input
@@ -217,7 +230,7 @@ const Table = ({
                 )}
                 {orderedColumns.map(column => (
                   <td key={column.key} className={styles.tableCell}>
-                    {column.render ? column.render(row, rowIdx, { onEdit, onToggleStatus }) : row[column.key]}
+                    {column.render ? column.render(row, row.id, { onEdit, onToggleStatus, onDelete }) : row[column.key]}
                   </td>
                 ))}
               </tr>

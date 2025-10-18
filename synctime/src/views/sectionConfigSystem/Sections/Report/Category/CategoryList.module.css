@@ -1,4 +1,4 @@
-/* UsuariosPage.module.css */
+/* CategoryList.module.css */
 
 .container {
   padding: 24px;
@@ -95,6 +95,12 @@ input:checked + .slider:before {
   transform: translateX(24px);
 }
 
+.actionsCell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .editButton {
   padding: 8px;
   background-color: #0ea5e9;
@@ -110,4 +116,21 @@ input:checked + .slider:before {
 
 .editButton:hover {
   background-color: #0284c7;
+}
+
+.deleteButton {
+  padding: 8px;
+  background-color: #ef4444;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.deleteButton:hover {
+  background-color: #dc2626;
 }
