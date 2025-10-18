@@ -1,11 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import styles from './RecordTypeForm.module.css';
-import SingleSelect from '../../../../../../components/select/SingleSelect';
-import ActionHeader from '../../../../../../components/header/ActionHeader/ActionHeader';
-import errorFormMessage from '../../../../../../utils/errorFormMessage';
-import { ErrorMessage } from '@hookform/error-message';
+import { useParams, useHistory } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
+import { ErrorMessage } from '@hookform/error-message';
 import {
   Home,
   FileText,
@@ -23,11 +20,33 @@ import {
   Briefcase,
   ShoppingCart
 } from 'lucide-react';
+
+// 💅 Estilos
+import styles from './RecordTypeForm.module.css';
+
+// 🧩 Componentes
+import SingleSelect from '../../../../../../components/select/SingleSelect';
+import ActionHeader from '../../../../../../components/header/ActionHeader/ActionHeader';
+
+// 🔧 Utils e Hooks
+import errorFormMessage from '../../../../../../utils/errorFormMessage';
 import { useTheme } from '../../../../../../hooks/useTheme';
+import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 
-const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
+// 📡 Services
+import ServiceRecordType from '../services/ServiceRecordType';
+
+const RecordTypeForm = () => {
+  console.log
+  const { id } = useParams();
+  const history = useHistory();
   const { theme } = useTheme();
+  const { setFlashMessage } = useFlashMessage();
+  
+  const [loading, setLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(!!id);
 
+// TODO: ADD ICONES
   const iconLabels = {
     Home: 'Início',
     FileText: 'Arquivo',
@@ -45,27 +64,6 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
     Briefcase: 'Pasta',
     ShoppingCart: 'Carrinho'
   };
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors }
-  } = useForm({
-    defaultValues: {
-      name: initialData?.name || '',
-      icon: initialData?.icon || null
-    }
-  });
-
-  useEffect(() => {
-    if (initialData) {
-      reset({
-        name: initialData.name || '',
-        icon: initialData.icon || null
-      });
-    }
-  }, [initialData, reset]);
 
   const iconMap = {
     Home,
@@ -85,6 +83,49 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
     ShoppingCart
   };
 
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      name: '',
+      icon: null
+    }
+  });
+
+  useEffect(() => {
+    const fetchRecordTypeData = async () => {
+      if (!id) return;
+
+      try {
+        setIsLoadingData(true);
+        const response = await ServiceRecordType.getByIdRecordType(id);
+        
+        if (response.data.status === 'OK') {
+          const recordTypeData = response.data.data;
+          reset({
+            name: recordTypeData.name || '',
+            icon: recordTypeData.icone ? { 
+              value: recordTypeData.icone, 
+              label: iconLabels[recordTypeData.icone],
+              icon: recordTypeData.icone
+            } : null
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao buscar tipo de registro:', error);
+        setFlashMessage('Erro ao carregar dados do tipo de registro', 'error');
+        history.push('/record-type');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchRecordTypeData();
+  }, [id]);
+
   const iconOptions = Object.keys(iconMap).map((iconName) => ({
     value: iconName,
     label: iconLabels[iconName],
@@ -99,7 +140,13 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
       <div
         {...innerProps}
         ref={innerRef}
-        style={{ display: 'flex', alignItems: 'center', background:theme === 'dark' ? '#1f2937' : '#ffffff', color: theme === 'dark' ? '#f1f5f9' : '#1f2937' }}
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          background: theme === 'dark' ? '#1f2937' : '#ffffff', 
+          color: theme === 'dark' ? '#f1f5f9' : '#1f2937',
+          padding: '8px'
+        }}
       >
         <IconComponent size={20} style={{ marginRight: '8px' }} />
         <span>{iconLabels[data.value]}</span>
@@ -121,7 +168,7 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
     return (
       <div
         {...props.innerProps}
-        style={{ display: 'flex', alignItems: 'center',  }}
+        style={{ display: 'flex', alignItems: 'center' }}
       >
         <IconComponent size={20} style={{ marginRight: '8px' }} />
         <span>{iconLabels[selectedIcon.value]}</span>
@@ -129,21 +176,51 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
     );
   };
 
-  const handleFormSubmit = (data) => {
-    console.log('Dados do formulário:', data);
-    onSubmit(data);
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        name: data.name,
+        icone: data.icon?.value || data.icon
+      };
+
+      if (id) {
+        await ServiceRecordType.editRecordType(id, payload);
+        setFlashMessage('Tipo de registro atualizado com sucesso', 'success');
+      } else {
+        await ServiceRecordType.createRecordType(payload);
+        setFlashMessage('Tipo de registro criado com sucesso', 'success');
+      }
+
+      history.push('/record-type');
+      
+    } catch (error) {
+      console.error('Erro ao salvar tipo de registro:', error);
+      const errorMessage = id 
+        ? 'Erro ao atualizar tipo de registro' 
+        : 'Erro ao criar tipo de registro';
+      setFlashMessage(errorMessage, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    reset();
+    history.push('/record-type');
   };
 
   const handleBack = () => {
-    console.log('Voltar');
-    // Implementar navegação para voltar
+    history.push('/record-type');
   };
 
-  // TODO: VER O BOTÃO DE  ICONE
+  if (isLoadingData) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Carregando dados do tipo de registro...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -153,9 +230,11 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
         isOnlyBack={true}
       />
       <div className={`${styles.container} ${styles[theme]}`}>
-        <h5 className={styles.title}>Tipo de Registro</h5>
+        <h5 className={styles.title}>
+          {id ? 'Editar Tipo de Registro' : 'Novo Tipo de Registro'}
+        </h5>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
+        <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           {/* Primeira Linha */}
           <Row className="mb-4">
             <Col md={6}>
@@ -174,6 +253,7 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
                         className={`${styles.input} ${
                           errors.name ? styles.error : ''
                         }`}
+                        disabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
@@ -200,6 +280,7 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Selecione um ícone..."
+                        isDisabled={loading}
                         components={{
                           Option: IconOption,
                           ValueContainer: IconValueContainer
@@ -209,7 +290,7 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
                             ...base,
                             minHeight: '50px',
                             height: '50px',
-                            background:theme === 'dark' ? '#111827' : 'transparent',
+                            background: theme === 'dark' ? '#111827' : 'transparent',
                             border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb',
                           })
                         }}
@@ -228,13 +309,18 @@ const RecordTypeForm = ({ initialData = null, onSubmit = () => {} }) => {
 
           {/* Botões */}
           <div className={styles.buttonContainer}>
-            <button type="submit" className={styles.buttonCreate}>
-              Criar
+            <button 
+              type="submit" 
+              className={styles.buttonCreate}
+              disabled={loading}
+            >
+              {loading ? 'Salvando...' : (id ? 'Atualizar' : 'Criar')}
             </button>
             <button
               type="button"
               onClick={handleCancel}
               className={styles.buttonCancel}
+              disabled={loading}
             >
               Cancelar
             </button>
