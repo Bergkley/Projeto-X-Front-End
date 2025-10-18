@@ -1,21 +1,41 @@
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { useParams, useHistory } from 'react-router-dom';
+import { Modal, ModalHeader, ModalBody, Row, Col } from 'reactstrap';
+import { ErrorMessage } from '@hookform/error-message';
+import { Edit2, Trash2, Plus } from 'lucide-react';
+
+// 💅 Estilos
 import styles from './CustomFieldForm.module.css';
+
+// 🧩 Componentes
 import SingleSelect from '../../../../../../components/select/SingleSelect';
 import MultiSelect from '../../../../../../components/select/MultiSelect';
 import ActionHeader from '../../../../../../components/header/ActionHeader/ActionHeader';
-import errorFormMessage from '../../../../../../utils/errorFormMessage';
-import { ErrorMessage } from '@hookform/error-message';
-import { Row, Col } from 'reactstrap';
-import { Edit2, Trash2, Plus } from 'lucide-react';
-import { useTheme } from '../../../../../../hooks/useTheme'; // Ajuste o caminho conforme necessário
 
-const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOptions = [], recordTypeOptions = [] }) => {
+// 🔧 Utils e Hooks
+import errorFormMessage from '../../../../../../utils/errorFormMessage';
+import { useTheme } from '../../../../../../hooks/useTheme';
+import useFlashMessage from '../../../../../../hooks/userFlashMessage';
+import ServiceCategory from '../../../Report/Category/services/ServiceCategory';
+import ServiceRecordType from '../../RecordType/services/ServiceRecordType';
+import ServiceCustomFields from '../services/ServiceCustomFields';
+
+// 📡 Services
+
+const CustomFieldForm = () => {
+  const { id } = useParams();
+  const history = useHistory();
   const { theme } = useTheme();
+  const { setFlashMessage } = useFlashMessage();
+
+  const [loading, setLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(!!id);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [options, setOptions] = useState(initialData?.options || []);
+  const [options, setOptions] = useState([]);
   const [editingOption, setEditingOption] = useState(null);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [recordTypeOptions, setRecordTypeOptions] = useState([]);
 
   const {
     control,
@@ -25,31 +45,144 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
     formState: { errors }
   } = useForm({
     defaultValues: {
-      type: initialData?.type || null,
-      label: initialData?.label || '',
-      name: initialData?.name || '',
-      description: initialData?.description || '',
-      categoryId: initialData?.categoryId || null,
-      recordTypeId: initialData?.recordTypeId || null,
-      required: initialData?.required || false
+      type: null,
+      label: '',
+      name: '',
+      description: '',
+      categoryId: null,
+      recordTypeId: null,
+      required: false
     }
   });
 
   useEffect(() => {
-    if (initialData) {
-      reset({
-        type: initialData.type || null,
-        label: initialData.label || '',
-        name: initialData.name || '',
-        description: initialData.description || '',
-        categoryId: initialData.categoryId || null,
-        recordTypeId: initialData.recordTypeId || null,
-        required: initialData.required || false
-      });
-      setOptions(initialData.options || []);
-    }
-  }, [initialData, reset]);
+    const fetchOptions = async () => {
+      try {
+        const categoriesResponse = await ServiceCategory.getByAllCategory(
+          1,
+          '',
+          '',
+          ''
+        );
+        if (categoriesResponse.data.status === 'OK') {
+          const categories = categoriesResponse.data.data.map((cat) => ({
+            value: cat.id,
+            label: cat.name
+          }));
+          setCategoryOptions(categories);
+        }
 
+        const recordTypesResponse = await ServiceRecordType.getByAllRecordType(
+          1,
+          '',
+          '',
+          ''
+        );
+        if (recordTypesResponse.data.status === 'OK') {
+          const recordTypes = recordTypesResponse.data.data.map((rt) => ({
+            value: rt.id,
+            label: rt.name
+          }));
+          setRecordTypeOptions(recordTypes);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar opções:', error);
+      }
+    };
+
+    fetchOptions();
+  }, []);
+
+  useEffect(() => {
+    const fetchCustomFieldData = async () => {
+      if (!id) return;
+
+      try {
+        setIsLoadingData(true);
+        const [responseCustomFields, responseRecordTypes, responseCategories] =
+          await Promise.all([
+            ServiceCustomFields.getByIdCustomFields(id),
+            ServiceRecordType.getByAllRecordType(1, '', '', ''),
+            ServiceCategory.getByAllCategory(1, '', '', '')
+          ]);
+
+        if (responseCustomFields.data.status === 'OK') {
+
+          const fieldData = responseCustomFields.data.data;
+          if (!fieldData) {
+            throw new Error('Campo personalizado não encontrado');
+          }
+
+          const recordTypeMap = {};
+          if (responseRecordTypes.data.status === 'OK') {
+            responseRecordTypes.data.data.forEach((rt) => {
+              recordTypeMap[rt.id] = rt.name;
+            });
+          }
+
+
+          let categoryName = '';
+          if (
+            responseCategories.data.status === 'OK' &&
+            fieldData?.category_id
+          ) {
+            const category = responseCategories.data.data.find(
+              (cat) => cat.id === fieldData?.category_id
+            );
+            categoryName = category ? category.name : '';
+          }
+
+          const recordTypeIdArray = (fieldData?.record_type_id || []).map(
+            (rtId) => ({
+              value: rtId,
+              label: recordTypeMap[rtId] || `Tipo de Registro ${rtId}`
+            })
+          );
+
+          const transformedOptions = (fieldData.options || []).map(
+            (option) => ({
+              id: option._id || Date.now() + Math.random(),
+              name: option.value,
+              recordTypes: (option.recordTypeIds || []).map((rtId) => ({
+                value: rtId,
+                label: recordTypeMap[rtId] || `Tipo de Registro ${rtId}`
+              }))
+            })
+          );
+
+          reset({
+            type: fieldData.type
+              ? {
+                  value: fieldData.type,
+                  label:
+                    fieldTypeOptions.find((t) => t.value === fieldData.type)
+                      ?.label || fieldData.type
+                }
+              : null,
+            label: fieldData.label || '',
+            description: fieldData.description || '',
+            categoryId: fieldData.category_id
+              ? { value: fieldData.category_id, label: categoryName }
+              : null,
+            recordTypeId: recordTypeIdArray,
+            required: fieldData.required || false
+          });
+          setOptions(transformedOptions);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar campo personalizado:', error);
+        setFlashMessage(
+          'Erro ao carregar dados do campo personalizado',
+          'error'
+        );
+        history.push('/custom-fields');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchCustomFieldData();
+  }, [id]);
   const fieldTypeOptions = [
     { value: 'text', label: 'Texto' },
     { value: 'number', label: 'Número' },
@@ -102,8 +235,16 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
     };
 
     return (
-      <Modal isOpen={isModalOpen} toggle={() => handleCloseModal()} centered className={styles[`modal_${theme}`]}>
-        <ModalHeader toggle={() => handleCloseModal()} className={styles.modalHeader}>
+      <Modal
+        isOpen={isModalOpen}
+        toggle={() => handleCloseModal()}
+        centered
+        className={styles[`modal_${theme}`]}
+      >
+        <ModalHeader
+          toggle={() => handleCloseModal()}
+          className={styles.modalHeader}
+        >
           {editingOption ? 'Editar Opção' : 'Adicionar Opção'}
         </ModalHeader>
         <ModalBody className={styles.modalBody}>
@@ -190,23 +331,74 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
     setOptions(options.filter((opt) => opt.id !== id));
   };
 
-  const handleFormSubmit = (data) => {
+  const onSubmit = async (data) => {
     if (isMultipleType && options.length === 0) {
-      alert('Adicione pelo menos uma opção para campos de múltipla escolha');
+      setFlashMessage(
+        'Adicione pelo menos uma opção para campos de múltipla escolha',
+        'error'
+      );
       return;
     }
-    console.log('Dados do formulário:', { ...data, options });
-    onSubmit({ ...data, options });
+
+    try {
+      setLoading(true);
+
+      const payload = {
+        type: data.type?.value || data.type,
+        label: data.label,
+        description: data.description,
+        categoryId: data.categoryId?.value || data.categoryId,
+        recordTypeId: Array.isArray(data.recordTypeId)
+          ? data.recordTypeId.map((rt) => rt.value || rt)
+          : [data.recordTypeId?.value || data.recordTypeId],
+        required: data.required
+      };
+
+      if (isMultipleType) {
+        payload.options = options.map((option) => ({
+          value: option.name,
+          recordTypeIds: option.recordTypes.map((rt) => rt.value || rt)
+        }));
+      }
+
+      if (id) {
+        await ServiceCustomFields.editCustomFields(id, payload);
+        setFlashMessage(
+          'Campo personalizado atualizado com sucesso',
+          'success'
+        );
+      } else {
+        await ServiceCustomFields.createCustomFields(payload);
+        setFlashMessage('Campo personalizado criado com sucesso', 'success');
+      }
+
+      history.push('/custom-fields');
+    } catch (error) {
+      console.error('Erro ao salvar campo personalizado:', error);
+      const errorMessage = id
+        ? 'Erro ao atualizar campo personalizado'
+        : 'Erro ao criar campo personalizado';
+      setFlashMessage(errorMessage, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    reset();
-    setOptions([]);
+    history.push('/custom-fields');
   };
 
   const handleBack = () => {
-    console.log('Voltar');
+    history.push('/custom-fields');
   };
+
+  if (isLoadingData) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Carregando dados do campo personalizado...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -216,14 +408,16 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
         isOnlyBack={true}
       />
       <div className={`${styles.container} ${styles[theme]}`}>
-        <h5 className={styles.title}>Campo Personalizado</h5>
+        <h5 className={styles.title}>
+          {id ? 'Editar Campo Personalizado' : 'Novo Campo Personalizado'}
+        </h5>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
+        <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           <Row className="mb-4">
             <Col md={6}>
               <div className={styles.fieldGroup}>
                 <Controller
-                  name="name"
+                  name="label"
                   control={control}
                   rules={{ required: 'Nome é obrigatório' }}
                   render={({ field }) => (
@@ -236,10 +430,11 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                         className={`${styles.input} ${
                           errors.name ? styles.error : ''
                         }`}
+                        disabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
-                        name="name"
+                        name="label"
                         render={({ message }) => errorFormMessage(message)}
                       />
                     </>
@@ -261,6 +456,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                         type="text"
                         placeholder="Digite uma descrição"
                         className={styles.input}
+                        disabled={loading}
                       />
                     </>
                   )}
@@ -284,6 +480,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Selecione uma categoria..."
+                        isDisabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
@@ -310,6 +507,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Selecione os tipo de registro..."
+                        isDisabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
@@ -338,6 +536,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Selecione um tipo..."
+                        isDisabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
@@ -364,6 +563,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                         type="checkbox"
                         checked={field.value}
                         onChange={(e) => field.onChange(e.target.checked)}
+                        disabled={loading}
                       />
                       <span>Obrigatório</span>
                     </label>
@@ -383,6 +583,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                       type="button"
                       onClick={() => handleOpenModal()}
                       className={styles.buttonAddOption}
+                      disabled={loading}
                     >
                       <Plus size={18} />
                       Adicionar Opção
@@ -415,6 +616,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                               onClick={() => handleOpenModal(option)}
                               className={styles.buttonEdit}
                               title="Editar"
+                              disabled={loading}
                             >
                               <Edit2 size={16} />
                             </button>
@@ -423,6 +625,7 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
                               onClick={() => handleDeleteOption(option.id)}
                               className={styles.buttonDelete}
                               title="Deletar"
+                              disabled={loading}
                             >
                               <Trash2 size={16} />
                             </button>
@@ -441,13 +644,18 @@ const CustomFieldForm = ({ initialData = null, onSubmit = () => {}, categoryOpti
           )}
 
           <div className={styles.buttonContainer}>
-            <button type="submit" className={styles.buttonCreate}>
-              Criar
+            <button
+              type="submit"
+              className={styles.buttonCreate}
+              disabled={loading}
+            >
+              {loading ? 'Salvando...' : id ? 'Atualizar' : 'Criar'}
             </button>
             <button
               type="button"
               onClick={handleCancel}
               className={styles.buttonCancel}
+              disabled={loading}
             >
               Cancelar
             </button>
