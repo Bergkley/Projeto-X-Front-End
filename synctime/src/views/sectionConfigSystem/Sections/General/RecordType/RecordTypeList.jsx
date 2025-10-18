@@ -24,7 +24,7 @@ const RecordTypeList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [categories, setCategories] = useState([]);
+  const [recordTypes, setRecordTypes] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -47,7 +47,7 @@ const RecordTypeList = () => {
   }, [debouncedSearchTerm]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchRecordTypes = async () => {
       setLoading(true);
       try {
         const response = await ServiceRecordType.getByAllRecordType(
@@ -57,7 +57,7 @@ const RecordTypeList = () => {
           order
         );
         if (response.data.status === 'OK') {
-          setCategories(response.data.data);
+          setRecordTypes(response.data.data);
           setTotalItems(response.data.totalRegisters);
         }
       } catch (error) {
@@ -68,7 +68,7 @@ const RecordTypeList = () => {
       }
     };
 
-    fetchCategories();
+    fetchRecordTypes();
   }, [currentPage, debouncedSearchTerm, sortBy, order]);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -129,7 +129,7 @@ const RecordTypeList = () => {
         order
       );
       if (response.data.status === 'OK') {
-        setCategories(response.data.data);
+        setRecordTypes(response.data.data);
         setTotalItems(response.data.totalRegisters);
       }
     } catch (error) {
@@ -161,7 +161,7 @@ const RecordTypeList = () => {
 
   const sortConfig = sortBy ? { key: sortBy, direction: order } : { key: null, direction: null };
 
-  if (loading && categories.length === 0) {
+  if (loading && recordTypes.length === 0) {
     return <div>Carregando...</div>; 
   }
 
@@ -182,7 +182,7 @@ const RecordTypeList = () => {
 
       <Table
         columns={columns}
-        data={categories}
+        data={recordTypes}
         selectable={false}
         reorderable={true}
         onSelectionChange={handleSelectionChange}
