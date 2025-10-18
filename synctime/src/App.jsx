@@ -28,6 +28,7 @@ import SectionConfigSystem from './views/sectionConfigSystem/SectionConfigSystem
 // 🌐 Contexto
 import { UserProvider } from './context/UserContext';
 import RecordTypeList from './views/sectionConfigSystem/Sections/General/RecordType/RecordTypeList';
+import CustomFieldsList from './views/sectionConfigSystem/Sections/General/CustomFields/CustomFieldsList';
 
 function ProtectedRoute({ children, ...rest }) {
   const token = localStorage.getItem('token');
@@ -208,6 +209,16 @@ function App() {
                 </ProtectedRoute>
                 <ProtectedRoute path="/record-type/form/:id">
                   <RecordTypeForm />
+                </ProtectedRoute>
+
+                 <ProtectedRoute exact path="/custom-fields">
+                  <CustomFieldsList />
+                </ProtectedRoute>
+                <ProtectedRoute exact path="/custom-fields/form">
+                  <CustomFieldForm />
+                </ProtectedRoute>
+                <ProtectedRoute path="/custom-fields/form/:id">
+                  <CustomFieldForm />
                 </ProtectedRoute>
               </Switch>
             </Layout>
