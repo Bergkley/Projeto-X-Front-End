@@ -25,16 +25,13 @@ const CategoryList = () => {
   const [order, setOrder] = useState('');
   const itemsPerPage = 10;
 
-  // Debounce the search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 300); // 300ms delay
-
+    }, 300); 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Reset page to 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchTerm]);
@@ -105,24 +102,20 @@ const CategoryList = () => {
 
   const handleEdit = (categoryId) => {
     console.log('Editar categoria:', categoryId);
-    // Implementar navegação para editar categoria
   };
 
   const handleDelete = (categoryId) => {
     if (window.confirm('Tem certeza que deseja excluir esta categoria?')) {
       console.log('Excluir categoria:', categoryId);
-      // Implementar chamada para API de delete
     }
   };
 
   const handleBack = () => {
     console.log('Voltar');
-    // Implementar navegação para voltar
   };
 
   const handleCreate = () => {
     console.log('Criar nova categoria');
-    // Implementar navegação para criar nova categoria
   };
 
   const handleSelectionChange = (selectedItems) => {
@@ -132,7 +125,7 @@ const CategoryList = () => {
   const sortConfig = sortBy ? { key: sortBy, direction: order } : { key: null, direction: null };
 
   if (loading && categories.length === 0) {
-    return <div>Carregando...</div>; // Show loading only on initial load
+    return <div>Carregando...</div>; 
   }
 
   return (
