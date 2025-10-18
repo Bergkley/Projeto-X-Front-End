@@ -4,7 +4,7 @@ import { Edit2, Trash2 } from "lucide-react";
 import { useHistory } from 'react-router-dom';
 
 // 💅 Estilos
-import styles from './RecordType.module.css';
+import styles from './RecordTypeList.module.css';
 
 // 🧩 Componentes
 import TableHeader from "../../../../../components/header/TableHeader/TableHeader";
