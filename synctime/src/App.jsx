@@ -27,6 +27,7 @@ import SectionConfigSystem from './views/sectionConfigSystem/SectionConfigSystem
 
 // 🌐 Contexto
 import { UserProvider } from './context/UserContext';
+import RecordTypeList from './views/sectionConfigSystem/Sections/General/RecordType/RecordTypeList';
 
 function ProtectedRoute({ children, ...rest }) {
   const token = localStorage.getItem('token');
@@ -76,7 +77,13 @@ function Layout({ children }) {
     '/conta',
     '/categoria',
     '/categoria/form',
-    '/categoria/form/:id'
+    '/categoria/form/:id',
+    '/record-type',
+    '/record-type/form',
+    '/record-type/form/:id',
+    '/custom-fields',
+    '/custom-fields/form',
+    '/custom-fields/form/:id'
   ];
 
   const showSidebar =
@@ -191,6 +198,16 @@ function App() {
 
                 <ProtectedRoute path="/categoria/form/:id">
                   <CategoryForm />
+                </ProtectedRoute>
+
+                <ProtectedRoute exact path="/record-type">
+                  <RecordTypeList />
+                </ProtectedRoute>
+                <ProtectedRoute exact path="/record-type/form">
+                  <RecordTypeForm />
+                </ProtectedRoute>
+                <ProtectedRoute path="/record-type/form/:id">
+                  <RecordTypeForm />
                 </ProtectedRoute>
               </Switch>
             </Layout>
