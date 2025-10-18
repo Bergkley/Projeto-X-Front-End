@@ -85,7 +85,6 @@ const CategoryForm = () => {
     { value: 'tipo3', label: 'Tipo 3' }
   ];
 
-  // 💾 Função de submit (cria ou edita)
   const onSubmit = async (data) => {
     try {
       setLoading(true);
