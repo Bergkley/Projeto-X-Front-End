@@ -20,7 +20,7 @@ class ServiceCategory {
   }
 
   createCategory(data){
-    return api.post(`/category`, data);
+    return api.post(`/category/create`, data);
   }
 
   editCategory(id,data){
