@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Switch, Route, Redirect, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+  useLocation
+} from 'react-router-dom';
 import { useState } from 'react';
 // 🧩 Componentes
 import Message from './components/flashMessage/Message';
@@ -13,9 +19,11 @@ import LoadingPage from './views/loading/Loading';
 import ForgotPassword from './views/auth/ForgotPassword';
 import StartLogin from './views/auth/StartLogin';
 import Home from './views/home/Home';
-import SectionConfigSystem from './views/SectionConfigSystem/SectionConfigSystem';
-
-
+import CategoryList from './views/sectionConfigSystem/Sections/Report/Category/CategoryList';
+import CategoryForm from './views/sectionConfigSystem/Sections/Report/Category/Form/CategoryForm';
+import RecordTypeForm from './views/sectionConfigSystem/Sections/General/RecordType/Form/RecordTypeForm';
+import CustomFieldForm from './views/sectionConfigSystem/Sections/General/CustomFields/Form/CustomFieldsForm';
+import SectionConfigSystem from './views/sectionConfigSystem/SectionConfigSystem';
 
 // 🌐 Contexto
 import { UserProvider } from './context/UserContext';
@@ -32,7 +40,7 @@ function ProtectedRoute({ children, ...rest }) {
           <Redirect
             to={{
               pathname: '/',
-              state: { from: location },
+              state: { from: location }
             }}
           />
         )
@@ -46,13 +54,7 @@ function PublicRoute({ children, ...rest }) {
   return (
     <Route
       {...rest}
-      render={() =>
-        token ? (
-          <Redirect to="/inicio" />
-        ) : (
-          children
-        )
-      }
+      render={() => (token ? <Redirect to="/inicio" /> : children)}
     />
   );
 }
@@ -60,18 +62,33 @@ function PublicRoute({ children, ...rest }) {
 function Layout({ children }) {
   const location = useLocation();
   const token = localStorage.getItem('token');
-  const [sidebarState, setSidebarState] = useState({ isMinimized: false, isMobile: false });
-  
-  // Páginas protegidas que mostram sidebar, header e footer
-  const protectedPages = ['/inicio', '/dashboard', '/relatorios', '/anotacoes', '/configuracoes', '/conta'];
-  const showSidebar = token && protectedPages.includes(location.pathname);
+  const [sidebarState, setSidebarState] = useState({
+    isMinimized: false,
+    isMobile: false
+  });
 
-  // Callback para receber o estado da sidebar
+  const protectedPages = [
+    '/inicio',
+    '/dashboard',
+    '/relatorios',
+    '/anotacoes',
+    '/configuracoes',
+    '/conta',
+    '/categoria',
+    '/categoria/form',
+    '/categoria/form/:id'
+  ];
+
+  const showSidebar =
+    token &&
+    protectedPages.some((path) =>
+      location.pathname.startsWith(path.replace('/:id', ''))
+    );
+
   const handleSidebarToggle = (isMinimized, isMobile) => {
     setSidebarState({ isMinimized, isMobile });
   };
 
-  // Calcula a margem dinamicamente baseado no estado da sidebar
   const getMarginLeft = () => {
     if (!showSidebar) return '0';
     if (sidebarState.isMobile) return '0';
@@ -89,28 +106,49 @@ function Layout({ children }) {
   return (
     <>
       {showSidebar && <Sidebar onToggle={handleSidebarToggle} />}
-      <div style={{ 
-        marginLeft: getMarginLeft(), 
-        minHeight: '100vh',
-        transition: 'margin-left 0.3s ease, width 0.3s ease',
-        width: getWidth()
-      }}>
+      <div
+        style={{
+          marginLeft: getMarginLeft(),
+          minHeight: '100vh',
+          transition: 'margin-left 0.3s ease, width 0.3s ease',
+          width: getWidth()
+        }}
+      >
         {showSidebar && <Header />}
-        <main style={{ 
-          padding: showSidebar ? '0' : '0',
-          paddingTop: sidebarState.isMobile && showSidebar ? '70px' : '0'
-        }}>
-          {showSidebar ? (
-            <Container>{children}</Container>
-          ) : (
-            children
-          )}
+        <main
+          style={{
+            padding: showSidebar ? '0' : '0',
+            paddingTop: sidebarState.isMobile && showSidebar ? '70px' : '0'
+          }}
+        >
+          {showSidebar ? <Container>{children}</Container> : children}
         </main>
         {showSidebar && <Footer />}
       </div>
     </>
   );
 }
+
+export const mockRecordTypes = [
+  { value: 'rec_001', label: 'Padrão' },
+  { value: 'rec_002', label: 'POC Tevendas' },
+  { value: 'rec_003', label: 'Teste' },
+  { value: 'rec_004', label: 'Receita' },
+  { value: 'rec_005', label: 'Despesa' },
+  { value: 'rec_006', label: 'Lead' },
+  { value: 'rec_007', label: 'Cliente' },
+  { value: 'rec_008', label: 'Fornecedor' },
+  { value: 'rec_009', label: 'Evento' },
+  { value: 'rec_010', label: 'Tarefa' }
+];
+
+export const mockCategories = [
+  { value: 'cat_001', label: 'Educação' },
+  { value: 'cat_002', label: 'Financeiro' },
+  { value: 'cat_003', label: 'Atividade Doméstica' },
+  { value: 'cat_004', label: 'Saúde' },
+  { value: 'cat_005', label: 'Trabalho' }
+];
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -142,22 +180,18 @@ function App() {
                 <ProtectedRoute path="/configuracoes">
                   <SectionConfigSystem />
                 </ProtectedRoute>
-                {/* Adicione aqui as outras rotas protegidas */}
-                {/* <ProtectedRoute path="/dashboard">
-                  <Dashboard />
+
+                <ProtectedRoute exact path="/categoria">
+                  <CategoryList />
                 </ProtectedRoute>
-                <ProtectedRoute path="/relatorios">
-                  <Relatorios />
+
+                <ProtectedRoute exact path="/categoria/form">
+                  <CategoryForm />
                 </ProtectedRoute>
-                <ProtectedRoute path="/anotacoes">
-                  <Anotacoes />
+
+                <ProtectedRoute path="/categoria/form/:id">
+                  <CategoryForm />
                 </ProtectedRoute>
-                <ProtectedRoute path="/configuracoes">
-                  <Configuracoes />
-                </ProtectedRoute>
-                <ProtectedRoute path="/conta">
-                  <Conta />
-                </ProtectedRoute> */}
               </Switch>
             </Layout>
           </>
