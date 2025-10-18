@@ -1,15 +1,33 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { useParams, useHistory } from 'react-router-dom';
+import { Row, Col } from 'reactstrap';
+import { ErrorMessage } from '@hookform/error-message';
+
+// 💅 Estilos
 import styles from './CategoryForm.module.css';
+
+// 🧩 Componentes
 import SingleSelect from '../../../../../../components/select/SingleSelect';
 import ActionHeader from '../../../../../../components/header/ActionHeader/ActionHeader';
-import errorFormMessage from '../../../../../../utils/errorFormMessage';
-import { ErrorMessage } from '@hookform/error-message';
-import { Row, Col } from 'reactstrap';
-import { useTheme } from '../../../../../../hooks/useTheme'; 
 
-const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
+// 🔧 Utils e Hooks
+import errorFormMessage from '../../../../../../utils/errorFormMessage';
+import { useTheme } from '../../../../../../hooks/useTheme';
+import useFlashMessage from '../../../../../../hooks/userFlashMessage';
+
+// 📡 Services
+import ServiceCategory from '../services/ServiceCategory';
+
+const CategoryForm = () => {
+  const { id } = useParams();
+  const history = useHistory();
   const { theme } = useTheme();
+  const { setFlashMessage } = useFlashMessage();
+  
+  const [loading, setLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(!!id);
+
   const {
     control,
     handleSubmit,
@@ -17,23 +35,42 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
     formState: { errors }
   } = useForm({
     defaultValues: {
-      name: initialData?.name || '',
-      description: initialData?.description || '',
-      type: initialData?.type || null,
-      recordType: initialData?.recordType || null
+      name: '',
+      description: '',
+      type: null,
+      recordType: null
     }
   });
 
   useEffect(() => {
-    if (initialData) {
-      reset({
-        name: initialData.name || '',
-        description: initialData.description || '',
-        type: initialData.type || null,
-        recordType: initialData.recordType || null
-      });
-    }
-  }, [initialData, reset]);
+    const fetchCategoryData = async () => {
+      if (!id) return;
+
+      try {
+        setIsLoadingData(true);
+        const response = await ServiceCategory.getByIdCategory(id);
+        
+        if (response.data.status === 'OK') {
+          const categoryData = response.data.data;
+          // TODO: AJUSTAR O RECORD TYPE
+          reset({
+            name: categoryData.name || '',
+            description: categoryData.description || '',
+            type: categoryData.type ? { value: categoryData.type, label: categoryData.type } : null,
+            recordType: categoryData.recordType ? { value: categoryData.recordTypeId, label: categoryData.recordTypeId } : null
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao buscar categoria:', error);
+        setFlashMessage('Erro ao carregar dados da categoria', 'error');
+        history.push('/categoria');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchCategoryData();
+  }, [id]);
 
   const typeOptions = [
     { value: 'educacao', label: 'Educação' },
@@ -44,23 +81,58 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
 
   const recordTypeOptions = [
     { value: 'tipo1', label: 'Tipo 1' },
-    { value: 'tipo2', label: 'Tipo 2' },
+    { value: '2', label: 'Tipo 2' },
     { value: 'tipo3', label: 'Tipo 3' }
   ];
 
-  const handleFormSubmit = (data) => {
-    console.log('Dados do formulário:', data);
-    onSubmit(data);
+  // 💾 Função de submit (cria ou edita)
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        name: data.name,
+        description: data.description,
+        type: data.type?.value || data.type,
+        recordTypeId: data.recordType?.value || data.recordType
+      };
+
+      if (id) {
+        await ServiceCategory.editCategory(id, payload);
+        setFlashMessage('Categoria atualizada com sucesso', 'success');
+      } else {
+        await ServiceCategory.createCategory(payload);
+        setFlashMessage('Categoria criada com sucesso', 'success');
+      }
+
+      history.push('/categoria');
+      
+    } catch (error) {
+      console.error('Erro ao salvar categoria:', error);
+      const errorMessage = id 
+        ? 'Erro ao atualizar categoria' 
+        : 'Erro ao criar categoria';
+      setFlashMessage(errorMessage, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    reset();
+    history.push('/categoria');
   };
 
   const handleBack = () => {
-    console.log('Voltar');
-    // Implementar navegação para voltar
+    history.push('/categoria');
   };
+
+  if (isLoadingData) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Carregando dados da categoria...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -70,10 +142,11 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
         isOnlyBack={true}
       />
       <div className={`${styles.container} ${styles[theme]}`}>
-        <h5 className={styles.title}>Categoria</h5>
+        <h5 className={styles.title}>
+          {id ? 'Editar Categoria' : 'Nova Categoria'}
+        </h5>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
-          {/* Primeira Linha */}
+        <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           <Row className="mb-4">
             <Col md={6}>
               <div className={styles.fieldGroup}>
@@ -91,6 +164,7 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
                         className={`${styles.input} ${
                           errors.name ? styles.error : ''
                         }`}
+                        disabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
@@ -116,6 +190,7 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
                         type="text"
                         placeholder="Digite uma descrição"
                         className={styles.input}
+                        disabled={loading}
                       />
                     </>
                   )}
@@ -140,6 +215,7 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Selecione..."
+                        isDisabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
@@ -166,6 +242,7 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Selecione..."
+                        isDisabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
@@ -181,13 +258,18 @@ const CategoryForm = ({ initialData = null, onSubmit = () => {} }) => {
 
           {/* Botões */}
           <div className={styles.buttonContainer}>
-            <button type="submit" className={styles.buttonCreate}>
-              Criar
+            <button 
+              type="submit" 
+              className={styles.buttonCreate}
+              disabled={loading}
+            >
+              {loading ? 'Salvando...' : (id ? 'Atualizar' : 'Criar')}
             </button>
             <button
               type="button"
               onClick={handleCancel}
               className={styles.buttonCancel}
+              disabled={loading}
             >
               Cancelar
             </button>

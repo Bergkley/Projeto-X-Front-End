@@ -1,6 +1,7 @@
 // ⚙️ Bibliotecas externas
 import { useEffect, useState } from "react";
 import { Edit2, Trash2 } from "lucide-react";
+import { useHistory } from 'react-router-dom';
 
 // 💅 Estilos
 import styles from './CategoryList.module.css';
@@ -10,17 +11,26 @@ import TableHeader from "../../../../../components/header/TableHeader/TableHeade
 import ActionHeader from "../../../../../components/header/ActionHeader/ActionHeader";
 import Table from "../../../../../components/table/Table";
 import Pagination from "../../../../../components/pagination/Pagination";
+import ConfirmModal from './../../../../../components/modal/ConfirmModal';
 
-// 
+// 🔧 Services e Hooks
 import ServiceCategory from "./services/ServiceCategory";
+import useFlashMessage from './../../../../../hooks/userFlashMessage';
 
 const CategoryList = () => {
+  const history = useHistory();
+  const { setFlashMessage } = useFlashMessage();
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [categories, setCategories] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+
   const [sortBy, setSortBy] = useState('');
   const [order, setOrder] = useState('');
   const itemsPerPage = 10;
@@ -52,6 +62,7 @@ const CategoryList = () => {
         }
       } catch (error) {
         console.error('Erro ao buscar categorias:', error);
+        setFlashMessage('Erro ao buscar categorias', 'error');
       } finally {
         setLoading(false);
       }
@@ -101,21 +112,48 @@ const CategoryList = () => {
   };
 
   const handleEdit = (categoryId) => {
-    console.log('Editar categoria:', categoryId);
+    history.push(`/categoria/form/${categoryId}`);
   };
 
-  const handleDelete = (categoryId) => {
-    if (window.confirm('Tem certeza que deseja excluir esta categoria?')) {
-      console.log('Excluir categoria:', categoryId);
+  const handleDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      await ServiceCategory.deleteCategory(categoryToDelete);
+      setFlashMessage('Categoria excluída com sucesso', 'success');
+      
+      const response = await ServiceCategory.getByAllCategory(
+        currentPage,
+        debouncedSearchTerm,
+        sortBy,
+        order
+      );
+      if (response.data.status === 'OK') {
+        setCategories(response.data.data);
+        setTotalItems(response.data.totalRegisters);
+      }
+    } catch (error) {
+      console.error('Erro ao excluir categoria:', error);
+      setFlashMessage('Erro ao excluir categoria', 'error');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setCategoryToDelete(null);
     }
   };
 
+  const handleDelete = (categoryId) => {
+    setCategoryToDelete(categoryId);
+    setShowDeleteModal(true);
+  };
+
   const handleBack = () => {
-    console.log('Voltar');
+    history.push('/configuracoes');
   };
 
   const handleCreate = () => {
-    console.log('Criar nova categoria');
+    history.push('/categoria/form');
   };
 
   const handleSelectionChange = (selectedItems) => {
@@ -161,6 +199,21 @@ const CategoryList = () => {
         totalItems={totalItems}
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setCategoryToDelete(null);
+        }}
+        onConfirm={handleDeleteCategory}
+        title="Confirmar exclusão de categoria"
+        message="Tem certeza que deseja excluir esta categoria? Esta ação é irreversível."
+        confirmText="Sim, excluir"
+        cancelText="Cancelar"
+        danger={true}
+        loading={isDeleting}
       />
     </div>
   );
