@@ -1,10 +1,6 @@
-// ⚙️ Bibliotecas externas
 import { User, Settings, PaintBucket, ClipboardList } from 'lucide-react';
-
-// 💅 Estilos
+import { Link } from 'react-router-dom';
 import styles from './SectionConfigSystem.module.css';
-
-// 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 
@@ -17,28 +13,41 @@ const SectionConfigSystem = () => {
       id: 'geral',
       title: 'Geral',
       icon: Settings,
-      items: ['Configuração geral', 'Campos Customizados', 'Privacidade'],
+      items: [
+        { label: 'Configuração geral', path: '#' },
+        { label: 'Tipos de Registros', path: '/record-type' },
+        { label: 'Campos Customizados', path: '/custom-fields' },
+        { label: 'Privacidade', path: '#' }
+      ],
       subtitle: 'Definições básicas do sistema'
     },
     {
       id: 'Aparencia',
       title: 'Aparencia',
       icon: PaintBucket,
-      items: ['Temas'],
+      items: [
+        { label: 'Temas', path: '#' }
+      ],
       subtitle: 'Personalize a aparência do sistema'
     },
     {
       id: 'Relatorios',
       title: 'Relatorios',
       icon: ClipboardList,
-      items: ['Categoria'],
+      items: [
+        { label: 'Categoria', path: '/categoria' }
+      ],
       subtitle: 'Configurações de relatórios e análises'
     },
     {
       id: 'conta',
       title: 'Conta',
       icon: User,
-      items: ['Configuração da conta', 'Alterar senha', 'Esqueceu senha'],
+      items: [
+        { label: 'Configuração da conta', path: '#' },
+        { label: 'Alterar senha', path: '#' },
+        { label: 'Esqueceu senha', path: '/esqueceu-senha' }
+      ],
       subtitle: 'Gerencie as informações da sua conta'
     },
   ];
@@ -76,10 +85,23 @@ const SectionConfigSystem = () => {
                       className={styles.item}
                       style={{
                         '--hover-color': emphasisColor || '#e91e63',
-                        '--hover-bg-opacity': theme === 'dark' ? '0.1' : '0.05'
+                        '--hover-bg-opacity': theme === 'dark' ? '0.1' : '0.05',
+                        padding: 0
                       }}
                     >
-                      {item}
+                      <Link 
+                        to={item.path} 
+                        style={{ 
+                          textDecoration: 'none', 
+                          color: 'inherit',
+                          display: 'block',
+                          width: '100%',
+                          padding: '0.5rem 0 0.5rem 1.25rem',
+                          height: '100%'
+                        }}
+                      >
+                        {item.label}
+                      </Link>
                     </li>
                   ))}
                 </ul>
