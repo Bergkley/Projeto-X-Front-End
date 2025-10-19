@@ -5,7 +5,7 @@ import {
   Redirect,
   useLocation
 } from 'react-router-dom';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 // 🧩 Componentes
 import Message from './components/flashMessage/Message';
 import Header from './components/header/Header';
@@ -93,9 +93,9 @@ function Layout({ children }) {
       location.pathname.startsWith(path.replace('/:id', ''))
     );
 
-  const handleSidebarToggle = (isMinimized, isMobile) => {
+  const handleSidebarToggle = useCallback((isMinimized, isMobile) => {
     setSidebarState({ isMinimized, isMobile });
-  };
+  }, []);
 
   const getMarginLeft = () => {
     if (!showSidebar) return '0';
