@@ -16,6 +16,7 @@ import ConfirmModal from '../../../../../components/modal/ConfirmModal';
 // 🔧 Services e Hooks
 import ServiceRecordType from "./services/ServiceRecordType";
 import useFlashMessage from '../../../../../hooks/userFlashMessage';
+import LoadingSpinner from './../../../../../components/loading/LoadingSpinner';
 
 const RecordTypeList = () => {
   const history = useHistory();
@@ -162,7 +163,8 @@ const RecordTypeList = () => {
   const sortConfig = sortBy ? { key: sortBy, direction: order } : { key: null, direction: null };
 
   if (loading && recordTypes.length === 0) {
-    return <div>Carregando...</div>; 
+        return <LoadingSpinner message="Carregando os tipos de registros..." />; 
+
   }
 
   return (

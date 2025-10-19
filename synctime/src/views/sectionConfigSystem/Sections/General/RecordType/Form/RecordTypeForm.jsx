@@ -35,18 +35,19 @@ import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 
 // 📡 Services
 import ServiceRecordType from '../services/ServiceRecordType';
+import LoadingSpinner from '../../../../../../components/loading/LoadingSpinner';
 
 const RecordTypeForm = () => {
-  console.log
+  console.log;
   const { id } = useParams();
   const history = useHistory();
   const { theme } = useTheme();
   const { setFlashMessage } = useFlashMessage();
-  
+
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(!!id);
 
-// TODO: ADD ICONES
+  // TODO: ADD ICONES
   const iconLabels = {
     Home: 'Início',
     FileText: 'Arquivo',
@@ -102,16 +103,18 @@ const RecordTypeForm = () => {
       try {
         setIsLoadingData(true);
         const response = await ServiceRecordType.getByIdRecordType(id);
-        
+
         if (response.data.status === 'OK') {
           const recordTypeData = response.data.data;
           reset({
             name: recordTypeData.name || '',
-            icon: recordTypeData.icone ? { 
-              value: recordTypeData.icone, 
-              label: iconLabels[recordTypeData.icone],
-              icon: recordTypeData.icone
-            } : null
+            icon: recordTypeData.icone
+              ? {
+                  value: recordTypeData.icone,
+                  label: iconLabels[recordTypeData.icone],
+                  icon: recordTypeData.icone
+                }
+              : null
           });
         }
       } catch (error) {
@@ -140,10 +143,10 @@ const RecordTypeForm = () => {
       <div
         {...innerProps}
         ref={innerRef}
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          background: theme === 'dark' ? '#1f2937' : '#ffffff', 
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: theme === 'dark' ? '#1f2937' : '#ffffff',
           color: theme === 'dark' ? '#f1f5f9' : '#1f2937',
           padding: '8px'
         }}
@@ -194,11 +197,10 @@ const RecordTypeForm = () => {
       }
 
       history.push('/record-type');
-      
     } catch (error) {
       console.error('Erro ao salvar tipo de registro:', error);
-      const errorMessage = id 
-        ? 'Erro ao atualizar tipo de registro' 
+      const errorMessage = id
+        ? 'Erro ao atualizar tipo de registro'
         : 'Erro ao criar tipo de registro';
       setFlashMessage(errorMessage, 'error');
     } finally {
@@ -216,9 +218,7 @@ const RecordTypeForm = () => {
 
   if (isLoadingData) {
     return (
-      <div className={styles.loadingContainer}>
-        <p>Carregando dados do tipo de registro...</p>
-      </div>
+      <LoadingSpinner message="Carregando os dados do tipos de registros..." />
     );
   }
 
@@ -290,8 +290,12 @@ const RecordTypeForm = () => {
                             ...base,
                             minHeight: '50px',
                             height: '50px',
-                            background: theme === 'dark' ? '#111827' : 'transparent',
-                            border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb',
+                            background:
+                              theme === 'dark' ? '#111827' : 'transparent',
+                            border:
+                              theme === 'dark'
+                                ? '1px solid #374151'
+                                : '1px solid #e5e7eb'
                           })
                         }}
                       />
@@ -309,12 +313,12 @@ const RecordTypeForm = () => {
 
           {/* Botões */}
           <div className={styles.buttonContainer}>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={styles.buttonCreate}
               disabled={loading}
             >
-              {loading ? 'Salvando...' : (id ? 'Atualizar' : 'Criar')}
+              {loading ? 'Salvando...' : id ? 'Atualizar' : 'Criar'}
             </button>
             <button
               type="button"
