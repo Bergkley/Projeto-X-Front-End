@@ -3,23 +3,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { useParams, useHistory } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
 import { ErrorMessage } from '@hookform/error-message';
-import {
-  Home,
-  FileText,
-  DollarSign,
-  Users,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  Star,
-  Heart,
-  Inbox,
-  Archive,
-  Trash2,
-  Settings,
-  Briefcase,
-  ShoppingCart
-} from 'lucide-react';
 
 // 💅 Estilos
 import styles from './RecordTypeForm.module.css';
@@ -36,6 +19,7 @@ import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 // 📡 Services
 import ServiceRecordType from '../services/ServiceRecordType';
 import LoadingSpinner from '../../../../../../components/loading/LoadingSpinner';
+import { iconLabels, iconMap } from '../../../../../../utils/iconsConfig';
 
 const RecordTypeForm = () => {
   console.log;
@@ -46,43 +30,6 @@ const RecordTypeForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(!!id);
-
-  // TODO: ADD ICONES
-  const iconLabels = {
-    Home: 'Início',
-    FileText: 'Arquivo',
-    DollarSign: 'Dinheiro',
-    Users: 'Usuários',
-    Calendar: 'Calendário',
-    CheckCircle: 'Concluído',
-    AlertCircle: 'Alerta',
-    Star: 'Favorito',
-    Heart: 'Coração',
-    Inbox: 'Entrada',
-    Archive: 'Arquivo',
-    Trash2: 'Lixeira',
-    Settings: 'Configurações',
-    Briefcase: 'Pasta',
-    ShoppingCart: 'Carrinho'
-  };
-
-  const iconMap = {
-    Home,
-    FileText,
-    DollarSign,
-    Users,
-    Calendar,
-    CheckCircle,
-    AlertCircle,
-    Star,
-    Heart,
-    Inbox,
-    Archive,
-    Trash2,
-    Settings,
-    Briefcase,
-    ShoppingCart
-  };
 
   const {
     control,
