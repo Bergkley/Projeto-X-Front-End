@@ -1,5 +1,4 @@
 /* LoadingSpinner.module.css */
-/* Estilo moderno com spinner de 8 pontos rotacionando, inspirado em designs minimalistas */
 
 .loadingContainer {
   display: flex;
@@ -8,9 +7,20 @@
   justify-content: center;
   min-height: 200px;
   padding: 2rem;
-  background-color: var(--bg-secondary, #f8f9fa); /* Use variáveis CSS se disponíveis no seu tema */
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Tema claro (padrão com fallback) */
+.loadingContainer.light {
+  background-color: var(--bg-secondary, #f8f9fa);
+}
+
+/* Tema escuro */
+.loadingContainer.dark {
+  background-color: var(--bg-secondary, #343a40);
+  color: var(--text-primary, #ffffff); 
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .spinner {
@@ -31,7 +41,7 @@
   position: absolute;
   width: 8px;
   height: 8px;
-  background-color: var(--primary-color, #007bff); /* Cor primária do tema */
+  background-color: var(--primary-color, #007bff); 
   border-radius: 50%;
   animation: spinnerPulse 1.2s infinite ease-in-out;
 }
@@ -62,6 +72,10 @@
   font-weight: 500;
   margin: 0;
   text-align: center;
+}
+
+.loadingContainer.dark .loadingMessage {
+  color: var(--text-secondary, #adb5bd);
 }
 
 /* Responsivo */
