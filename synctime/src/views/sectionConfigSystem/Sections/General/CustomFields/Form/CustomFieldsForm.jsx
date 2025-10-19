@@ -20,6 +20,7 @@ import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 import ServiceCategory from '../../../Report/Category/services/ServiceCategory';
 import ServiceRecordType from '../../RecordType/services/ServiceRecordType';
 import ServiceCustomFields from '../services/ServiceCustomFields';
+import LoadingSpinner from '../../../../../../components/loading/LoadingSpinner';
 
 // 📡 Services
 
@@ -245,7 +246,8 @@ const CustomFieldForm = () => {
           style={{
             backgroundColor: theme === 'dark' ? '#1a202c' : '#fff',
             color: theme === 'dark' ? '#fff' : '#1a202c',
-            borderBottom: theme === 'dark' ? '1px solid #374151' : '1px solid #dee2e6'
+            borderBottom:
+              theme === 'dark' ? '1px solid #374151' : '1px solid #dee2e6'
           }}
         >
           {editingOption ? 'Editar Opção' : 'Adicionar Opção'}
@@ -265,11 +267,7 @@ const CustomFieldForm = () => {
                 rules={{ required: 'Nome da opção é obrigatório' }}
                 render={({ field }) => (
                   <div>
-                    <label
-                      className={styles.label}
-                    >
-                      Nome da Opção *
-                    </label>
+                    <label className={styles.label}>Nome da Opção *</label>
                     <input
                       {...field}
                       type="text"
@@ -280,7 +278,10 @@ const CustomFieldForm = () => {
                       style={{
                         backgroundColor: theme === 'dark' ? '#1a202c' : '#fff',
                         color: theme === 'dark' ? '#fff' : '#1a202c',
-                        border: theme === 'dark' ? '1px solid #374151' : '1px solid #dee2e6'
+                        border:
+                          theme === 'dark'
+                            ? '1px solid #374151'
+                            : '1px solid #dee2e6'
                       }}
                     />
                     {modalErrors.optionName && (
@@ -412,9 +413,7 @@ const CustomFieldForm = () => {
 
   if (isLoadingData) {
     return (
-      <div className={styles.loadingContainer}>
-        <p>Carregando dados do campo personalizado...</p>
-      </div>
+      <LoadingSpinner message="Carregando dados do campos customizados..." />
     );
   }
 
