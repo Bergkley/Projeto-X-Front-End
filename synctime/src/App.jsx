@@ -137,27 +137,6 @@ function Layout({ children }) {
   );
 }
 
-export const mockRecordTypes = [
-  { value: 'rec_001', label: 'Padrão' },
-  { value: 'rec_002', label: 'POC Tevendas' },
-  { value: 'rec_003', label: 'Teste' },
-  { value: 'rec_004', label: 'Receita' },
-  { value: 'rec_005', label: 'Despesa' },
-  { value: 'rec_006', label: 'Lead' },
-  { value: 'rec_007', label: 'Cliente' },
-  { value: 'rec_008', label: 'Fornecedor' },
-  { value: 'rec_009', label: 'Evento' },
-  { value: 'rec_010', label: 'Tarefa' }
-];
-
-export const mockCategories = [
-  { value: 'cat_001', label: 'Educação' },
-  { value: 'cat_002', label: 'Financeiro' },
-  { value: 'cat_003', label: 'Atividade Doméstica' },
-  { value: 'cat_004', label: 'Saúde' },
-  { value: 'cat_005', label: 'Trabalho' }
-];
-
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   return (
