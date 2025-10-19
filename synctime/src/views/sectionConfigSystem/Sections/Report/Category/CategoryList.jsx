@@ -16,6 +16,7 @@ import ConfirmModal from './../../../../../components/modal/ConfirmModal';
 // 🔧 Services e Hooks
 import ServiceCategory from "./services/ServiceCategory";
 import useFlashMessage from './../../../../../hooks/userFlashMessage';
+import LoadingSpinner from "../../../../../components/loading/LoadingSpinner";
 
 const CategoryList = () => {
   const history = useHistory();
@@ -163,7 +164,8 @@ const CategoryList = () => {
   const sortConfig = sortBy ? { key: sortBy, direction: order } : { key: null, direction: null };
 
   if (loading && categories.length === 0) {
-    return <div>Carregando...</div>; 
+            return <LoadingSpinner message="Carregando categorias..." />; 
+
   }
 
   return (

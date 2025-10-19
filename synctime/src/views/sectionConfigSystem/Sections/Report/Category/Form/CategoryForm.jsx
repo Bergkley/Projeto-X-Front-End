@@ -19,15 +19,14 @@ import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 // 📡 Services
 import ServiceCategory from '../services/ServiceCategory';
 import ServiceRecordType from '../../../General/RecordType/services/ServiceRecordType';
-
-
+import LoadingSpinner from '../../../../../../components/loading/LoadingSpinner';
 
 const CategoryForm = () => {
   const { id } = useParams();
   const history = useHistory();
   const { theme } = useTheme();
   const { setFlashMessage } = useFlashMessage();
-  
+
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(!!id);
 
@@ -54,63 +53,72 @@ const CategoryForm = () => {
     { value: 'outros', label: 'Outros' }
   ];
   useEffect(() => {
-  const fetchCategoryData = async () => {
-    if (!id) return;
+    const fetchCategoryData = async () => {
+      if (!id) return;
 
-    try {
-      setIsLoadingData(true);
-      const [responseCategory, responseRecordTypes] = await Promise.all([
-        ServiceCategory.getByIdCategory(id),
-        ServiceRecordType.getByAllRecordType(1, '', '', '')
-      ]);
+      try {
+        setIsLoadingData(true);
+        const [responseCategory, responseRecordTypes] = await Promise.all([
+          ServiceCategory.getByIdCategory(id),
+          ServiceRecordType.getByAllRecordType(1, '', '', '')
+        ]);
 
-      if (responseCategory.data.status === 'OK') {
-        const categoryData = responseCategory.data.data;
-        if (!categoryData) {
-          throw new Error('Categoria não encontrada');
-        }
+        if (responseCategory.data.status === 'OK') {
+          const categoryData = responseCategory.data.data;
+          if (!categoryData) {
+            throw new Error('Categoria não encontrada');
+          }
 
-        const recordTypeMap = {};
-        if (responseRecordTypes.data.status === 'OK') {
-          responseRecordTypes.data.data.forEach(rt => {
-            recordTypeMap[rt.id] = rt.name;
+          const recordTypeMap = {};
+          if (responseRecordTypes.data.status === 'OK') {
+            responseRecordTypes.data.data.forEach((rt) => {
+              recordTypeMap[rt.id] = rt.name;
+            });
+          }
+
+          let recordTypeValue = null;
+
+          if (categoryData?.record_type_id) {
+            const recordTypeName =
+              recordTypeMap[categoryData.record_type_id] ||
+              `Tipo de Registro ${categoryData.record_type_id}`;
+            recordTypeValue = {
+              value: categoryData.record_type_id,
+              label: recordTypeName
+            };
+          }
+
+          setRecordTypes(
+            responseRecordTypes.data.data.map((rt) => ({
+              value: rt.id,
+              label: rt.name
+            }))
+          );
+
+          reset({
+            name: categoryData.name || '',
+            description: categoryData.description || '',
+            type: categoryData.type
+              ? {
+                  value: categoryData.type,
+                  label: typeOptions.find((t) => t.value === categoryData.type)
+                    ?.label
+                }
+              : null,
+            recordType: recordTypeValue
           });
         }
-
-        let recordTypeValue = null;
-
-        if (categoryData?.record_type_id) {
-          const recordTypeName = recordTypeMap[categoryData.record_type_id] || `Tipo de Registro ${categoryData.record_type_id}`;
-          recordTypeValue = {
-            value: categoryData.record_type_id,
-            label: recordTypeName
-          };
-        }
-
-        setRecordTypes(responseRecordTypes.data.data.map(rt => ({ value: rt.id, label: rt.name })));
-
-        reset({
-          name: categoryData.name || '',
-          description: categoryData.description || '',
-          type: categoryData.type ? { value: categoryData.type, label: typeOptions.find(t => t.value === categoryData.type)?.label } : null,
-          recordType: recordTypeValue
-        });
+      } catch (error) {
+        console.error('Erro ao buscar categoria:', error);
+        setFlashMessage('Erro ao carregar dados da categoria', 'error');
+        history.push('/categoria');
+      } finally {
+        setIsLoadingData(false);
       }
-    } catch (error) {
-      console.error('Erro ao buscar categoria:', error);
-      setFlashMessage('Erro ao carregar dados da categoria', 'error');
-      history.push('/categoria');
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
+    };
 
-  fetchCategoryData();
-}, [id]);
-
-  
-
-  
+    fetchCategoryData();
+  }, [id]);
 
   const onSubmit = async (data) => {
     try {
@@ -132,11 +140,10 @@ const CategoryForm = () => {
       }
 
       history.push('/categoria');
-      
     } catch (error) {
       console.error('Erro ao salvar categoria:', error);
-      const errorMessage = id 
-        ? 'Erro ao atualizar categoria' 
+      const errorMessage = id
+        ? 'Erro ao atualizar categoria'
         : 'Erro ao criar categoria';
       setFlashMessage(errorMessage, 'error');
     } finally {
@@ -153,11 +160,7 @@ const CategoryForm = () => {
   };
 
   if (isLoadingData) {
-    return (
-      <div className={styles.loadingContainer}>
-        <p>Carregando dados da categoria...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Carregando os dados da categoria." />;
   }
 
   return (
@@ -182,7 +185,9 @@ const CategoryForm = () => {
                   rules={{ required: 'Nome da categoria é obrigatório' }}
                   render={({ field }) => (
                     <>
-                      <label className={styles.label}>Nome da Categoria *</label>
+                      <label className={styles.label}>
+                        Nome da Categoria *
+                      </label>
                       <input
                         {...field}
                         type="text"
@@ -284,12 +289,12 @@ const CategoryForm = () => {
 
           {/* Botões */}
           <div className={styles.buttonContainer}>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={styles.buttonCreate}
               disabled={loading}
             >
-              {loading ? 'Salvando...' : (id ? 'Atualizar' : 'Criar')}
+              {loading ? 'Salvando...' : id ? 'Atualizar' : 'Criar'}
             </button>
             <button
               type="button"
