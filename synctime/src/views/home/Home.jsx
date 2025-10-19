@@ -3,6 +3,7 @@ import { Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets, Calendar, Filter, Bar
 import styles from './Home.module.css';
 import { useTheme } from '../../hooks/useTheme'; 
 
+
 const Home = () => {
   const { theme } = useTheme();
   const [weather, setWeather] = useState(null);
@@ -18,6 +19,8 @@ const Home = () => {
 
   const [selectedMonth, setSelectedMonth] = useState('10');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [location, setLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
 
   const months = [
     { value: '1', label: 'Janeiro' },
@@ -43,7 +46,7 @@ const Home = () => {
     const daysInMonth = date.getDate();
     const data = [];
     for (let day = 1; day <= daysInMonth; day++) {
-      const present = Math.random() > 0.2; // 80% chance of being present
+      const present = Math.random() > 0.2; 
       const sessions = present ? Math.floor(Math.random() * 7) + 1 : 0;
       data.push({ day: day.toString().padStart(2, '0'), present, sessions });
     }
@@ -54,49 +57,65 @@ const Home = () => {
   const totalSessions = presenceData.reduce((acc, d) => acc + d.sessions, 0);
   const rate = Math.round((presentDays / presenceData.length) * 100);
 
-  useEffect(() => {
-    fetchWeather();
-  }, []);
-
-  const fetchWeather = async () => {
-    try {
-      const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=Fortaleza,BR&units=metric&lang=pt_br&appid=4f4b4e8c8f9c8e0b3c5c5f0c5c5c5c5c`
-      );
-      
-      if (!response.ok) {
-        setWeather({
-          temp: 28,
-          condition: 'Ensolarado',
-          icon: 'sun',
-          humidity: 75,
-          wind: 18,
-          city: 'Fortaleza'
-        });
-      } else {
-        const data = await response.json();
-        setWeather({
-          temp: Math.round(data.main.temp),
-          condition: data.weather[0].description,
-          icon: getWeatherIcon(data.weather[0].main),
-          humidity: data.main.humidity,
-          wind: Math.round(data.wind.speed * 3.6),
-          city: data.name
-        });
+ useEffect(() => {
+  if (navigator?.geolocation) {
+    navigator?.geolocation?.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, altitude, accuracy } = position.coords;
+        setLocation({ latitude, longitude, altitude, accuracy });
+        fetchWeatherByCoords(latitude, longitude);
+      },
+      (error) => {
+        console.error('Erro ao obter localização:', error);
+        setLocationError(error.message);
+        setLocation({ latitude: -3.7319, longitude: -38.5267, altitude: null, accuracy: null });
+        fetchWeatherByCoords(-3.7319, -38.5267);
       }
-    } catch (error) {
-      setWeather({
-        temp: 28,
-        condition: 'Ensolarado',
-        icon: 'sun',
-        humidity: 75,
-        wind: 18,
-        city: 'Fortaleza'
-      });
-    } finally {
-      setLoading(false);
+    );
+  } else {
+    setLocationError('Geolocalização não suportada');
+    setLocation({ latitude: -3.7319, longitude: -38.5267, altitude: null, accuracy: null });
+    fetchWeatherByCoords(-3.7319, -38.5267);
+  }
+}, []);
+
+const fetchWeatherByCoords = async (lat, lon) => {
+  try {
+    const apiKey = import.meta.env.VITE_KEY_API_OPENWEATHER || '';
+    
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=pt_br&appid=${apiKey}`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Erro ao buscar dados do clima');
     }
-  };
+
+    const data = await response.json();
+    setWeather({
+      temp: Math.round(data.main.temp),
+      condition: data.weather[0].description,
+      icon: getWeatherIcon(data.weather[0].main),
+      humidity: data.main.humidity,
+      wind: Math.round(data.wind.speed * 3.6),
+      city: data.name,
+      country: data.sys.country
+    });
+  } catch (error) {
+    console.error('Erro ao buscar clima:', error);
+    setWeather({
+      temp: 28,
+      condition: 'Ensolarado',
+      icon: 'sun',
+      humidity: 75,
+      wind: 18,
+      city: 'Localização desconhecida',
+      country: 'BR'
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getWeatherIcon = (condition) => {
     const icons = {
