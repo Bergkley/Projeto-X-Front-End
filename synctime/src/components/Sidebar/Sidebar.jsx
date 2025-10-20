@@ -26,10 +26,25 @@ const relatoriosSubMenu = [
   { 
     id: 1,
     name: 'Categoria', 
-    subcategorias: [
-      { id: 11, name: 'Vendas por Período', path: '/relatorios/vendas/periodo' },
-      { id: 12, name: 'Vendas por Produto', path: '/relatorios/vendas/produto' },
-      { id: 13, name: 'Vendas por Vendedor', path: '/relatorios/vendas/vendedor' },
+    tipos: [
+      {
+        id: 101,
+        name: 'Vendas',
+        subcategorias: [
+          { id: 11, name: 'Vendas por Período', path: '/relatorios/vendas/periodo' },
+          { id: 12, name: 'Vendas por Produto', path: '/relatorios/vendas/produto' },
+          { id: 13, name: 'Vendas por Vendedor', path: '/relatorios/vendas/vendedor' },
+        ]
+      },
+      {
+        id: 102,
+        name: 'teste',
+        subcategorias: [
+          { id: 11, name: 'Vendas por Período', path: '/relatorios/vendas/periodo' },
+          { id: 12, name: 'Vendas por Produto', path: '/relatorios/vendas/produto' },
+          { id: 13, name: 'Vendas por Vendedor', path: '/relatorios/vendas/vendedor' },
+        ]
+      }
     ]
   }
 ];
@@ -44,6 +59,7 @@ function Sidebar({ onToggle }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isRelatoriosOpen, setIsRelatoriosOpen] = useState(false);
   const [openCategories, setOpenCategories] = useState({});
+  const [openTipos, setOpenTipos] = useState({});
 
   useEffect(() => {
     const handleResize = () => {
@@ -62,14 +78,22 @@ function Sidebar({ onToggle }) {
       setIsRelatoriosOpen(true);
       
       relatoriosSubMenu.forEach(category => {
-        category.subcategorias.forEach(sub => {
-          if (location.pathname === sub.path) {
-            setOpenCategories(prev => ({
-              ...prev,
-              [category.id]: true
-            }));
-          }
-        });
+        if (category.tipos) {
+          category.tipos.forEach(tipo => {
+            tipo.subcategorias.forEach(sub => {
+              if (location.pathname === sub.path) {
+                setOpenCategories(prev => ({
+                  ...prev,
+                  [category.id]: true
+                }));
+                setOpenTipos(prev => ({
+                  ...prev,
+                  [tipo.id]: true
+                }));
+              }
+            });
+          });
+        }
       });
     }
   }, [location.pathname]);
@@ -133,6 +157,15 @@ function Sidebar({ onToggle }) {
     setOpenCategories(prev => ({
       ...prev,
       [categoryId]: !prev[categoryId]
+    }));
+  };
+
+  const toggleTipo = (tipoId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpenTipos(prev => ({
+      ...prev,
+      [tipoId]: !prev[tipoId]
     }));
   };
 
@@ -250,22 +283,39 @@ function Sidebar({ onToggle }) {
                           </span>
                         </button>
                         
-                        {/* Sub-subcategorias */}
-                        {openCategories[category.id] && (
+                        {openCategories[category.id] && category.tipos && (
                           <ul className={styles.subSubmenu}>
-                            {category.subcategorias.map((sub) => (
-                              <li key={sub.id}>
-                                <Link
-                                  to={sub.path}
-                                  className={`${styles.subSubmenuItem} ${isActive(sub.path)}`}
-                                  onClick={closeMobileMenu}
-                                  style={location.pathname === sub.path ? {
-                                    borderLeftColor: emphasisColor || '#3b82f6',
-                                    color: emphasisColor || '#3b82f6'
-                                  } : {}}
+                            {category.tipos.map((tipo) => (
+                              <li key={tipo.id}>
+                                <button
+                                  className={`${styles.submenuItem} ${styles.submenuItemDropdown}`}
+                                  onClick={(e) => toggleTipo(tipo.id, e)}
                                 >
-                                  {sub.name}
-                                </Link>
+                                  <span>{tipo.name}</span>
+                                  <span className={styles.submenuArrow}>
+                                    {openTipos[tipo.id] ? <FaChevronDown /> : <FaChevronRight />}
+                                  </span>
+                                </button>
+                                
+                                {openTipos[tipo.id] && (
+                                  <ul className={styles.subSubmenu}>
+                                    {tipo.subcategorias.map((sub) => (
+                                      <li key={sub.id}>
+                                        <Link
+                                          to={sub.path}
+                                          className={`${styles.subSubmenuItem} ${isActive(sub.path)}`}
+                                          onClick={closeMobileMenu}
+                                          style={location.pathname === sub.path ? {
+                                            borderLeftColor: emphasisColor || '#3b82f6',
+                                            color: emphasisColor || '#3b82f6'
+                                          } : {}}
+                                        >
+                                          {sub.name}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
                               </li>
                             ))}
                           </ul>

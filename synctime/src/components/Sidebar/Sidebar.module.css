@@ -283,6 +283,10 @@
   color: inherit;
 }
 
+.subSubmenu .submenuItem {
+  padding: 10px 16px 10px 28px;
+}
+
 /* Sub-submenu (Subcategorias) */
 .subSubmenu {
   list-style: none;
