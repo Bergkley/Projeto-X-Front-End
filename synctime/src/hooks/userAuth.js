@@ -12,6 +12,8 @@ import {
   useMemorizeFilters,
   POSSIBLE_FILTERS_ENTITIES
 } from './useMemorizeInputsFilters';
+import { useMemorizeTableColumns,TABLE_CONFIG_KEYS } from './useMemorizeTableColumns';
+
 
 export default function useAuth() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -27,6 +29,10 @@ export default function useAuth() {
     getMemorizedFilters: getMemorizedFiltersSystem,
     memorizeFilters: memorizeFiltersSystem
   } = useMemorizeFilters(POSSIBLE_FILTERS_ENTITIES.SYSTEM_CONFIG);
+
+  const {
+    clearAllMemorizedConfigs: clearAllMemorizedConfigs
+  } = useMemorizeTableColumns(TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS);
 
   async function validateToken() {
     const token = localStorage.getItem('token');
@@ -153,6 +159,7 @@ export default function useAuth() {
   function logout(silent = false, deleteAccount = false) {
     setAuthenticated(false);
     clearMemorizedFiltersUsers();
+    clearAllMemorizedConfigs();
     localStorage.removeItem('token');
     api.defaults.headers.Authorization = undefined;
     
