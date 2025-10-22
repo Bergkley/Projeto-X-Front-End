@@ -1,6 +1,3 @@
-/* ============================================
-   CONTAINER PRINCIPAL
-   ============================================ */
 
 .tableContainer {
   transition: background-color 0.3s ease;
@@ -18,9 +15,7 @@
   background-color: white;
 }
 
-/* ============================================
-   TOOLBAR E FILTROS
-   ============================================ */
+
 
 .tableToolbar {
   padding: 12px 20px;
@@ -172,9 +167,7 @@
   background-color: #f3f4f6;
 }
 
-/* ============================================
-   TABELA
-   ============================================ */
+
 
 .tableWrapper {
   overflow-x: auto;
@@ -187,9 +180,6 @@
   min-width: 600px;
 }
 
-/* ============================================
-   CABEÇALHO DA TABELA
-   ============================================ */
 
 .tableHeaderRow {
   transition: background-color 0.3s ease;
@@ -308,9 +298,7 @@
   opacity: 1;
 }
 
-/* ============================================
-   LINHAS DA TABELA
-   ============================================ */
+
 
 .tableRow {
   border-bottom: 1px solid;
@@ -325,7 +313,6 @@
   border-bottom-color: rgba(229, 231, 235, 0.3);
 }
 
-/* Hover */
 .tableContainer.dark .tableRow:not(.groupHeaderRow):hover {
   background-color: rgba(59, 130, 246, 0.15) !important;
   transform: translateX(2px);
@@ -362,9 +349,7 @@
   border-radius: 3px;
 }
 
-/* ============================================
-   CARDS DE REGISTROS
-   ============================================ */
+
 
 .cardsContainerRow {
   border: none !important;
@@ -517,9 +502,7 @@
   color: #9ca3af;
 }
 
-/* ============================================
-   CABEÇALHOS DE GRUPO (DATAS)
-   ============================================ */
+
 
 .groupHeaderRow {
   background-color: transparent !important;
@@ -588,7 +571,6 @@
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1) !important;
 }
 
-/* Espaçamento entre grupos diferentes */
 .groupHeaderRow {
   border-top: 8px solid transparent !important;
 }
@@ -601,9 +583,41 @@
   border-top-color: white !important;
 }
 
-/* ============================================
-   RESPONSIVIDADE
-   ============================================ */
+.addCard {
+  border: 2px dashed #dee2e6;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  margin-top: 16px;
+}
+
+.addCard:hover {
+  border-color: #667eea;
+  background-color: #e3f2fd;
+  transform: translateY(-1px);
+}
+
+.addCardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.addIcon {
+  color: #667eea;
+}
+
+.addText {
+  font-size: 14px;
+}
+
 .groupHeaderRow {
   border-top: 8px solid transparent !important;
 }
@@ -616,9 +630,6 @@
   border-top-color: white !important;
 }
 
-/* ============================================
-   RESPONSIVIDADE
-   ============================================ */
 
 /* Tablets */
 @media (max-width: 768px) {
@@ -715,15 +726,41 @@
     order: 1;
     width: 100%;
     justify-content: center;
+    font-size: 11px;
+    padding: 8px 12px; 
+    gap: 5px;
+    min-height: 44px; 
   }
 
   .expandButton {
     font-size: 10px;
-    padding: 5px 8px;
+    padding: 8px 12px; 
+    min-height: 44px;
+  }
+
+  .columnFilterDropdown {
+    left: 12px;
+    right: 12px;
+    top: 46px;
+  }
+
+  .table {
+    min-width: 300px;
+  }
+
+  .tableHeaderCell {
+    padding: 6px 8px; 
+    font-size: 9px;
+  }
+
+  .tableCell {
+    padding: 6px 8px;
+    font-size: 12px;
+    max-width: 120px; 
   }
 
   .groupHeaderCell {
-    padding: 7px 12px !important;
+    padding: 6px 8px !important; 
     font-size: 9px !important;
   }
 
@@ -736,33 +773,6 @@
     height: 12px;
   }
 
-  .columnFilterDropdown {
-    left: 12px;
-    right: 12px;
-    top: 46px;
-  }
-
-  .table {
-    min-width: 400px;
-  }
-
-  .tableHeaderCell {
-    padding: 8px 12px;
-    font-size: 9px;
-  }
-
-  .tableCell {
-    padding: 8px 12px;
-    font-size: 12px;
-    max-width: 150px;
-  }
-
-  .filterButton {
-    font-size: 11px;
-    padding: 5px 10px;
-    gap: 5px;
-  }
-
   .dragHandle {
     display: none;
   }
@@ -771,9 +781,61 @@
     opacity: 1;
   }
 
-  .groupHeaderCell {
-    padding: 6px 12px !important;
-    font-size: 9px !important;
+  .cardsContainerCell {
+    padding: 4px 8px !important; 
+  }
+
+  .recordCard {
+    padding: 12px 8px; 
+    gap: 8px; 
+    min-height: auto;
+    margin-bottom: 4px; 
+    touch-action: manipulation; 
+  }
+
+  .cardContent {
+    gap: 6px; 
+  }
+
+  .cardField {
+    gap: 2px;
+  }
+
+  .cardLabel {
+    font-size: 10px; 
+    line-height: 1.2;
+    white-space: nowrap; 
+  }
+
+  .cardValue {
+    font-size: 12px; 
+    line-height: 1.3;
+    word-break: break-word; 
+  }
+
+  .cardCheckbox {
+    padding-top: 0;
+    width: 18px; 
+    height: 18px;
+    margin-right: 8px; 
+    flex-shrink: 0;
+  }
+
+  .tableWrapper {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain; 
+  }
+
+  .recordCard:active {
+    transform: scale(0.98); 
+  }
+
+  .sortIcons {
+    display: none; 
+  }
+
+  .sortableHeader:hover .sortIcons {
+    display: none; 
   }
 }
 
