@@ -4,7 +4,7 @@ import { Edit2, Trash2 } from 'lucide-react';
 import { useHistory } from 'react-router-dom';
 
 // 💅 Estilos
-import styles from './ReportCategoryList.module.css';
+import styles from './ReportMonthlyRecordList.module.css';
 
 // 🔧 Services e Hooks
 import useFlashMessage from '../../../../hooks/userFlashMessage';
@@ -192,7 +192,7 @@ const ReportMonthlyRecordList = () => {
   };
 
   const handleEdit = (recordId) => {
-    history.push(`/registro-mensal/form/${recordId}`);
+    history.push(`/relatorios/categoria/relatorio-mesal/form/${recordId}`);
   };
 
   const handleDeleteRecord = async () => {
@@ -243,11 +243,11 @@ const ReportMonthlyRecordList = () => {
   };
 
   const handleBack = () => {
-    history.push('/dashboard');
+    history.push('/inicio');
   };
 
   const handleCreate = () => {
-    history.push('/registro-mensal/form');
+    history.push('/relatorios/categoria/relatorio-mesal/form');
   };
 
   const handleSelectionChange = (selectedItems) => {
