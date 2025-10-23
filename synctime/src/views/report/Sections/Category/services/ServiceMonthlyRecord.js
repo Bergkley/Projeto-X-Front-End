@@ -1,6 +1,6 @@
 import api from '../../../../../services/api';
 class ServiceMonthlyRecord {
-  getByAllMonthlyRecord(page = 1, sortBy = '', order = '', filters = []) {
+  getByAllMonthlyRecord(page = 1, sortBy = '', order = '', filters = [], categoryId) {
     const params = new URLSearchParams();
     params.append('page', page.toString());
     params.append('limit', '10');
@@ -10,7 +10,7 @@ class ServiceMonthlyRecord {
     }
 
     return api.get(`/monthly-record/userId?${params.toString()}`, {
-      params: { sortBy, order }
+      params: { sortBy, order, categoryId }
     });
   }
   getByIdMonthlyRecord(id) {

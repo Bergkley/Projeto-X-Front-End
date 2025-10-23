@@ -17,8 +17,10 @@ import Table from '../../../../components/table/Table';
 import Pagination from '../../../../components/pagination/Pagination';
 import TableHeaderWithFilter from '../../../../components/header/TableHeaderWithFilter/TableHeaderWithFilter';
 import ServiceMonthlyRecord from './services/ServiceMonthlyRecord';
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 
 const ReportMonthlyRecordList = () => {
+  const {id: idCategory} = useParams();
   const history = useHistory();
   const { setFlashMessage } = useFlashMessage();
 
@@ -71,7 +73,8 @@ const ReportMonthlyRecordList = () => {
           currentPage,
           sortBy,
           order,
-          filtersToSend 
+          filtersToSend,
+          idCategory
         );
 
         if (response.data.status === 'OK') {
@@ -88,7 +91,7 @@ const ReportMonthlyRecordList = () => {
     };
 
     fetchMonthlyRecords();
-  }, [currentPage, sortBy, order, activeFilters]);
+  }, [currentPage, sortBy, order, activeFilters,idCategory]);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
@@ -281,6 +284,7 @@ const ReportMonthlyRecordList = () => {
         columns={filterColumns}
         onFiltersChange={handleFiltersChange}
       />
+      {/* TODO: arrumar o estilo dessa parte  */}
 
       {monthlyRecords.length === 0 && !loading ? (
         <div className={styles.emptyState}>
