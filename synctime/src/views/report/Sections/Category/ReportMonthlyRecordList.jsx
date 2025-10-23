@@ -295,7 +295,7 @@ const ReportMonthlyRecordList = () => {
             columns={columns}
             data={monthlyRecords}
             selectable={false}
-            reorderable={false}
+            reorderable={true}
             onSelectionChange={handleSelectionChange}
             onEdit={handleEdit}
             onDelete={handleDelete}
