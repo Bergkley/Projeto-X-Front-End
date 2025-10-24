@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory,useLocation } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
 import { ErrorMessage } from '@hookform/error-message';
+
 
 // 💅 Estilos
 import styles from './ReportMonthlyRecordForm.module.css';
@@ -15,16 +16,21 @@ import SingleSelect from '../../../../../components/select/SingleSelect';
 // 🔧 Utils e Hooks
 import useFlashMessage from '../../../../../hooks/userFlashMessage';
 import { useTheme } from '../../../../../hooks/useTheme';
-import errorFormMessage from '../../../../../utils/errorFormMessage';
+import errorFormMessage from '../../../../../utils/errorFormMessage'
+;
 
 // 📡 Services
 import ServiceMonthlyRecord from '../services/ServiceMonthlyRecord';
 
 const ReportMonthlyRecordForm = () => {
+  console.log('ReportMonthlyRecordForm');
   const { id } = useParams();
+  const location = useLocation();
+  const { dados } = location.state || {};
   const history = useHistory();
   const { theme } = useTheme();
   const { setFlashMessage } = useFlashMessage();
+  console.log('dados', dados)
 
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(!!id);
@@ -170,11 +176,17 @@ const ReportMonthlyRecordForm = () => {
   };
 
   const handleCancel = () => {
-    history.push('/relatorios/categoria/relatorio-mesal');
+    if(dados.categoryId) {
+      return history.push(`/relatorios/categoria/relatorio-mesal/${dados.categoryId}`)
+    };
+    history.push('/inicio');
   };
 
   const handleBack = () => {
-    history.push('/relatorios/categoria/relatorio-mesal');
+    if(dados.categoryId) {
+      return history.push(`/relatorios/categoria/relatorio-mesal/${dados.categoryId}`)
+    };
+    history.push('/inicio');
   };
 
   if (isLoadingData) {
