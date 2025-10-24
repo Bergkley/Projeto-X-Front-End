@@ -1,7 +1,7 @@
 // ⚙️ Bibliotecas externas
 import { useEffect, useState } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
-import { useHistory } from 'react-router-dom';
+import { useHistory,useLocation } from 'react-router-dom';
 import useFlashMessage from '../../../../../hooks/userFlashMessage';
 import { useTheme } from '../../../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../../../hooks/useEmphasisColor';
@@ -13,6 +13,7 @@ import Pagination from '../../../../../components/pagination/Pagination';
 import ConfirmModal from '../../../../../components/modal/ConfirmModal';
 import styles from './TransactionList.module.css';
 import TableWithDate from '../../../../../components/table/TableWithDate';
+import ServiceTransactionsRecord from '../services/ServiceTransactionsRecord';
 
 
 // 💅 Estilos
@@ -23,6 +24,8 @@ import TableWithDate from '../../../../../components/table/TableWithDate';
 
 
 const TransactionList = () => {
+  const location = useLocation();
+   const { monthlyRecordId } = location.state || {};
   const history = useHistory();
   const { setFlashMessage } = useFlashMessage();
   const { theme } = useTheme();
@@ -61,7 +64,7 @@ const TransactionList = () => {
   }, [activeFilters]);
 
   useEffect(() => {
-    const fetchMonthlyRecords = async () => {
+    const fetchTransactionsRecord = async () => {
       setLoading(true);
       try {
         const filtersToSend = activeFilters
@@ -73,11 +76,12 @@ const TransactionList = () => {
             value2: filter.value2 || null
           }));
 
-        const response = await ServiceMonthlyRecord.getByAllMonthlyRecord(
+        const response = await ServiceTransactionsRecord.getByAllTransactionsRecord(
           currentPage,
           sortBy,
           order,
-          filtersToSend 
+          filtersToSend,
+          monthlyRecordId
         );
 
         if (response.data.status === 'OK') {
@@ -93,8 +97,8 @@ const TransactionList = () => {
       }
     };
 
-    fetchMonthlyRecords();
-  }, [currentPage, sortBy, order, activeFilters]);
+    fetchTransactionsRecord();
+  }, [currentPage, sortBy, order, activeFilters,monthlyRecordId]);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
