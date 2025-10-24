@@ -21,6 +21,14 @@
   visibility: visible;
 }
 
+.modalBackdrop.light {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modalBackdrop.dark {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
 @keyframes fadeIn {
   to {
     opacity: 1;
@@ -29,7 +37,6 @@
 }
 
 .modalContent {
-  background: white;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   width: 90%;
@@ -43,6 +50,17 @@
   animation: slideIn 0.3s ease forwards;
 }
 
+.modalContent.light {
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #2c3e50);
+}
+
+.modalContent.dark {
+  background: var(--bg-primary, #1a1a1a);
+  color: var(--text-primary, #f1f5f9);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
 @keyframes slideIn {
   to {
     transform: scale(1) translateY(0);
@@ -54,14 +72,28 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #e9ecef;
+}
+
+.modalHeader.light {
+  border-bottom: 1px solid var(--border-color, #e9ecef);
+}
+
+.modalHeader.dark {
+  border-bottom: 1px solid var(--border-color, #333);
 }
 
 .modalTitle {
   font-size: 24px;
   font-weight: 700;
-  color: #2c3e50;
   margin: 0;
+}
+
+.modalTitle.light {
+  color: var(--text-primary, #2c3e50);
+}
+
+.modalTitle.dark {
+  color: var(--text-primary, #f1f5f9);
 }
 
 .closeBtn {
@@ -69,15 +101,27 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6c757d;
   padding: 4px;
   border-radius: 50%;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.closeBtn:hover {
-  background-color: #f8f9fa;
+.closeBtn.light {
+  color: var(--text-secondary, #6c757d);
+}
+
+.closeBtn.light:hover {
+  background-color: var(--bg-secondary, #f8f9fa);
   color: #dc3545;
+}
+
+.closeBtn.dark {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.closeBtn.dark:hover {
+  background-color: var(--bg-secondary, #2d3748);
+  color: #f87171;
 }
 
 .modalBody {
@@ -97,7 +141,14 @@
   margin-bottom: 6px;
   font-size: 14px;
   font-weight: 600;
-  color: #495057;
+}
+
+.formLabel.light {
+  color: var(--text-primary, #495057);
+}
+
+.formLabel.dark {
+  color: var(--text-primary, #cbd5e1);
 }
 
 .formInput,
@@ -105,18 +156,41 @@
 .formTextarea {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px;
 }
 
-.formInput:focus,
-.formSelect:focus,
-.formTextarea:focus {
+.formInput.light,
+.formSelect.light,
+.formTextarea.light {
+  background-color: var(--bg-secondary, #ffffff);
+  border: 2px solid var(--border-color, #e9ecef);
+  color: var(--text-primary, #495057);
+}
+
+.formInput.light:focus,
+.formSelect.light:focus,
+.formTextarea.light:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--focus-border-color, rgb(20, 18, 129));
+  box-shadow: 0 0 0 3px var(--focus-shadow-color, rgba(102, 126, 234, 0.15));
+}
+
+.formInput.dark,
+.formSelect.dark,
+.formTextarea.dark {
+  background-color: var(--bg-secondary, #2d3748);
+  border: 2px solid var(--border-color, #4a5568);
+  color: var(--text-primary, #f1f5f9);
+}
+
+.formInput.dark:focus,
+.formSelect.dark:focus,
+.formTextarea.dark:focus {
+  outline: none;
+  border-color: var(--focus-border-color, rgb(20, 18, 129));
+  box-shadow: 0 0 0 3px var(--focus-shadow-color, rgba(102, 126, 234, 0.2));
 }
 
 .formTextarea {
@@ -126,799 +200,81 @@
 
 .modalFooter {
   padding: 0 24px 24px;
-  border-top: 1px solid #efebe9;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
 }
 
-.modalFooter .btnCancel,
-.modalFooter .btnSave {
-  margin-top: 12px;
+.modalFooter.light {
+  border-top: 1px solid var(--border-color, #e9ecef);
 }
 
+.modalFooter.dark {
+  border-top: 1px solid var(--border-color, rgb(20, 18, 129));
+}
 
-.btn {
+.btnCancel,
+.btnSave {
+  margin-top: 12px;
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 60px;
 }
 
-.btnCancel {
-  background-color: #6c757d;
+.btnCancel.light {
+  background-color: var(--secondary-color, #6c757d);
   color: white;
 }
 
-.btnCancel:hover {
-  background-color: #5a6268;
+.btnCancel.light:hover {
+  background-color: var(--secondary-hover, #5a6268);
 }
 
-.btnSave {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.btnCancel.dark {
+  background-color: var(--secondary-color, #4a5568);
   color: white;
 }
 
-.btnSave:hover {
+.btnCancel.dark:hover {
+  background-color: var(--secondary-hover, #2d3748);
+}
+
+.btnSave.light,
+.btnSave.dark {
+  color: white;
+}
+
+.btnSave.light:hover,
+.btnSave.dark:hover {
   opacity: 0.9;
+  transform: scale(1.02);
 }
 
-/* ============================================
-   RESPONSIVIDADE
-   ============================================ */
-
-/* Desktop Grande (1920px+) */
-@media (min-width: 1920px) {
-  .cardContent {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-  
-  .tableContainer {
-    max-width: 1800px;
-    margin: 0 auto;
-  }
-}
-
-/* Desktop (1440px - 1919px) */
-@media (min-width: 1440px) and (max-width: 1919px) {
-  .cardContent {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  }
-}
-
-/* Laptop (1024px - 1439px) */
-@media (min-width: 1024px) and (max-width: 1439px) {
-  .tableToolbar {
-    padding: 12px 18px;
+@media (max-width: 768px) {
+  .modalContent {
+    width: 95%;
+    max-height: 95vh;
   }
 
-  .tableHeaderCell {
-    padding: 11px 18px;
-    font-size: 10.5px;
-  }
-
-  .tableCell {
-    padding: 11px 18px;
-    font-size: 13.5px;
-  }
-
-  .cardContent {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-}
-
-/* Tablets Paisagem (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .tableToolbar {
-    padding: 10px 16px;
-    flex-wrap: wrap;
-    gap: 8px;
-    
-  }
-
-  .toolbarLeft {
-    order: 2;
-    width: 100%;
-    justify-content: flex-start;
-    gap: 6px;
-  }
-
-  .filterButton {
-    order: 1;
-    margin-left: auto;
-  }
-
-  .expandButton {
-    font-size: 11px;
-    padding: 6px 12px;
-  }
-
-  .columnFilterDropdown {
-    left: 16px;
-    right: 16px;
-    max-width: none;
-    width: auto;
-  }
-
-  .table {
-    min-width: 650px;
-  }
-
-  .tableHeaderCell {
-    padding: 10px 16px;
-    font-size: 10px;
-  }
-
-  .tableCell {
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-
-  .groupHeaderCell {
-    padding: 8px 16px !important;
-    font-size: 10px !important;
-  }
-
-  .cardsContainerCell {
-    padding: 14px 16px !important;
-  }
-
-  .recordCard {
-    padding: 14px;
-  }
-
-  .cardContent {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 10px;
-  }
-
-  .cardLabel {
-    font-size: 10px;
-  }
-
-  .cardValue {
-    font-size: 13px;
-  }
-
-  .addCard {
-    min-height: 70px;
-  }
-}
-
-/* Tablets Retrato (600px - 767px) */
-@media (min-width: 600px) and (max-width: 767px) {
-  .tableToolbar {
-    padding: 10px 14px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    
-  }
-
-  .toolbarLeft {
-    order: 2;
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .filterButton {
-    order: 1;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .expandButton {
-    font-size: 11px;
-    padding: 7px 12px;
-    flex: 1;
-  }
-
-  .columnFilterDropdown {
-    left: 14px;
-    right: 14px;
-    top: 90px;
-  }
-
-  .table {
-    min-width: 550px;
-  }
-
-  .tableHeaderCell {
-    padding: 9px 14px;
-    font-size: 9.5px;
-  }
-
-  .tableCell {
-    padding: 9px 14px;
-    font-size: 12.5px;
-  }
-
-  .groupHeaderCell {
-    padding: 7px 14px !important;
-    font-size: 9.5px !important;
-  }
-
-  .cardsContainerCell {
-    padding: 12px 14px !important;
-  }
-
-  .recordCard {
-    padding: 12px;
-  }
-
-  .cardContent {
+  .modalBody {
     grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .cardLabel {
-    font-size: 10px;
-  }
-
-  .cardValue {
-    font-size: 12.5px;
-  }
-
-  .dragHandle {
-    width: 12px;
-    height: 12px;
-  }
-
-  .addCard {
-    min-height: 65px;
-  }
-
-  .addText {
-    font-size: 13px;
-  }
-}
-
-/* Mobile Grande (480px - 599px) */
-@media (min-width: 480px) and (max-width: 599px) {
-  .tableToolbar {
-    padding: 9px 12px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    
-  }
-
-  .toolbarLeft {
-    width: 100%;
-    order: 2;
-    gap: 6px;
-  }
-
-  .filterButton {
-    order: 1;
-    width: 100%;
-    justify-content: center;
-    font-size: 12px;
-    padding: 7px 14px;
-
-  }
-
-  .expandButton {
-    font-size: 10.5px;
-    padding: 6px 10px;
-    flex: 1;
-  }
-
-  .columnFilterDropdown {
-    left: 12px;
-    right: 12px;
-    top: 85px;
-  }
-
-  .table {
-    min-width: 450px;
-  }
-
-  .tableHeaderCell {
-    padding: 8px 12px;
-    font-size: 9px;
-  }
-
-  .tableCell {
-    padding: 8px 12px;
-    font-size: 12px;
-    max-width: 160px;
-  }
-
-  .groupHeaderCell {
-    padding: 6px 12px !important;
-    font-size: 9px !important;
-    letter-spacing: 0.6px !important;
-  }
-
-  .recordCount {
-    font-size: 8.5px;
-  }
-
-  .expandIcon {
-    width: 14px;
-    height: 14px;
-  }
-
-  .cardsContainerCell {
-    padding: 8px 10px !important;
-  }
-
-  .cardsGrid {
-    gap: 8px;
-  }
-
-  .recordCard {
-    padding: 8px;
-    gap: 8px;
-    border-left-width: 2px;
-  }
-
-  .recordCard:hover {
-    border-left-width: 3px;
-  }
-
-  .cardContent {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .cardField {
-    gap: 2px;
-  }
-
-  .cardLabel {
-    font-size: 9px;
-    letter-spacing: 0.3px;
-  }
-
-  .cardValue {
-    font-size: 11.5px;
-  }
-
-  .dragHandle {
-    display: none;
-  }
-
-  .sortIcons {
-    opacity: 1;
-  }
-
-  .addCard {
-    min-height: 50px;
-    margin-top: 8px;
-    padding: 8px;
-  }
-
-  .addCardContent {
-    gap: 6px;
-  }
-
-  .addText {
-    font-size: 11.5px;
-  }
-
-  .addIcon {
-    width: 18px;
-    height: 18px;
-  }
-}
-
-/* Mobile Médio (375px - 479px) */
-@media (min-width: 375px) and (max-width: 479px) {
-  .tableToolbar {
-    padding: 8px 10px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    
-  }
-
-  .toolbarLeft {
-    width: 100%;
-    order: 2;
-    gap: 5px;
-  }
-
-  .filterButton {
-    order: 1;
-    width: 100%;
-    justify-content: center;
-    font-size: 11px;
-    padding: 6px 12px;
-    gap: 6px;
-  }
-
-  .expandButton {
-    font-size: 10px;
-    padding: 6px 8px;
-    flex: 1;
-  }
-
-  .columnFilterDropdown {
-    left: 10px;
-    right: 10px;
-    top: 80px;
-  }
-
-  .columnFilterItem {
-    padding: 7px 10px;
-    font-size: 12px;
-  }
-
-  .table {
-    min-width: 350px;
-  }
-
-  .tableHeaderCell {
-    padding: 7px 10px;
-    font-size: 8.5px;
-    letter-spacing: 0.3px;
-  }
-
-  .tableCell {
-    padding: 7px 10px;
-    font-size: 11.5px;
-    max-width: 140px;
-  }
-
-  .groupHeaderCell {
-    padding: 5px 10px !important;
-    font-size: 8.5px !important;
-    letter-spacing: 0.5px !important;
-  }
-
-  .recordCount {
-    font-size: 7.5px;
-  }
-
-  .expandIcon {
-    width: 13px;
-    height: 13px;
-  }
-
-  .cardsContainerCell {
-    padding: 8px !important;
-  }
-
-  .cardsGrid {
-    gap: 6px;
-  }
-
-  .recordCard {
-    padding: 8px;
-    gap: 6px;
-    border-left-width: 2px;
-  }
-
-  .recordCard:hover {
-    border-left-width: 2px;
-    transform: translateX(2px);
-  }
-
-  .cardContent {
-    grid-template-columns: 1fr;
-    gap: 5px;
-  }
-
-  .cardCheckbox {
-    padding-top: 0;
-  }
-
-  .cardField {
-    gap: 2px;
-  }
-
-  .cardLabel {
-    font-size: 8.5px;
-    letter-spacing: 0.3px;
-  }
-
-  .cardValue {
-    font-size: 11px;
-  }
-
-  .dragHandle {
-    display: none;
-  }
-
-  .sortIcons {
-    opacity: 1;
-  }
-
-  .sortIcon {
-    width: 11px;
-    height: 11px;
-  }
-
-  .addCard {
-    min-height: 45px;
-    margin-top: 8px;
-    padding: 6px;
-  }
-
-  .addCardContent {
-    gap: 4px;
-  }
-
-  .addText {
-    font-size: 11px;
-  }
-
-  .addIcon {
-    width: 16px;
-    height: 16px;
-  }
-
-  .emptyState {
-    padding: 20px;
-  }
-
-  .emptyStateText {
-    font-size: 12px;
-  }
-}
-
-/* Mobile Pequeno (320px - 374px) */
-@media (max-width: 374px) {
-  .tableToolbar {
-    padding: 6px 8px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-  }
-
-  .toolbarLeft {
-    width: 100%;
-    order: 2;
-    gap: 4px;
-    flex-direction: column;
-  }
-
-  .filterButton {
-    order: 1;
-    width: 100%;
-    justify-content: center;
-    font-size: 10.5px;
-    padding: 6px 10px;
-    gap: 5px;
-  }
-
-  .expandButton {
-    font-size: 9.5px;
-    padding: 5px 8px;
-    width: 100%;
-  }
-
-  .columnFilterDropdown {
-    left: 8px;
-    right: 8px;
-    top: 95px;
-    padding: 6px;
-  }
-
-  .columnFilterItem {
-    padding: 6px 8px;
-    font-size: 11px;
-  }
-
-  .table {
-    min-width: 300px;
-  }
-
-  .tableHeaderCell {
-    padding: 6px 8px;
-    font-size: 8px;
-    letter-spacing: 0.2px;
-  }
-
-  .tableCell {
-    padding: 6px 8px;
-    font-size: 11px;
-    max-width: 120px;
-  }
-
-  .groupHeaderCell {
-    padding: 4px 8px !important;
-    font-size: 8px !important;
-    letter-spacing: 0.4px !important;
-  }
-
-  .recordCount {
-    font-size: 7px;
-    margin-left: 4px;
-  }
-
-  .expandIcon {
-    width: 12px;
-    height: 12px;
-  }
-
-  .cardsContainerCell {
-    padding: 6px !important;
-  }
-
-  .cardsGrid {
-    gap: 6px;
-  }
-
-  .recordCard {
-    padding: 6px;
-    gap: 6px;
-    border-left-width: 2px;
-  }
-
-  .recordCard:hover {
-    border-left-width: 2px;
-    transform: translateX(1px);
-  }
-
-  .cardContent {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-
-  .cardField {
-    gap: 1px;
-  }
-
-  .cardLabel {
-    font-size: 8px;
-    letter-spacing: 0.2px;
-  }
-
-  .cardValue {
-    font-size: 10.5px;
-  }
-
-  .checkbox {
-    width: 14px;
-    height: 14px;
-  }
-
-  .dragHandle {
-    display: none;
-  }
-
-  .sortIcons {
-    opacity: 1;
-  }
-
-  .sortIcon {
-    width: 10px;
-    height: 10px;
-  }
-
-  .addCard {
-    min-height: 40px;
-    margin-top: 6px;
-    padding: 6px;
-  }
-
-  .addCardContent {
-    gap: 4px;
-  }
-
-  .addText {
-    font-size: 10px;
-  }
-
-  .addIcon {
-    width: 14px;
-    height: 14px;
-  }
-
-  .emptyState {
+    gap: 16px;
     padding: 16px;
   }
 
-  .emptyStateText {
-    font-size: 11px;
-  }
-}
-
-/* Scroll hint para dispositivos móveis e tablets */
-@media (max-width: 1023px) {
-  .tableWrapper {
-    position: relative;
+  .modalHeader {
+    padding: 16px;
   }
 
-  .tableWrapper::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 30px;
-    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1));
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .tableContainer.dark .tableWrapper::after {
-    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.3));
-  }
-}
-
-/* Otimizações de toque para dispositivos móveis */
-@media (hover: none) and (pointer: coarse) {
-  .expandButton,
-  .filterButton,
-  .recordCard,
-  .addCard,
-  .groupHeaderRow {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-
-  .expandButton:active,
-  .filterButton:active {
-    transform: scale(0.97);
-  }
-
-  .recordCard:active {
-    transform: translateX(3px) scale(0.99);
-  }
-
-  .addCard:active {
-    transform: translateY(-1px) scale(0.98);
-  }
-
-  /* Aumenta área de toque para checkboxes em mobile */
-  .checkbox {
-    min-width: 18px;
-    min-height: 18px;
-  }
-
-  /* Melhora a área de toque dos ícones de sort */
-  .sortIcon {
-    padding: 2px;
-  }
-}
-
-/* Landscape específico para dispositivos pequenos */
-@media (max-height: 500px) and (orientation: landscape) {
-  .tableToolbar {
-    padding: 6px 12px;
-  }
-
-  .expandButton,
-  .filterButton {
-    padding: 5px 10px;
-    font-size: 10px;
-  }
-
-  .recordCard {
-    padding: 8px;
-  }
-
-  .cardContent {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 8px;
-  }
-
-  .addCard {
-    min-height: 45px;
-  }
-}
-
-/* Suporte para notch em dispositivos iOS */
-@supports (padding: max(0px)) {
-  .tableContainer {
-    padding-left: max(0px, env(safe-area-inset-left));
-    padding-right: max(0px, env(safe-area-inset-right));
-  }
-
-  .tableToolbar {
-    padding-left: max(12px, env(safe-area-inset-left));
-    padding-right: max(12px, env(safe-area-inset-right));
+  .modalFooter {
+    padding: 0 16px 16px;
   }
 }
