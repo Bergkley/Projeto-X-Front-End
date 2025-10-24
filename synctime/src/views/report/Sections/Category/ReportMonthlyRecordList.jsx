@@ -200,9 +200,7 @@ const ReportMonthlyRecordList = () => {
             className={styles.editButton}
             onClick={() => onEdit(row.id)}
             title="Editar registro"
-            style={{
-              backgroundColor: emphasisColor || '#0ea5e9'
-            }}
+            
           >
             <Edit2 size={16} />
           </button>

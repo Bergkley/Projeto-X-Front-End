@@ -189,7 +189,7 @@ input:checked + .slider:before {
 
 .editButton {
   padding: 8px;
-  /* background-color removido - será aplicado via inline style */
+  background-color: #3b82f6;
   border: none;
   border-radius: 6px;
   color: white;
