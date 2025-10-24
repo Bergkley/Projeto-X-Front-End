@@ -1,6 +1,6 @@
 // ⚙️ Bibliotecas externas
 import { useEffect, useState } from 'react';
-import { Edit2, FileText, Plus, Trash2 } from 'lucide-react';
+import { Edit2, ExternalLink, FileText,  Plus, Trash2 } from 'lucide-react';
 import { useHistory } from 'react-router-dom';
 
 // 💅 Estilos
@@ -184,8 +184,18 @@ const ReportMonthlyRecordList = () => {
       key: 'actions',
       label: 'Ações',
       sortable: false,
-      render: (row, idx, { onEdit, onDelete }) => (
+      render: (row, idx, { onEdit, onDelete, onReport }) => (
         <div className={styles.actionsCell}>
+          <button
+            className={styles.editButton}
+            onClick={() => onReport(row.id)}
+            title="Entrar no Relatório"
+            style={{
+              backgroundColor: emphasisColor || '#0ea5e9'
+            }}
+          >
+            <ExternalLink size={16} />
+          </button>
           <button
             className={styles.editButton}
             onClick={() => onEdit(row.id)}
@@ -220,6 +230,11 @@ const ReportMonthlyRecordList = () => {
     history.push(`/relatorios/categoria/relatorio-mesal/form/${recordId}`, {
       dados
     });
+  };
+
+  const handleReport = (recordId) => {
+    history.push(`/relatorios/categoria/transações`,{
+      monthlyRecordId: recordId});
   };
 
   const handleDeleteRecord = async () => {
@@ -356,6 +371,7 @@ const ReportMonthlyRecordList = () => {
             onSelectionChange={handleSelectionChange}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onReport={handleReport}
             sortConfig={sortConfig}
             onSort={handleSort}
           />
