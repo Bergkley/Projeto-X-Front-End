@@ -19,7 +19,8 @@ const Table = ({
   onToggleStatus,
   onDelete,
   sortConfig,
-  onSort
+  onSort,
+  onReport
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
@@ -230,7 +231,7 @@ const Table = ({
                 )}
                 {orderedColumns.map(column => (
                   <td key={column.key} className={styles.tableCell}>
-                    {column.render ? column.render(row, row.id, { onEdit, onToggleStatus, onDelete }) : row[column.key]}
+                    {column.render ? column.render(row, row.id, { onEdit, onToggleStatus, onDelete,onReport }) : row[column.key]}
                   </td>
                 ))}
               </tr>
