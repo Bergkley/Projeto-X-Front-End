@@ -1,6 +1,6 @@
 // ⚙️ Bibliotecas externas
 import { useEffect, useState } from 'react';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, FileText, Plus, Trash2 } from 'lucide-react';
 import { useHistory } from 'react-router-dom';
 
 // 💅 Estilos
@@ -8,6 +8,8 @@ import styles from './ReportMonthlyRecordList.module.css';
 
 // 🔧 Services e Hooks
 import useFlashMessage from '../../../../hooks/userFlashMessage';
+import { useTheme } from '../../../../hooks/useTheme';
+import { useEmphasisColor } from '../../../../hooks/useEmphasisColor';
 
 // 🧩 Componentes
 import LoadingSpinner from '../../../../components/loading/LoadingSpinner';
@@ -20,9 +22,11 @@ import ServiceMonthlyRecord from './services/ServiceMonthlyRecord';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 
 const ReportMonthlyRecordList = () => {
-  const {id: idCategory} = useParams();
+  const { id: idCategory } = useParams();
   const history = useHistory();
   const { setFlashMessage } = useFlashMessage();
+  const { theme } = useTheme();
+  const { emphasisColor } = useEmphasisColor();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [monthlyRecords, setMonthlyRecords] = useState([]);
@@ -37,7 +41,6 @@ const ReportMonthlyRecordList = () => {
   const [sortBy, setSortBy] = useState('');
   const [order, setOrder] = useState('');
   const itemsPerPage = 10;
-
 
   const filterColumns = [
     { id: 'title', label: 'Título', type: 'text' },
@@ -61,8 +64,8 @@ const ReportMonthlyRecordList = () => {
       setLoading(true);
       try {
         const filtersToSend = activeFilters
-          .filter(filter => filter.value && filter.value.trim() !== '')
-          .map(filter => ({
+          .filter((filter) => filter.value && filter.value.trim() !== '')
+          .map((filter) => ({
             field: filter.column,
             operator: filter.operator,
             value: filter.value,
@@ -91,32 +94,44 @@ const ReportMonthlyRecordList = () => {
     };
 
     fetchMonthlyRecords();
-  }, [currentPage, sortBy, order, activeFilters,idCategory]);
+  }, [currentPage, sortBy, order, activeFilters, idCategory]);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const formatMonthYear = (month, year) => {
     const monthNames = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro'
     ];
     return `${monthNames[month - 1]} ${year}`;
   };
 
   const formatCurrency = (value) => {
-    if(value === null) return '0,00';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value || 0) || '0,00';
+    if (value === null) return '0,00';
+    return (
+      new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(value || 0) || '0,00'
+    );
   };
 
   const formatStatus = (status) => {
     const statusMap = {
-      'active': 'Ativo',
-      'completed': 'Completo',
-      'cancelled': 'Cancelado',
-      'pending': 'Pendente'
+      active: 'Ativo',
+      completed: 'Completo',
+      cancelled: 'Cancelado',
+      pending: 'Pendente'
     };
     return statusMap[status] || status;
   };
@@ -147,7 +162,9 @@ const ReportMonthlyRecordList = () => {
     {
       key: 'goal',
       label: 'Meta',
-      render: (row) => {return row.goal}
+      render: (row) => {
+        return row.goal;
+      }
     },
     {
       key: 'initial_balance',
@@ -169,10 +186,13 @@ const ReportMonthlyRecordList = () => {
       sortable: false,
       render: (row, idx, { onEdit, onDelete }) => (
         <div className={styles.actionsCell}>
-          <button 
-            className={styles.editButton} 
+          <button
+            className={styles.editButton}
             onClick={() => onEdit(row.id)}
             title="Editar registro"
+            style={{
+              backgroundColor: emphasisColor || '#0ea5e9'
+            }}
           >
             <Edit2 size={16} />
           </button>
@@ -195,7 +215,11 @@ const ReportMonthlyRecordList = () => {
   };
 
   const handleEdit = (recordId) => {
-    history.push(`/relatorios/categoria/relatorio-mesal/form/${recordId}`);
+    const dados = { categoryId: idCategory };
+
+    history.push(`/relatorios/categoria/relatorio-mesal/form/${recordId}`, {
+      dados
+    });
   };
 
   const handleDeleteRecord = async () => {
@@ -207,8 +231,8 @@ const ReportMonthlyRecordList = () => {
       setFlashMessage('Registro mensal excluído com sucesso', 'success');
 
       const filtersToSend = activeFilters
-        .filter(filter => filter.value && filter.value.trim() !== '')
-        .map(filter => ({
+        .filter((filter) => filter.value && filter.value.trim() !== '')
+        .map((filter) => ({
           field: filter.column,
           operator: filter.operator,
           value: filter.value,
@@ -225,7 +249,7 @@ const ReportMonthlyRecordList = () => {
       if (response.data.status === 'OK') {
         setMonthlyRecords(response.data.data);
         setTotalItems(response.data.totalRegisters);
-        
+
         if (response.data.data.length === 0 && currentPage > 1) {
           setCurrentPage(currentPage - 1);
         }
@@ -250,7 +274,8 @@ const ReportMonthlyRecordList = () => {
   };
 
   const handleCreate = () => {
-    history.push('/relatorios/categoria/relatorio-mesal/form');
+    const dados = { categoryId: idCategory };
+    history.push('/relatorios/categoria/relatorio-mesal/form', { dados });
   };
 
   const handleSelectionChange = (selectedItems) => {
@@ -266,12 +291,12 @@ const ReportMonthlyRecordList = () => {
     ? { key: sortBy, direction: order }
     : { key: null, direction: null };
 
-  if (loading && monthlyRecords.length === 0 && !status ) {
+  if (loading && monthlyRecords.length === 0 && !status) {
     return <LoadingSpinner message="Carregando registros mensais..." />;
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${styles[theme]}`}>
       <ActionHeader
         onBack={handleBack}
         onCreate={handleCreate}
@@ -284,12 +309,40 @@ const ReportMonthlyRecordList = () => {
         columns={filterColumns}
         onFiltersChange={handleFiltersChange}
       />
-      {/* TODO: arrumar o estilo dessa parte  */}
 
       {monthlyRecords.length === 0 && !loading ? (
-        <div className={styles.emptyState}>
-          <p>Nenhum registro mensal encontrado.</p>
-          <button onClick={handleCreate} className={styles.emptyStateButton}>
+        <div className={`${styles.emptyState} ${styles[theme]}`}>
+          <div
+            className={styles.emptyStateIcon}
+            style={{
+              background: `linear-gradient(135deg, ${
+                emphasisColor || '#ec4899'
+              } 0%, ${emphasisColor || '#8b5cf6'} 100%)`,
+              boxShadow: `0 10px 30px ${
+                emphasisColor ? `${emphasisColor}4D` : 'rgba(236, 72, 153, 0.3)'
+              }`
+            }}
+          >
+            <FileText />
+          </div>
+          <p>Nenhum registro mensal encontrado</p>
+          <div className={styles.emptyStateSubtitle}>
+            Comece criando seu primeiro registro mensal para acompanhar suas
+            metas e transações.
+          </div>
+          <button
+            onClick={handleCreate}
+            className={styles.emptyStateButton}
+            style={{
+              background: `linear-gradient(135deg, ${
+                emphasisColor || '#ec4899'
+              } 0%, ${emphasisColor || '#8b5cf6'} 100%)`,
+              boxShadow: `0 4px 15px ${
+                emphasisColor ? `${emphasisColor}4D` : 'rgba(236, 72, 153, 0.3)'
+              }`
+            }}
+          >
+            <Plus size={20} />
             Criar primeiro registro
           </button>
         </div>

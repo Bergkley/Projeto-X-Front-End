@@ -1,16 +1,98 @@
-/* ReportCategoryList.module.css */
+/* ReportMonthlyRecordList.module.css */
 
 .container {
   padding: 24px;
-  background-color: transparent;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Tema claro (padrão com fallback) */
+.container.light {
+  background-color: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #1f2937);
+}
+
+/* Tema escuro */
+.container.dark {
+  background-color: var(--bg-primary, #0f172a);
+  color: var(--text-primary, #f1f5f9);
 }
 
 .nameCell {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.nameCell .title {
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+}
+
+.nameCell .subtitle {
+  font-size: 14px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.container.dark .nameCell .title {
+  color: var(--text-primary, #f1f5f9);
+}
+
+.container.dark .nameCell .subtitle {
+  color: var(--text-secondary, #94a3b8);
+}
+
+/* Status badges - adicionados estilos básicos para os status */
+.status-active {
+  background-color: var(--success-bg, #d1fae5);
+  color: var(--success-text, #065f46);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-completed {
+  background-color: var(--success-bg, #d1fae5);
+  color: var(--success-text, #065f46);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-cancelled {
+  background-color: var(--error-bg, #fee2e2);
+  color: var(--error-text, #991b1b);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-pending {
+  background-color: var(--warning-bg, #fef3c7);
+  color: var(--warning-text, #92400e);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.container.dark .status-active,
+.container.dark .status-completed {
+  background-color: var(--success-bg-dark, #064e3b);
+  color: var(--success-text-dark, #d1fae5);
+}
+
+.container.dark .status-cancelled {
+  background-color: var(--error-bg-dark, #7f1d1d);
+  color: var(--error-text-dark, #fee2e2);
+}
+
+.container.dark .status-pending {
+  background-color: var(--warning-bg-dark, #78350f);
+  color: var(--warning-text-dark, #fef3c7);
 }
 
 .avatar {
@@ -95,6 +177,10 @@ input:checked + .slider:before {
   transform: translateX(24px);
 }
 
+.container.dark .slider {
+  background-color: #475569;
+}
+
 .actionsCell {
   display: flex;
   gap: 8px;
@@ -103,7 +189,7 @@ input:checked + .slider:before {
 
 .editButton {
   padding: 8px;
-  background-color: #0ea5e9;
+  /* background-color removido - será aplicado via inline style */
   border: none;
   border-radius: 6px;
   color: white;
@@ -111,11 +197,12 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .editButton:hover {
-  background-color: #0284c7;
+  opacity: 0.85;
+  transform: scale(1.05);
 }
 
 .deleteButton {
@@ -133,4 +220,129 @@ input:checked + .slider:before {
 
 .deleteButton:hover {
   background-color: #dc2626;
+}
+
+/* Estado vazio melhorado */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 48px 24px;
+  border-radius: 16px;
+  border: 2px dashed #cbd5e1;
+  margin: 24px 0;
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Tema claro para emptyState */
+.emptyState.light {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: #cbd5e1;
+}
+
+.emptyState.light p {
+  color: #475569;
+}
+
+.emptyState.light .emptyStateSubtitle {
+  color: #64748b;
+}
+
+/* Tema escuro para emptyState */
+.emptyState.dark {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-color: #475569;
+}
+
+.emptyState.dark p {
+  color: #e2e8f0;
+}
+
+.emptyState.dark .emptyStateSubtitle {
+  color: #94a3b8;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.emptyStateIcon {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s ease-in-out infinite;
+  /* background e box-shadow removidos - serão aplicados via inline style */
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.emptyStateIcon svg {
+  width: 60px;
+  height: 60px;
+  color: white;
+  stroke-width: 2;
+}
+
+.emptyState p {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.emptyStateSubtitle {
+  font-size: 14px;
+  margin-bottom: 32px;
+  text-align: center;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.emptyStateButton {
+  padding: 14px 32px;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  /* background e box-shadow removidos - serão aplicados via inline style */
+}
+
+.emptyStateButton:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.emptyStateButton:active {
+  transform: translateY(0);
+}
+
+.emptyStateButton svg {
+  width: 20px;
+  height: 20px;
 }
