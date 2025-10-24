@@ -1,16 +1,95 @@
-/* ReportCategoryList.module.css */
+/* TransactionList.module.css */
 
 .container {
   padding: 24px;
-  background-color: transparent;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.container.light {
+  background-color: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #1f2937);
+}
+
+.container.dark {
+  background-color: var(--bg-primary, #0f172a);
+  color: var(--text-primary, #f1f5f9);
 }
 
 .nameCell {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.nameCell .title {
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+}
+
+.nameCell .subtitle {
+  font-size: 14px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.container.dark .nameCell .title {
+  color: var(--text-primary, #f1f5f9);
+}
+
+.container.dark .nameCell .subtitle {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.status-active {
+  background-color: var(--success-bg, #d1fae5);
+  color: var(--success-text, #065f46);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-completed {
+  background-color: var(--success-bg, #d1fae5);
+  color: var(--success-text, #065f46);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-cancelled {
+  background-color: var(--error-bg, #fee2e2);
+  color: var(--error-text, #991b1b);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-pending {
+  background-color: var(--warning-bg, #fef3c7);
+  color: var(--warning-text, #92400e);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.container.dark .status-active,
+.container.dark .status-completed {
+  background-color: var(--success-bg-dark, #064e3b);
+  color: var(--success-text-dark, #d1fae5);
+}
+
+.container.dark .status-cancelled {
+  background-color: var(--error-bg-dark, #7f1d1d);
+  color: var(--error-text-dark, #fee2e2);
+}
+
+.container.dark .status-pending {
+  background-color: var(--warning-bg-dark, #78350f);
+  color: var(--warning-text-dark, #fef3c7);
 }
 
 .avatar {
@@ -95,6 +174,10 @@ input:checked + .slider:before {
   transform: translateX(24px);
 }
 
+.container.dark .slider {
+  background-color: #475569;
+}
+
 .actionsCell {
   display: flex;
   gap: 8px;
@@ -103,7 +186,7 @@ input:checked + .slider:before {
 
 .editButton {
   padding: 8px;
-  background-color: #0ea5e9;
+  /* background-color removido - será aplicado via inline style */
   border: none;
   border-radius: 6px;
   color: white;
@@ -111,11 +194,12 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .editButton:hover {
-  background-color: #0284c7;
+  opacity: 0.85;
+  transform: scale(1.05);
 }
 
 .deleteButton {
@@ -133,4 +217,75 @@ input:checked + .slider:before {
 
 .deleteButton:hover {
   background-color: #dc2626;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.emptyState.light {
+  background-color: var(--bg-secondary, #f8f9fa);
+  color: var(--text-primary, #1f2937);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.emptyState.light p {
+  color: var(--text-primary, #1f2937);
+  font-size: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.emptyState.light .emptyStateButton {
+  /* background-color removido - será aplicado via inline style */
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.emptyState.light .emptyStateButton:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
+.emptyState.dark {
+  background-color: var(--bg-secondary, #1e293b);
+  color: var(--text-primary, #f1f5f9);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #334155);
+}
+
+.emptyState.dark p {
+  color: var(--text-primary, #f1f5f9);
+  font-size: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.emptyState.dark .emptyStateButton {
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.emptyState.dark .emptyStateButton:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
 }

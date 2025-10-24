@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { useHistory } from 'react-router-dom';
 import useFlashMessage from '../../../../../hooks/userFlashMessage';
+import { useTheme } from '../../../../../hooks/useTheme';
+import { useEmphasisColor } from '../../../../../hooks/useEmphasisColor';
 import ServiceMonthlyRecord from '../services/ServiceMonthlyRecord';
 import LoadingSpinner from '../../../../../components/loading/LoadingSpinner';
 import ActionHeader from '../../../../../components/header/ActionHeader/ActionHeader';
@@ -23,6 +25,8 @@ import TableWithDate from '../../../../../components/table/TableWithDate';
 const TransactionList = () => {
   const history = useHistory();
   const { setFlashMessage } = useFlashMessage();
+  const { theme } = useTheme();
+  const { emphasisColor } = useEmphasisColor();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [monthlyRecords, setMonthlyRecords] = useState([]);
@@ -172,6 +176,9 @@ const TransactionList = () => {
             className={styles.editButton} 
             onClick={() => onEdit(row.id)}
             title="Editar registro"
+            style={{
+              backgroundColor: emphasisColor || '#0ea5e9'
+            }}
           >
             <Edit2 size={16} />
           </button>
@@ -270,7 +277,7 @@ const TransactionList = () => {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${styles[theme]}`}>
       <ActionHeader
         onBack={handleBack}
         onCreate={handleCreate}
@@ -285,9 +292,15 @@ const TransactionList = () => {
       />
 
       {monthlyRecords.length === 0 && !loading ? (
-        <div className={styles.emptyState}>
+        <div className={`${styles.emptyState} ${styles[theme]}`}>
           <p>Nenhum registro mensal encontrado.</p>
-          <button onClick={handleCreate} className={styles.emptyStateButton}>
+          <button 
+            onClick={handleCreate} 
+            className={styles.emptyStateButton}
+            style={{
+              backgroundColor: emphasisColor || (theme === 'dark' ? 'rgb(20, 18, 129)' : '#007bff')
+            }}
+          >
             Criar primeiro registro
           </button>
         </div>
