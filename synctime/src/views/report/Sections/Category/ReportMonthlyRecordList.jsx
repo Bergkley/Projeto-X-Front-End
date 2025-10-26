@@ -188,7 +188,7 @@ const ReportMonthlyRecordList = () => {
         <div className={styles.actionsCell}>
           <button
             className={styles.editButton}
-            onClick={() => onReport(row.id)}
+            onClick={() => onReport(row.id, row.month, row.year)}
             title="Entrar no Relatório"
             style={{
               backgroundColor: emphasisColor || '#0ea5e9'
@@ -230,9 +230,11 @@ const ReportMonthlyRecordList = () => {
     });
   };
 
-  const handleReport = (recordId) => {
+  const handleReport = (recordId ,month, year) => {
     history.push(`/relatorios/categoria/transações`,{
-      monthlyRecordId: recordId});
+      monthlyRecordId: recordId,
+      month,
+      year});
   };
 
   const handleDeleteRecord = async () => {
