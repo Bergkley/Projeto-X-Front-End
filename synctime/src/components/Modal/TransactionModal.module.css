@@ -136,6 +136,36 @@
   margin-bottom: 20px;
 }
 
+.sectionHeader {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid;
+}
+
+.sectionHeader .formLabel {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.sectionHeader.light {
+  border-color: var(--border-color, #e9ecef);
+}
+
+.sectionHeader.dark {
+  border-color: var(--border-color, #333);
+}
+
+.customFieldsSection {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding-top: 24px;
+  margin-top: 12px;
+}
+
 .formLabel {
   display: block;
   margin-bottom: 6px;
@@ -193,9 +223,22 @@
   box-shadow: 0 0 0 3px var(--focus-shadow-color, rgba(102, 126, 234, 0.2));
 }
 
+.formInput.error,
+.formSelect.error,
+.formTextarea.error {
+  border-color: #dc3545 !important;
+}
+
 .formTextarea {
   resize: vertical;
   min-height: 80px;
+}
+
+.errorMessage {
+  min-height: 20px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #dc3545;
 }
 
 .modalFooter {
@@ -210,7 +253,7 @@
 }
 
 .modalFooter.dark {
-  border-top: 1px solid var(--border-color, rgb(20, 18, 129));
+  border-top: 1px solid var(--border-color, #333);
 }
 
 .btnCancel,
@@ -270,11 +313,22 @@
     padding: 16px;
   }
 
+  .customFieldsSection {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
   .modalHeader {
     padding: 16px;
   }
 
   .modalFooter {
     padding: 0 16px 16px;
+    flex-direction: column;
+  }
+
+  .btnCancel,
+  .btnSave {
+    width: 100%;
   }
 }
