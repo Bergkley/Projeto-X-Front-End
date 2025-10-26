@@ -1,6 +1,13 @@
-// TableWithDate.jsx (com persistência de colunas)
+// TableWithDate.jsx
 import React, { useState, useEffect } from 'react';
-import { Filter, GripVertical, ChevronUp, ChevronDown, ChevronRight, Plus } from 'lucide-react';
+import {
+  Filter,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+  ChevronRight,
+  Plus
+} from 'lucide-react';
 
 // 💅 Estilos
 import styles from './TableWithDate.module.css';
@@ -8,12 +15,15 @@ import styles from './TableWithDate.module.css';
 // 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
-import { useMemorizeTableColumns, TABLE_CONFIG_KEYS } from '../../hooks/useMemorizeTableColumns';
+import {
+  useMemorizeTableColumns,
+  TABLE_CONFIG_KEYS
+} from '../../hooks/useMemorizeTableColumns';
 import TransactionModal from '../modal/TransactionModal';
 
-const TableWithDate = ({ 
-  columns, 
-  data, 
+const TableWithDate = ({
+  columns,
+  data,
   selectable = false,
   reorderable = false,
   onSelectionChange,
@@ -27,15 +37,13 @@ const TableWithDate = ({
   year,
   onUpdateRecord,
   onCreateRecord,
-  tableKey = TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS 
+  tableKey = TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS,
+  dados
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
-  const { 
-    getMemorizedConfig, 
-    memorizeVisibleColumns, 
-    memorizeColumnOrder 
-  } = useMemorizeTableColumns(tableKey);
+  const { getMemorizedConfig, memorizeVisibleColumns, memorizeColumnOrder } =
+    useMemorizeTableColumns(tableKey);
 
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [visibleColumns, setVisibleColumns] = useState([]);
@@ -46,29 +54,44 @@ const TableWithDate = ({
   const [showModal, setShowModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const monthNames = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+  const monthNames = [
+    'JAN',
+    'FEV',
+    'MAR',
+    'ABR',
+    'MAI',
+    'JUN',
+    'JUL',
+    'AGO',
+    'SET',
+    'OUT',
+    'NOV',
+    'DEZ'
+  ];
   const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
 
   useEffect(() => {
     const memorizedConfig = getMemorizedConfig();
-    
+
     if (memorizedConfig) {
-      const validVisibleColumns = memorizedConfig.visibleColumns?.filter(key =>
-        columns.some(col => col.key === key)
-      ) || columns.map(col => col.key);
-      
-      const validColumnOrder = memorizedConfig.columnOrder?.filter(key =>
-        columns.some(col => col.key === key)
-      ) || columns.map(col => col.key);
+      const validVisibleColumns =
+        memorizedConfig.visibleColumns?.filter((key) =>
+          columns.some((col) => col.key === key)
+        ) || columns.map((col) => col.key);
+
+      const validColumnOrder =
+        memorizedConfig.columnOrder?.filter((key) =>
+          columns.some((col) => col.key === key)
+        ) || columns.map((col) => col.key);
 
       const newColumns = columns
-        .filter(col => !validColumnOrder.includes(col.key))
-        .map(col => col.key);
+        .filter((col) => !validColumnOrder.includes(col.key))
+        .map((col) => col.key);
 
       setVisibleColumns(validVisibleColumns.concat(newColumns));
       setColumnOrder(validColumnOrder.concat(newColumns));
     } else {
-      const allColumnKeys = columns.map(col => col.key);
+      const allColumnKeys = columns.map((col) => col.key);
       setVisibleColumns(allColumnKeys);
       setColumnOrder(allColumnKeys);
     }
@@ -76,6 +99,7 @@ const TableWithDate = ({
 
   const openModal = (record = null, partialData = {}) => {
     console.log('openModal', record, partialData);
+    console.log('data', data);
     setSelectedRecord(record ? record : { ...partialData, id: null });
     setShowModal(true);
   };
@@ -85,11 +109,12 @@ const TableWithDate = ({
     setSelectedRecord(null);
   };
 
-  const handleModalSave = (updatedData) => {
+  const handleModalSave = async (updatedData) => {
     if (selectedRecord && selectedRecord.id) {
-      onUpdateRecord?.(selectedRecord.id, updatedData);
+      console.log('caiu no edit')
+      await onUpdateRecord?.(selectedRecord.id, updatedData);
     } else {
-      onCreateRecord?.(updatedData);
+      await onCreateRecord?.(updatedData);
     }
   };
 
@@ -137,11 +162,11 @@ const TableWithDate = ({
 
   const toggleColumnVisibility = (columnKey) => {
     if (columnKey === 'actions') return;
-    
+
     const newVisibleColumns = visibleColumns.includes(columnKey)
-      ? visibleColumns.filter(k => k !== columnKey)
+      ? visibleColumns.filter((k) => k !== columnKey)
       : [...visibleColumns, columnKey];
-    
+
     setVisibleColumns(newVisibleColumns);
     memorizeVisibleColumns(newVisibleColumns);
   };
@@ -203,21 +228,29 @@ const TableWithDate = ({
   };
 
   const orderedColumns = columnOrder
-    .map(key => columns.find(col => col.key === key))
-    .filter(col => col && visibleColumns.includes(col.key));
+    .map((key) => columns.find((col) => col.key === key))
+    .filter((col) => col && visibleColumns.includes(col.key));
 
-  const groupedData = groupBy === 'date' ? 
-    sortedData.reduce((acc, row) => {
-      const date = new Date(row.created_at);
-      if (date.getMonth() + 1 === month && date.getFullYear() === year) {
-        const dateKey = date.getDate();
-        if (!acc[dateKey]) {
-          acc[dateKey] = [];
+  const groupedData =
+  groupBy === 'date'
+    ? sortedData.reduce((acc, row) => {
+        
+        const [yearStr, monthStr, dayStr] = row.transaction_date.split('-');
+        const yearNum = parseInt(yearStr, 10);
+        const monthNum = parseInt(monthStr, 10);
+        const dayNum = parseInt(dayStr, 10);
+        
+        if (monthNum === month && yearNum === year) {  
+          const dateKey = dayNum;
+          
+          if (!acc[dateKey]) {
+            acc[dateKey] = [];
+          }
+          acc[dateKey].push(row);
         }
-        acc[dateKey].push(row);
-      }
-      return acc;
-    }, {}) : null;
+        return acc;
+      }, {})
+    : null;
 
   const renderGroupedRows = () => {
     if (!groupedData) {
@@ -236,9 +269,15 @@ const TableWithDate = ({
               />
             </td>
           )}
-          {orderedColumns.map(column => (
+          {orderedColumns.map((column) => (
             <td key={column.key} className={styles.tableCell}>
-              {column.render ? column.render(row, row.id, { onEdit, onToggleStatus, onDelete }) : row[column.key]}
+              {column.render
+                ? column.render(row, row.id, {
+                    onEdit,
+                    onToggleStatus,
+                    onDelete
+                  })
+                : row[column.key]}
             </td>
           ))}
         </tr>
@@ -252,7 +291,9 @@ const TableWithDate = ({
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month - 1, day);
       const dayAbbr = dayNames[date.getDay()];
-      const headerText = `${day.toString().padStart(2, '0')} ${monthAbbr}/${year.toString().slice(-2)} ${dayAbbr}`;
+      const headerText = `${day.toString().padStart(2, '0')} ${monthAbbr}/${year
+        .toString()
+        .slice(-2)} ${dayAbbr}`;
       const groupRows = groupedData[day] || [];
 
       allDays.push({ day, headerText, rows: groupRows });
@@ -260,42 +301,52 @@ const TableWithDate = ({
 
     return allDays.map(({ day, headerText, rows }) => (
       <React.Fragment key={day}>
-        <tr 
-          className={`${styles.tableRow} ${styles.groupHeaderRow} ${expandedDays.has(day) ? styles.expanded : ''}`}
+        <tr
+          className={`${styles.tableRow} ${styles.groupHeaderRow} ${
+            expandedDays.has(day) ? styles.expanded : ''
+          }`}
           onClick={() => toggleDay(day)}
           style={{ cursor: 'pointer' }}
         >
-          <td 
-            colSpan={orderedColumns.length + (selectable ? 1 : 0)} 
+          <td
+            colSpan={orderedColumns.length + (selectable ? 1 : 0)}
             className={`${styles.tableCell} ${styles.groupHeaderCell}`}
           >
             <div className={styles.groupHeaderContent}>
-              <ChevronRight 
-                size={16} 
-                className={`${styles.expandIcon} ${expandedDays.has(day) ? styles.expanded : ''}`}
+              <ChevronRight
+                size={16}
+                className={`${styles.expandIcon} ${
+                  expandedDays.has(day) ? styles.expanded : ''
+                }`}
               />
               <span>{headerText}</span>
               <span className={styles.recordCount}>
-                {rows.length > 0 ? `${rows.length} ${rows.length === 1 ? 'registro' : 'registros'}` : 'Sem registros'}
+                {rows.length > 0
+                  ? `${rows.length} ${
+                      rows.length === 1 ? 'registro' : 'registros'
+                    }`
+                  : 'Sem registros'}
               </span>
             </div>
           </td>
         </tr>
         {expandedDays.has(day) && (
           <tr className={styles.cardsContainerRow}>
-            <td 
+            <td
               colSpan={orderedColumns.length + (selectable ? 1 : 0)}
               className={styles.cardsContainerCell}
             >
               {rows.length === 0 ? (
                 <div className={styles.emptyState}>
-                  <span className={styles.emptyStateText}>Nenhum registro nesta data</span>
+                  <span className={styles.emptyStateText}>
+                    Nenhum registro nesta data
+                  </span>
                 </div>
               ) : (
                 <div className={styles.cardsGrid}>
                   {rows.map((row) => (
-                    <div 
-                      key={row.id} 
+                    <div
+                      key={row.id}
                       className={styles.recordCard}
                       onClick={() => openModal(row)}
                       style={{ cursor: 'pointer' }}
@@ -317,11 +368,19 @@ const TableWithDate = ({
                         </div>
                       )}
                       <div className={styles.cardContent}>
-                        {orderedColumns.map(column => (
+                        {orderedColumns.map((column) => (
                           <div key={column.key} className={styles.cardField}>
-                            <span className={styles.cardLabel}>{column.label}:</span>
+                            <span className={styles.cardLabel}>
+                              {column.label}:
+                            </span>
                             <span className={styles.cardValue}>
-                              {column.render ? column.render(row, row.id, { onEdit, onToggleStatus, onDelete }) : row[column.key]}
+                              {column.render
+                                ? column.render(row, row.id, {
+                                    onEdit,
+                                    onToggleStatus,
+                                    onDelete
+                                  })
+                                : row[column.key]}
                             </span>
                           </div>
                         ))}
@@ -330,10 +389,15 @@ const TableWithDate = ({
                   ))}
                 </div>
               )}
-              <div className={`${styles.recordCard} ${styles.addCard}`} onClick={() => openModal(null, { month, year, day })}>
+              <div
+                className={`${styles.recordCard} ${styles.addCard}`}
+                onClick={() => openModal(null, { month, year, day })}
+              >
                 <div className={styles.addCardContent}>
                   <Plus size={24} className={styles.addIcon} />
-                  <span className={styles.addText}>Adicionar Novo Registro</span>
+                  <span className={styles.addText}>
+                    Adicionar Novo Registro
+                  </span>
                 </div>
               </div>
             </td>
@@ -370,7 +434,7 @@ const TableWithDate = ({
             </>
           )}
         </div>
-        
+
         <button
           className={styles.filterButton}
           onClick={() => setShowColumnFilter(!showColumnFilter)}
@@ -381,25 +445,25 @@ const TableWithDate = ({
           <Filter size={16} />
           Colunas
         </button>
-        
+
         {showColumnFilter && (
           <div className={styles.columnFilterDropdown}>
             {columns
-              .filter(column => column.key !== 'actions')
-              .map(column => (
-              <label key={column.key} className={styles.columnFilterItem}>
-                <input
-                  type="checkbox"
-                  checked={visibleColumns.includes(column.key)}
-                  onChange={() => toggleColumnVisibility(column.key)}
-                  className={styles.checkbox}
-                  style={{
-                    accentColor: emphasisColor || '#0ea5e9'
-                  }}
-                />
-                {column.label}
-              </label>
-            ))}
+              .filter((column) => column.key !== 'actions')
+              .map((column) => (
+                <label key={column.key} className={styles.columnFilterItem}>
+                  <input
+                    type="checkbox"
+                    checked={visibleColumns.includes(column.key)}
+                    onChange={() => toggleColumnVisibility(column.key)}
+                    className={styles.checkbox}
+                    style={{
+                      accentColor: emphasisColor || '#0ea5e9'
+                    }}
+                  />
+                  {column.label}
+                </label>
+              ))}
           </div>
         )}
       </div>
@@ -412,7 +476,9 @@ const TableWithDate = ({
                 <th className={styles.tableHeaderCell}>
                   <input
                     type="checkbox"
-                    checked={selectedRows.size === data.length && data.length > 0}
+                    checked={
+                      selectedRows.size === data.length && data.length > 0
+                    }
                     onChange={handleSelectAll}
                     className={styles.checkbox}
                     style={{
@@ -421,46 +487,76 @@ const TableWithDate = ({
                   />
                 </th>
               )}
-              {orderedColumns.map(column => {
+              {orderedColumns.map((column) => {
                 const isSortable = column.sortable !== false;
                 return (
                   <th
                     key={column.key}
                     className={styles.tableHeaderCell}
                     draggable={reorderable}
-                    onDragStart={(e) => reorderable && handleDragStart(e, column.key)}
+                    onDragStart={(e) =>
+                      reorderable && handleDragStart(e, column.key)
+                    }
                     onDragOver={reorderable ? handleDragOver : undefined}
-                    onDrop={reorderable ? (e) => handleDrop(e, column.key) : undefined}
+                    onDrop={
+                      reorderable ? (e) => handleDrop(e, column.key) : undefined
+                    }
                   >
                     <div className={styles.headerCellContent}>
-                      {reorderable && <GripVertical size={14} className={styles.dragHandle} />}
+                      {reorderable && (
+                        <GripVertical size={14} className={styles.dragHandle} />
+                      )}
                       {!isSortable ? (
                         <div className={styles.unsortableHeader}>
                           {column.label}
                         </div>
                       ) : (
-                        <div 
-                          className={`${styles.sortableHeader} ${sortConfig?.key === column.key ? styles.sortedHeader : ''}`} 
+                        <div
+                          className={`${styles.sortableHeader} ${
+                            sortConfig?.key === column.key
+                              ? styles.sortedHeader
+                              : ''
+                          }`}
                         >
                           {column.label}
                           <div className={styles.sortIcons}>
-                            <ChevronUp 
-                              size={12} 
-                              className={`${styles.sortIcon} ${sortConfig?.key === column.key && sortConfig?.direction === 'asc' ? styles.active : ''}`}
-                              style={sortConfig?.key === column.key && sortConfig?.direction === 'asc' ? {
-                                color: emphasisColor || '#ec1109'
-                              } : {}}
+                            <ChevronUp
+                              size={12}
+                              className={`${styles.sortIcon} ${
+                                sortConfig?.key === column.key &&
+                                sortConfig?.direction === 'asc'
+                                  ? styles.active
+                                  : ''
+                              }`}
+                              style={
+                                sortConfig?.key === column.key &&
+                                sortConfig?.direction === 'asc'
+                                  ? {
+                                      color: emphasisColor || '#ec1109'
+                                    }
+                                  : {}
+                              }
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleSortAsc(column.key);
                               }}
                             />
-                            <ChevronDown 
-                              size={12} 
-                              className={`${styles.sortIcon} ${sortConfig?.key === column.key && sortConfig?.direction === 'desc' ? styles.active : ''}`}
-                              style={sortConfig?.key === column.key && sortConfig?.direction === 'desc' ? {
-                                color: emphasisColor || '#ec1109'
-                              } : {}}
+                            <ChevronDown
+                              size={12}
+                              className={`${styles.sortIcon} ${
+                                sortConfig?.key === column.key &&
+                                sortConfig?.direction === 'desc'
+                                  ? styles.active
+                                  : ''
+                              }`}
+                              style={
+                                sortConfig?.key === column.key &&
+                                sortConfig?.direction === 'desc'
+                                  ? {
+                                      color: emphasisColor || '#ec1109'
+                                    }
+                                  : {}
+                              }
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleSortDesc(column.key);
@@ -475,9 +571,7 @@ const TableWithDate = ({
               })}
             </tr>
           </thead>
-          <tbody>
-            {renderGroupedRows()}
-          </tbody>
+          <tbody>{renderGroupedRows()}</tbody>
         </table>
       </div>
 
@@ -486,6 +580,7 @@ const TableWithDate = ({
         onClose={closeModal}
         record={selectedRecord}
         onSave={handleModalSave}
+        dados={dados}
       />
     </div>
   );
