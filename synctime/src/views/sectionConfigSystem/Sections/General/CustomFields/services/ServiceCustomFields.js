@@ -14,6 +14,12 @@ class ServiceCustomFields {
       params: { sortBy, order }
     });
   }
+
+  getByAllByRecordType(categoryId, recordTypeId) {
+    return api.get(`/custom-fields/get-by-record-type`, {
+      params: { categoryId, recordTypeId }
+    });
+  }
   getByIdCustomFields(id) {
     return api.get(`/custom-fields/${id}`);
   }
@@ -32,4 +38,3 @@ class ServiceCustomFields {
 }
 
 export default new ServiceCustomFields();
-
