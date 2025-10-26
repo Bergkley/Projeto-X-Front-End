@@ -14,7 +14,7 @@ const MultiSelect = ({ label, options, value, onChange, ...props }) => {
           color: '#f3f4f6',
           boxShadow: state.isFocused ? '0 0 0 3px rgba(99, 102, 241, 0.2)' : 'none',
           transition: 'all 0.3s ease',
-          minHeight: '38px',
+          minHeight: '50px',
           '&:hover': {
             borderColor: '#6366f1'
           }
@@ -113,7 +113,7 @@ const MultiSelect = ({ label, options, value, onChange, ...props }) => {
         color: '#1f2937',
         boxShadow: state.isFocused ? '0 0 0 3px rgba(99, 102, 241, 0.1)' : 'none',
         transition: 'all 0.3s ease',
-        minHeight: '38px',
+        minHeight: '50px',
         '&:hover': {
           borderColor: '#6366f1'
         }
