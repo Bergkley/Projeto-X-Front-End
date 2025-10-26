@@ -98,8 +98,6 @@ const TableWithDate = ({
   }, [columns, getMemorizedConfig]);
 
   const openModal = (record = null, partialData = {}) => {
-    console.log('openModal', record, partialData);
-    console.log('data', data);
     setSelectedRecord(record ? record : { ...partialData, id: null });
     setShowModal(true);
   };
@@ -111,7 +109,6 @@ const TableWithDate = ({
 
   const handleModalSave = async (updatedData) => {
     if (selectedRecord && selectedRecord.id) {
-      console.log('caiu no edit')
       await onUpdateRecord?.(selectedRecord.id, updatedData);
     } else {
       await onCreateRecord?.(updatedData);

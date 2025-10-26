@@ -15,7 +15,6 @@ const ActionHeader = ({
   isOnlyBack = false
 }) => {
   const { emphasisColor } = useEmphasisColor();
-  console.log('isOnlyBack', isOnlyBack);
 
   return (
     <div className={styles.actionBar}>

@@ -22,7 +22,6 @@ import LoadingSpinner from '../../../../../../components/loading/LoadingSpinner'
 import { iconLabels, iconMap } from '../../../../../../utils/iconsConfig';
 
 const RecordTypeForm = () => {
-  console.log;
   const { id } = useParams();
   const history = useHistory();
   const { theme } = useTheme();

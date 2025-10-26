@@ -23,14 +23,12 @@ import errorFormMessage from '../../../../../utils/errorFormMessage'
 import ServiceMonthlyRecord from '../services/ServiceMonthlyRecord';
 
 const ReportMonthlyRecordForm = () => {
-  console.log('ReportMonthlyRecordForm');
   const { id } = useParams();
   const location = useLocation();
   const { dados } = location.state || {};
   const history = useHistory();
   const { theme } = useTheme();
   const { setFlashMessage } = useFlashMessage();
-  console.log('dados', dados)
 
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(!!id);

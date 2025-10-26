@@ -22,7 +22,6 @@ class ServiceMonthlyRecord {
   }
 
   editMonthlyRecord(id, data) {
-    console.log('editMonthlyRecord', id, data);
     return api.patch(`/monthly-record/edit/${id}`, data);
   }
 

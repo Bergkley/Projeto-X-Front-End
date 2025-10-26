@@ -232,7 +232,6 @@ const TransactionList = () => {
   };
 
   const handleFiltersChange = (filters) => {
-    console.log('Filtros aplicados:', filters);
     setActiveFilters(filters);
   };
 

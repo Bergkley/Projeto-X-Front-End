@@ -47,7 +47,6 @@ const TransactionModal = ({
           dados.categoryId,
           dados.recordTypeId
         );
-        console.log('response', response);
 
         if (response.data.status === 'OK') {
           setCustomFields(response.data.data || []);
