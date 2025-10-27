@@ -143,11 +143,13 @@ const ReportMonthlyRecordList = () => {
       render: (row) => (
         <div className={styles.nameCell}>
           <div className={styles.title}>{row.title}</div>
-          {row.description && (
-            <div className={styles.subtitle}>{row.description}</div>
-          )}
         </div>
       )
+    },
+    {
+      key: 'description',
+      label: 'Descrição',
+      render: (row) => row.description || '-'
     },
     {
       key: 'category',
@@ -234,7 +236,8 @@ const ReportMonthlyRecordList = () => {
     history.push(`/relatorios/categoria/transações`,{
       monthlyRecordId: recordId,
       month,
-      year});
+      year,
+      idCategory});
   };
 
   const handleDeleteRecord = async () => {
