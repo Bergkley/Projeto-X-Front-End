@@ -78,7 +78,6 @@ const TransactionModal = ({
       formData.transactionDate = record.transaction_date || '';
 
       const customFieldsData = record.customFieldsResult || [];
-      console.log('customFieldsData', customFieldsData)
       if (customFieldsData && Array.isArray(customFieldsData)) {
         customFieldsData.forEach((cf) => {
           const fieldName = `customField_${cf.custom_field_id}`;
