@@ -204,33 +204,36 @@ const CustomFieldsRenderModal = ({
         })) || [];
 
         return (
-          <Controller
-            key={field.id}
-            name={fieldName}
-            control={control}
-            rules={{
-              required: field.required ? `${field.label} é obrigatório` : false
-            }}
-            render={({ field: formField }) => (
-              <>
-                <label className={styles.label}>
-                  {field.label} {field.required && '*'}
-                </label>
-                <MultiSelect
-                  options={options}
-                  value={formField.value}
-                  onChange={formField.onChange}
-                  placeholder="Selecione uma ou mais opções..."
-                  isDisabled={loading}
-                />
-                <ErrorMessage
-                  errors={errors}
-                  name={fieldName}
-                  render={({ message }) => errorFormMessage(message)}
-                />
-              </>
-            )}
-          />
+          <div key={field.id} className={styles.formGroup}>
+            <Controller
+              name={fieldName}
+              control={control}
+              rules={{
+                required: field.required ? `${field.label} é obrigatório` : false
+              }}
+              render={({ field: formField }) => (
+                <>
+                  <label htmlFor={fieldName} className={`${styles.formLabel} ${styles[theme]}`}>
+                    {field.label} {field.required && '*'}
+                  </label>
+                  <MultiSelect
+                    options={options}
+                    value={formField.value}
+                    onChange={formField.onChange}
+                    placeholder="Selecione uma ou mais opções..."
+                    isDisabled={loading}
+                  />
+                  <div className={styles.errorMessage}>
+                    <ErrorMessage
+                      errors={errors}
+                      name={fieldName}
+                      render={({ message }) => errorFormMessage(message)}
+                    />
+                  </div>
+                </>
+              )}
+            />
+          </div>
         );
       }
 
