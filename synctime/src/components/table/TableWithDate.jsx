@@ -37,12 +37,15 @@ const TableWithDate = ({
   onUpdateRecord,
   onCreateRecord,
   tableKey = TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS,
-  dados
+  dados,
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
+  
+  const effectiveTableKey = `${tableKey}_${dados?.categoryId || 'general'}`;
+  
   const { getMemorizedConfig, memorizeVisibleColumns, memorizeColumnOrder } =
-    useMemorizeTableColumns(tableKey);
+    useMemorizeTableColumns(effectiveTableKey);
 
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [visibleColumns, setVisibleColumns] = useState([]);
