@@ -13,6 +13,7 @@ import styles from './TransactionList.module.css';
 import TableWithDate from '../../../../../components/table/TableWithDate';
 import ServiceTransactionsRecord from '../services/ServiceTransactionsRecord';
 import ServiceCustomFields from '../../../../sectionConfigSystem/Sections/General/CustomFields/services/ServiceCustomFields';
+import ServiceCategory from '../../../../sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
 
 // 💅 Estilos
 
@@ -22,7 +23,7 @@ import ServiceCustomFields from '../../../../sectionConfigSystem/Sections/Genera
 
 const TransactionList = () => {
   const location = useLocation();
-  const { monthlyRecordId, month, year } = location.state || {};
+  const { monthlyRecordId, month, year, idCategory } = location.state || {};
   const history = useHistory();
   const { setFlashMessage } = useFlashMessage();
   const { theme } = useTheme();
@@ -42,8 +43,9 @@ const TransactionList = () => {
   const [sortBy, setSortBy] = useState('');
   const [order, setOrder] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
 
-  const dados = { categoryId, recordTypeId, monthlyRecordId, month, year };
+  const dados = { categoryId: idCategory ?? categoryId, recordTypeId, monthlyRecordId, month, year };
 
   const filterColumnsBase = [
     { id: 'title', label: 'Título', type: 'text' },
@@ -61,6 +63,8 @@ const TransactionList = () => {
     }
     return sortByParam;
   };
+
+
 
   useEffect(() => {
     if (recordTypeId && categoryId) {
@@ -84,6 +88,7 @@ const TransactionList = () => {
       setCustomFieldsDefs([]);
     }
   }, [recordTypeId, categoryId]);
+  
 
   useEffect(() => {
     if (customFieldsDefs.length > 0 && transactionRecords.length > 0) {
@@ -318,13 +323,36 @@ const TransactionList = () => {
   };
 
   const handleBack = () => {
-    history.push(`/relatorios/categoria/relatorio-mesal/${categoryId}`);
+    history.push(`/relatorios/categoria/relatorio-mesal/${categoryId || idCategory}`);
   };
 
-  const handleCreate = () => {
-    history.push('/relatorios/categoria/transações/form', { dados });
-  };
+  const handleCreate = async () => {
+  let updatedDados = { ...dados };
 
+  if (!updatedDados.recordTypeId) {
+    try {
+      const response = await ServiceCategory.getByIdCategory(
+        updatedDados.categoryId
+      );
+      console.log('response berg', response);
+
+      if (response.data.status === 'OK' && response.data.data) {
+        updatedDados.recordTypeId = response.data.data.record_type_id;
+        
+        setRecordTypeId(updatedDados.recordTypeId);
+      } else {
+        setFlashMessage('Nenhum tipo de registro disponível para esta categoria.', 'error');
+        return;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar tipo de registro:', error);
+      setFlashMessage('Erro ao carregar configurações para criar transação', 'error');
+      return; 
+    }
+  }
+
+  history.push('/relatorios/categoria/transações/form', { dados: updatedDados });
+};
   const handleSelectionChange = (selectedItems) => {
     console.log('Itens selecionados:', selectedItems);
   };
@@ -377,7 +405,7 @@ const TransactionList = () => {
       />
 
       <TableHeaderWithFilter
-        title="Registros Mensais"
+        title="Transações"
         columns={filterColumns}
         onFiltersChange={handleFiltersChange}
       />
