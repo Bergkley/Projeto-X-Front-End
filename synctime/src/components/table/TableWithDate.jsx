@@ -1,4 +1,3 @@
-// TableWithDate.jsx
 import React, { useState, useEffect } from 'react';
 import {
   Filter,
@@ -97,6 +96,14 @@ const TableWithDate = ({
     }
   }, [columns, getMemorizedConfig]);
 
+  const getValue = (row, key) => {
+    if (key.startsWith('custom_')) {
+      const fieldName = key.slice(7);
+      return row.customFields?.[fieldName] || '';
+    }
+    return row[key];
+  };
+
   const openModal = (record = null, partialData = {}) => {
     setSelectedRecord(record ? record : { ...partialData, id: null });
     setShowModal(true);
@@ -190,8 +197,8 @@ const TableWithDate = ({
   const sortedData = React.useMemo(() => {
     if (!sortConfig?.key) return data;
     return [...data].sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
+      const aVal = getValue(a, sortConfig.key);
+      const bVal = getValue(b, sortConfig.key);
       if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
@@ -274,7 +281,7 @@ const TableWithDate = ({
                     onToggleStatus,
                     onDelete
                   })
-                : row[column.key]}
+                : (getValue(row, column.key) || '-')}
             </td>
           ))}
         </tr>
@@ -377,7 +384,7 @@ const TableWithDate = ({
                                     onToggleStatus,
                                     onDelete
                                   })
-                                : row[column.key]}
+                                : (getValue(row, column.key) || '-')}
                             </span>
                           </div>
                         ))}

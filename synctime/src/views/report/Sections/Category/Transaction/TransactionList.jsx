@@ -12,6 +12,7 @@ import ConfirmModal from '../../../../../components/modal/ConfirmModal';
 import styles from './TransactionList.module.css';
 import TableWithDate from '../../../../../components/table/TableWithDate';
 import ServiceTransactionsRecord from '../services/ServiceTransactionsRecord';
+import ServiceCustomFields from '../../../../sectionConfigSystem/Sections/General/CustomFields/services/ServiceCustomFields';
 
 // 💅 Estilos
 
@@ -36,6 +37,7 @@ const TransactionList = () => {
   const [status, setStatus] = useState('');
   const [recordTypeId, setRecordTypeId] = useState(null);
   const [categoryId, setCategoryId] = useState(null);
+  const [customFieldsDefs, setCustomFieldsDefs] = useState([]);
 
   const [sortBy, setSortBy] = useState('');
   const [order, setOrder] = useState('');
@@ -43,23 +45,149 @@ const TransactionList = () => {
 
   const dados = { categoryId, recordTypeId, monthlyRecordId, month, year };
 
-  const filterColumns = [
+  const filterColumnsBase = [
     { id: 'title', label: 'Título', type: 'text' },
     { id: 'description', label: 'Descrição', type: 'text' },
-    { id: 'goal', label: 'Meta', type: 'number' },
-    { id: 'initial_balance', label: 'Saldo Inicial', type: 'number' },
-    { id: 'month', label: 'Mês', type: 'number' },
-    { id: 'year', label: 'Ano', type: 'number' },
-    { id: 'status', label: 'Status', type: 'text' },
-    { id: 'category.name', label: 'Categoria', type: 'text' },
+    { id: 'amount', label: 'Valor', type: 'number' },
+    { id: 'transaction_date', label: 'Data da Transação', type: 'date' },
     { id: 'created_at', label: 'Data de Criação', type: 'date' },
     { id: 'updated_at', label: 'Última Atualização', type: 'date' }
   ];
+
+  const getAdjustedSortBy = (sortByParam) => {
+    if (sortByParam && sortByParam.startsWith('custom_')) {
+      const fieldName = sortByParam.slice(7);
+      return `customFields.${fieldName}`;
+    }
+    return sortByParam;
+  };
+
+  useEffect(() => {
+    if (recordTypeId && categoryId) {
+      const fetchCustomFields = async () => {
+        try {
+          const response = await ServiceCustomFields.getByAllByRecordType(
+            categoryId,
+            recordTypeId
+          );
+          if (response.data.status === 'OK') {
+            setCustomFieldsDefs(response.data.data);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar campos customizados:', error);
+          setFlashMessage('Erro ao buscar campos customizados', 'error');
+        }
+      };
+
+      fetchCustomFields();
+    } else {
+      setCustomFieldsDefs([]);
+    }
+  }, [recordTypeId, categoryId]);
+
+  useEffect(() => {
+    if (customFieldsDefs.length > 0 && transactionRecords.length > 0) {
+      const firstCustom = transactionRecords[0]?.customFields;
+      if (Array.isArray(firstCustom)) {
+        const processed = transactionRecords.map((record) => {
+          const customMap = {};
+          record.customFields.forEach((cf) => {
+            const def = customFieldsDefs.find(
+              (d) => d.id === cf.custom_field_id
+            );
+            if (def) {
+              const val = Array.isArray(cf.value)
+                ? cf.value.join(', ')
+                : cf.value;
+              customMap[def.name] = val;
+            }
+          });
+          return {
+            ...record,
+            customFields: customMap,
+            customFieldsResult: record.customFields
+          };
+        });
+        setTransactionRecords(processed);
+      }
+    }
+  }, [customFieldsDefs, transactionRecords]);
+
+  const customFilterColumns = customFieldsDefs.map((def) => ({
+    id: `customFields.${def.name}`,
+    label: def.label,
+    type: def.type === 'multiple' ? 'text' : def.type.toLowerCase()
+  }));
+
+  const filterColumns = [...filterColumnsBase, ...customFilterColumns];
+
+  const defaultColumns = [
+    {
+      key: 'title',
+      label: 'Título',
+      render: (row) => (
+        <div className={styles.nameCell}>
+          <div className={styles.title}>{row.title}</div>
+        </div>
+      )
+    },
+    {
+      key: 'description',
+      label: 'Descrição',
+      render: (row) => row.description || '-'
+    },
+    {
+      key: 'amount',
+      label: 'Saldo Inicial',
+      render: (row) => formatCurrency(row.amount)
+    },
+    {
+      key: 'transaction_date',
+      label: 'Data da Transação',
+      render: (row) => formatDateTime(row.transaction_date)
+    }
+  ];
+
+  const customColumns = customFieldsDefs.map((def) => ({
+    key: `custom_${def.name}`,
+    label: def.label,
+    sortable: true
+  }));
+
+  const actionsColumn = {
+    key: 'actions',
+    label: 'Ações',
+    sortable: false,
+    render: (row, idx, { onEdit, onDelete }) => (
+      <div className={styles.actionsCell}>
+        <button
+          className={styles.editButton}
+          onClick={() => onEdit(row.id)}
+          title="Editar registro"
+          style={{
+            backgroundColor: emphasisColor || '#0ea5e9'
+          }}
+        >
+          <Edit2 size={16} />
+        </button>
+        <button
+          className={styles.deleteButton}
+          onClick={() => onDelete(row.id)}
+          title="Excluir registro"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    )
+  };
+
+  const columns = [...defaultColumns, ...customColumns, actionsColumn];
 
   useEffect(() => {
     const fetchTransactionsRecord = async () => {
       setLoading(true);
       try {
+        const adjustedSortBy = getAdjustedSortBy(sortBy);
         const filtersToSend = activeFilters
           .filter((filter) => filter.value && filter.value.trim() !== '')
           .map((filter) => ({
@@ -71,7 +199,7 @@ const TransactionList = () => {
 
         const response =
           await ServiceTransactionsRecord.getByAllTransactionsRecord(
-            sortBy,
+            adjustedSortBy,
             order,
             filtersToSend,
             monthlyRecordId
@@ -80,16 +208,25 @@ const TransactionList = () => {
         if (response.data.status === 'OK') {
           setStatus(response.data.status);
           setTransactionRecords(
-            response.data.data.map((item) => {return { ...item.transaction, customFields: item.customFields };})
+            response.data.data.map((item) => ({
+              ...item.transaction,
+              customFields: item.customFields
+            }))
           );
           if (response.data.data.length > 0) {
             setRecordTypeId(response.data.data[0].recordTypeId);
             setCategoryId(response.data.data[0].transaction.category_id);
+          } else {
+            setRecordTypeId(null);
+            setCategoryId(null);
           }
         }
       } catch (error) {
         console.error('Erro ao buscar registros dos registros mensais:', error);
-        setFlashMessage('Erro ao buscar registros dos registros mensais', 'error');
+        setFlashMessage(
+          'Erro ao buscar registros dos registros mensais',
+          'error'
+        );
       } finally {
         setLoading(false);
       }
@@ -108,54 +245,8 @@ const TransactionList = () => {
     );
   };
 
-  const columns = [
-    {
-      key: 'title',
-      label: 'Título',
-      render: (row) => (
-        <div className={styles.nameCell}>
-          <div className={styles.title}>{row.title}</div>
-        </div>
-      )
-    },
-    {
-      key: 'description',
-      label: 'Descrição',
-      render: (row) => row.description || '-'
-    },
-
-    {
-      key: 'amount',
-      label: 'Saldo Inicial',
-      render: (row) => formatCurrency(row.amount)
-    },
-    {
-      key: 'actions',
-      label: 'Ações',
-      sortable: false,
-      render: (row, idx, { onEdit, onDelete }) => (
-        <div className={styles.actionsCell}>
-          <button
-            className={styles.editButton}
-            onClick={() => onEdit(row.id)}
-            title="Editar registro"
-            style={{
-              backgroundColor: emphasisColor || '#0ea5e9'
-            }}
-          >
-            <Edit2 size={16} />
-          </button>
-          <button
-            className={styles.deleteButton}
-            onClick={() => onDelete(row.id)}
-            title="Excluir registro"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      )
-    }
-  ];
+  const formatDateTime = (date) =>
+    date ? new Date(`${date}T00:00:00`).toLocaleDateString('pt-BR') : '-';
 
   const handleSort = (key, direction) => {
     setSortBy(direction ? key : '');
@@ -178,6 +269,7 @@ const TransactionList = () => {
       );
       setFlashMessage('Registro mensal excluído com sucesso', 'success');
 
+      const adjustedSortBy = getAdjustedSortBy(sortBy);
       const filtersToSend = activeFilters
         .filter((filter) => filter.value && filter.value.trim() !== '')
         .map((filter) => ({
@@ -189,7 +281,7 @@ const TransactionList = () => {
 
       const response =
         await ServiceTransactionsRecord.getByAllTransactionsRecord(
-          sortBy,
+          adjustedSortBy,
           order,
           filtersToSend,
           monthlyRecordId
@@ -197,11 +289,17 @@ const TransactionList = () => {
 
       if (response.data.status === 'OK') {
         setTransactionRecords(
-            response.data.data.map((item) => {return { ...item.transaction, customFields: item.customFields };})
-          );
+          response.data.data.map((item) => ({
+            ...item.transaction,
+            customFields: item.customFields
+          }))
+        );
         if (response.data.data.length > 0) {
           setRecordTypeId(response.data.data[0].recordTypeId);
           setCategoryId(response.data.data[0].transaction.category_id);
+        } else {
+          setRecordTypeId(null);
+          setCategoryId(null);
         }
       }
     } catch (error) {
@@ -264,7 +362,9 @@ const TransactionList = () => {
     : { key: null, direction: null };
 
   if (loading && transactionRecords.length === 0 && !status) {
-    return <LoadingSpinner message="Carregando registros dos registros mensais..." />;
+    return (
+      <LoadingSpinner message="Carregando registros dos registros mensais..." />
+    );
   }
 
   return (
