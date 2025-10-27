@@ -12,7 +12,10 @@ const SingleSelect = ({ label, options, value, onChange, ...props }) => {
           backgroundColor: '#111827',
           borderColor: state.isFocused ? '#6366f1' : '#374151',
           color: '#f3f4f6',
-          boxShadow: state.isFocused ? '0 0 0 3px rgba(99, 102, 241, 0.2)' : 'none',
+          height: '50px',
+          boxShadow: state.isFocused
+            ? '0 0 0 3px rgba(99, 102, 241, 0.2)'
+            : 'none',
           transition: 'all 0.3s ease',
           '&:hover': {
             borderColor: '#6366f1'
@@ -53,10 +56,10 @@ const SingleSelect = ({ label, options, value, onChange, ...props }) => {
         }),
         option: (base, state) => ({
           ...base,
-          backgroundColor: state.isSelected 
-            ? '#6366f1' 
-            : state.isFocused 
-            ? '#2a2a2a' 
+          backgroundColor: state.isSelected
+            ? '#6366f1'
+            : state.isFocused
+            ? '#2a2a2a'
             : '#1f2937',
           color: state.isSelected ? '#ffffff' : '#f3f4f6',
           cursor: 'pointer',
@@ -90,7 +93,11 @@ const SingleSelect = ({ label, options, value, onChange, ...props }) => {
         backgroundColor: 'white',
         borderColor: state.isFocused ? '#6366f1' : '#dee2e6',
         color: '#1f2937',
-        boxShadow: state.isFocused ? '0 0 0 3px rgba(99, 102, 241, 0.1)' : 'none',
+        boxShadow: state.isFocused
+          ? '0 0 0 3px rgba(99, 102, 241, 0.1)'
+          : 'none',
+        height: '50px',
+
         transition: 'all 0.3s ease',
         '&:hover': {
           borderColor: '#6366f1'
@@ -121,10 +128,10 @@ const SingleSelect = ({ label, options, value, onChange, ...props }) => {
       }),
       option: (base, state) => ({
         ...base,
-        backgroundColor: state.isSelected 
-          ? '#6366f1' 
-          : state.isFocused 
-          ? '#f3f4f6' 
+        backgroundColor: state.isSelected
+          ? '#6366f1'
+          : state.isFocused
+          ? '#f3f4f6'
           : 'white',
         color: state.isSelected ? '#ffffff' : '#1f2937',
         cursor: 'pointer',
