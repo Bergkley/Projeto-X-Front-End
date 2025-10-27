@@ -52,6 +52,8 @@ const TableWithDate = ({
   const [expandedDays, setExpandedDays] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [currentGroupBy, setCurrentGroupBy] = useState(groupBy || null);
+  const [showGroupByDropdown, setShowGroupByDropdown] = useState(false);
 
   const monthNames = [
     'JAN',
@@ -68,6 +70,10 @@ const TableWithDate = ({
     'DEZ'
   ];
   const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
+
+  useEffect(() => {
+    setCurrentGroupBy(groupBy || null);
+  }, [groupBy]);
 
   useEffect(() => {
     const memorizedConfig = getMemorizedConfig();
@@ -122,20 +128,30 @@ const TableWithDate = ({
     }
   };
 
-  const toggleDay = (day) => {
+  const toggleDay = (groupKey) => {
     const newExpanded = new Set(expandedDays);
-    if (newExpanded.has(day)) {
-      newExpanded.delete(day);
+    if (newExpanded.has(groupKey)) {
+      newExpanded.delete(groupKey);
     } else {
-      newExpanded.add(day);
+      newExpanded.add(groupKey);
     }
     setExpandedDays(newExpanded);
   };
 
+  const getAllGroupKeys = () => {
+    if (!groupedData || !currentGroupBy) return [];
+    if (currentGroupBy === 'date') {
+      return Object.keys(groupedData).map(Number);
+    } else if (currentGroupBy === 'week') {
+      const daysInMonth = new Date(year, month, 0).getDate();
+      return Array.from({ length: Math.ceil(daysInMonth / 7) }, (_, i) => i + 1);
+    }
+    return [];
+  };
+
   const expandAll = () => {
-    if (!groupedData) return;
-    const allDays = Object.keys(groupedData).map(Number);
-    setExpandedDays(new Set(allDays));
+    const allGroups = getAllGroupKeys();
+    setExpandedDays(new Set(allGroups));
   };
 
   const collapseAll = () => {
@@ -235,26 +251,35 @@ const TableWithDate = ({
     .map((key) => columns.find((col) => col.key === key))
     .filter((col) => col && visibleColumns.includes(col.key));
 
-  const groupedData =
-  groupBy === 'date'
-    ? sortedData.reduce((acc, row) => {
-        
-        const [yearStr, monthStr, dayStr] = row.transaction_date.split('-');
-        const yearNum = parseInt(yearStr, 10);
-        const monthNum = parseInt(monthStr, 10);
-        const dayNum = parseInt(dayStr, 10);
-        
-        if (monthNum === month && yearNum === year) {  
-          const dateKey = dayNum;
-          
-          if (!acc[dateKey]) {
-            acc[dateKey] = [];
-          }
-          acc[dateKey].push(row);
+  const groupedData = React.useMemo(() => {
+    if (!currentGroupBy || !sortedData.length) return null;
+
+    const result = sortedData.reduce((acc, row) => {
+      const [yearStr, monthStr, dayStr] = row.transaction_date.split('-');
+      const yearNum = parseInt(yearStr, 10);
+      const monthNum = parseInt(monthStr, 10);
+      const dayNum = parseInt(dayStr, 10);
+
+      if (monthNum === month && yearNum === year) {
+        let groupKey;
+        if (currentGroupBy === 'date') {
+          groupKey = dayNum;
+        } else if (currentGroupBy === 'week') {
+          groupKey = Math.ceil(dayNum / 7);
         }
-        return acc;
-      }, {})
-    : null;
+
+        if (groupKey && !acc[groupKey]) {
+          acc[groupKey] = [];
+        }
+        if (groupKey) {
+          acc[groupKey].push(row);
+        }
+      }
+      return acc;
+    }, {});
+
+    return result;
+  }, [sortedData, currentGroupBy, month, year]);
 
   const renderGroupedRows = () => {
     if (!groupedData) {
@@ -290,26 +315,38 @@ const TableWithDate = ({
 
     const monthAbbr = monthNames[month - 1];
     const daysInMonth = new Date(year, month, 0).getDate();
-    const allDays = [];
+    const allGroups = [];
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month - 1, day);
-      const dayAbbr = dayNames[date.getDay()];
-      const headerText = `${day.toString().padStart(2, '0')} ${monthAbbr}/${year
-        .toString()
-        .slice(-2)} ${dayAbbr}`;
-      const groupRows = groupedData[day] || [];
+    if (currentGroupBy === 'date') {
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month - 1, day);
+        const dayAbbr = dayNames[date.getDay()];
+        const headerText = `${day.toString().padStart(2, '0')} ${monthAbbr}/${year
+          .toString()
+          .slice(-2)} ${dayAbbr}`;
+        const groupRows = groupedData[day] || [];
 
-      allDays.push({ day, headerText, rows: groupRows });
+        allGroups.push({ groupKey: day, headerText, rows: groupRows });
+      }
+    } else if (currentGroupBy === 'week') {
+      const numWeeks = Math.ceil(daysInMonth / 7);
+      for (let week = 1; week <= numWeeks; week++) {
+        const startDay = (week - 1) * 7 + 1;
+        const endDay = Math.min(week * 7, daysInMonth);
+        const headerText = `Semana ${week} (${startDay.toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')} ${monthAbbr}/${year.toString().slice(-2)})`;
+        const groupRows = groupedData[week] || [];
+
+        allGroups.push({ groupKey: week, headerText, rows: groupRows, startDay });
+      }
     }
 
-    return allDays.map(({ day, headerText, rows }) => (
-      <React.Fragment key={day}>
+    return allGroups.map(({ groupKey, headerText, rows, startDay }) => (
+      <React.Fragment key={groupKey}>
         <tr
           className={`${styles.tableRow} ${styles.groupHeaderRow} ${
-            expandedDays.has(day) ? styles.expanded : ''
+            expandedDays.has(groupKey) ? styles.expanded : ''
           }`}
-          onClick={() => toggleDay(day)}
+          onClick={() => toggleDay(groupKey)}
           style={{ cursor: 'pointer' }}
         >
           <td
@@ -320,7 +357,7 @@ const TableWithDate = ({
               <ChevronRight
                 size={16}
                 className={`${styles.expandIcon} ${
-                  expandedDays.has(day) ? styles.expanded : ''
+                  expandedDays.has(groupKey) ? styles.expanded : ''
                 }`}
               />
               <span>{headerText}</span>
@@ -334,7 +371,7 @@ const TableWithDate = ({
             </div>
           </td>
         </tr>
-        {expandedDays.has(day) && (
+        {expandedDays.has(groupKey) && (
           <tr className={styles.cardsContainerRow}>
             <td
               colSpan={orderedColumns.length + (selectable ? 1 : 0)}
@@ -343,7 +380,7 @@ const TableWithDate = ({
               {rows.length === 0 ? (
                 <div className={styles.emptyState}>
                   <span className={styles.emptyStateText}>
-                    Nenhum registro nesta data
+                    Nenhum registro neste {currentGroupBy === 'date' ? 'dia' : 'semana'}
                   </span>
                 </div>
               ) : (
@@ -395,7 +432,7 @@ const TableWithDate = ({
               )}
               <div
                 className={`${styles.recordCard} ${styles.addCard}`}
-                onClick={() => openModal(null, { month, year, day })}
+                onClick={() => openModal(null, { month, year, day: startDay || groupKey })}
               >
                 <div className={styles.addCardContent}>
                   <Plus size={24} className={styles.addIcon} />
@@ -411,11 +448,58 @@ const TableWithDate = ({
     ));
   };
 
+  const handleGroupBySelect = (groupByOption) => {
+    setCurrentGroupBy(groupByOption);
+    setShowGroupByDropdown(false);
+  };
+
   return (
     <div className={`${styles.tableContainer} ${styles[theme]}`}>
       <div className={styles.tableToolbar}>
         <div className={styles.toolbarLeft}>
-          {groupBy === 'date' && (
+          <div className={styles.groupBySelector}>
+            <button
+              className={styles.groupByButton}
+              onClick={() => setShowGroupByDropdown(!showGroupByDropdown)}
+              style={{
+                '--hover-border-color': emphasisColor || '#0ea5e9'
+              }}
+            >
+              {currentGroupBy === 'date' ? 'Por Dia' : currentGroupBy === 'week' ? 'Por Semana' : 'Agrupar por...'}
+              <ChevronDown size={12} className={styles.dropdownIcon} />
+            </button>
+            {showGroupByDropdown && (
+              <div className={styles.groupByDropdown}>
+                <label className={styles.dropdownItem}>
+                  <input
+                    type="radio"
+                    name="groupBy"
+                    checked={currentGroupBy === 'date'}
+                    onChange={() => handleGroupBySelect('date')}
+                    className={styles.radio}
+                    style={{
+                      accentColor: emphasisColor || '#0ea5e9'
+                    }}
+                  />
+                  Por Dia
+                </label>
+                <label className={styles.dropdownItem}>
+                  <input
+                    type="radio"
+                    name="groupBy"
+                    checked={currentGroupBy === 'week'}
+                    onChange={() => handleGroupBySelect('week')}
+                    className={styles.radio}
+                    style={{
+                      accentColor: emphasisColor || '#0ea5e9'
+                    }}
+                  />
+                  Por Semana
+                </label>
+              </div>
+            )}
+          </div>
+          {currentGroupBy && (
             <>
               <button
                 className={styles.expandButton}
