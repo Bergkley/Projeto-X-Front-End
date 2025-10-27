@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { useParams, useHistory } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, Row, Col } from 'reactstrap';
 import { ErrorMessage } from '@hookform/error-message';
@@ -38,6 +38,13 @@ const CustomFieldForm = () => {
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [recordTypeOptions, setRecordTypeOptions] = useState([]);
 
+  const fieldTypeOptions = [
+    { value: 'text', label: 'Texto' },
+    { value: 'number', label: 'Número' },
+    { value: 'date', label: 'Data' },
+    { value: 'multiple', label: 'Múltipla Escolha' }
+  ];
+
   const {
     control,
     handleSubmit,
@@ -51,10 +58,12 @@ const CustomFieldForm = () => {
       name: '',
       description: '',
       categoryId: null,
-      recordTypeId: null,
+      recordTypeId: [],
       required: false
     }
   });
+
+  const selectedCategory = useWatch({ control, name: 'categoryId' });
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -72,20 +81,6 @@ const CustomFieldForm = () => {
           }));
           setCategoryOptions(categories);
         }
-
-        const recordTypesResponse = await ServiceRecordType.getByAllRecordType(
-          1,
-          '',
-          '',
-          ''
-        );
-        if (recordTypesResponse.data.status === 'OK') {
-          const recordTypes = recordTypesResponse.data.data.map((rt) => ({
-            value: rt.id,
-            label: rt.name
-          }));
-          setRecordTypeOptions(recordTypes);
-        }
       } catch (error) {
         console.error('Erro ao buscar opções:', error);
       }
@@ -95,6 +90,32 @@ const CustomFieldForm = () => {
   }, []);
 
   useEffect(() => {
+    if (selectedCategory?.value) {
+      const fetchRecordTypeForCategory = async () => {
+        try {
+          const catResp = await ServiceCategory.getByIdCategory(selectedCategory.value);
+          if (catResp.data.status === 'OK') {
+            const catData = catResp.data.data;
+            const rtId = catData.record_type_id;
+            const rtResp = await ServiceRecordType.getByIdRecordType(rtId);
+            if (rtResp.data.status === 'OK') {
+              const rtData = rtResp.data.data;
+              setRecordTypeOptions([{ value: rtData.id, label: rtData.name }]);
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao buscar tipo de registro para categoria:', error);
+          setRecordTypeOptions([]);
+        }
+      };
+
+      fetchRecordTypeForCategory();
+    } else {
+      setRecordTypeOptions([]);
+    }
+  }, [selectedCategory]);
+
+ useEffect(() => {
     const fetchCustomFieldData = async () => {
       if (!id) return;
 
@@ -182,12 +203,6 @@ const CustomFieldForm = () => {
 
     fetchCustomFieldData();
   }, [id]);
-  const fieldTypeOptions = [
-    { value: 'text', label: 'Texto' },
-    { value: 'number', label: 'Número' },
-    { value: 'date', label: 'Data' },
-    { value: 'multiple', label: 'Múltipla Escolha' }
-  ];
 
   const selectedType = watch('type');
   const isMultipleType = selectedType?.value === 'multiple';
@@ -233,15 +248,20 @@ const CustomFieldForm = () => {
       setIsModalOpen(false);
     };
 
+    const handleCloseModal = () => {
+      setIsModalOpen(false);
+      setEditingOption(null);
+    };
+
     return (
       <Modal
         isOpen={isModalOpen}
-        toggle={() => handleCloseModal()}
+        toggle={handleCloseModal}
         centered
         className={styles[`modal_${theme}`]}
       >
         <ModalHeader
-          toggle={() => handleCloseModal()}
+          toggle={handleCloseModal}
           className={styles.modalHeader}
           style={{
             backgroundColor: theme === 'dark' ? '#1a202c' : '#fff',
@@ -324,7 +344,7 @@ const CustomFieldForm = () => {
               </button>
               <button
                 type="button"
-                onClick={() => handleCloseModal()}
+                onClick={handleCloseModal}
                 className={styles.buttonCancel}
               >
                 Cancelar
@@ -334,11 +354,6 @@ const CustomFieldForm = () => {
         </ModalBody>
       </Modal>
     );
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingOption(null);
   };
 
   const handleOpenModal = (option = null) => {
@@ -445,7 +460,7 @@ const CustomFieldForm = () => {
                         type="text"
                         placeholder="Digite o nome do campo"
                         className={`${styles.input} ${
-                          errors.name ? styles.error : ''
+                          errors.label ? styles.error : ''
                         }`}
                         disabled={loading}
                       />
