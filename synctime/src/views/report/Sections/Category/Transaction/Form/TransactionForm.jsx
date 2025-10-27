@@ -199,11 +199,11 @@ const TransactionForm = () => {
         year: dados.year
       });
     } catch (error) {
-      console.error('Erro ao salvar transação:', error);
+      console.error('Erro ao salvar transação:', error?.response?.data?.errors[0]);
       const errorMessage = id
         ? 'Erro ao atualizar transação'
         : 'Erro ao criar transação';
-      setFlashMessage(errorMessage, 'error');
+      setFlashMessage(error?.response?.data?.errors[0] || errorMessage, 'error');
     } finally {
       setLoading(false);
     }
@@ -214,7 +214,8 @@ const TransactionForm = () => {
       return history.push(`/relatorios/categoria/transações`, {
         monthlyRecordId: dados.monthlyRecordId,
         month: dados.month,
-        year: dados.year
+        year: dados.year,
+        idCategory: dados.categoryId
       });
     }
     history.push('/inicio');
@@ -225,7 +226,8 @@ const TransactionForm = () => {
       return history.push(`/relatorios/categoria/transações`, {
         monthlyRecordId: dados.monthlyRecordId,
         month: dados.month,
-        year: dados.year
+        year: dados.year,
+        idCategory: dados.categoryId
       });
     }
     history.push('/inicio');
