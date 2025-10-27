@@ -150,7 +150,8 @@ const ReportMonthlyRecordForm = () => {
           ? parseFloat(data.initial_balance)
           : undefined,
         month: data.month?.value || data.month,
-        year: data.year?.value || data.year
+        year: data.year?.value || data.year,
+        categoryId: dados.categoryId
       };
 
       if (id) {
