@@ -19,7 +19,7 @@ const TransactionModal = ({
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
-  const isEditMode = !!record;
+  const isEditMode = !!record?.id;
   const [customFields, setCustomFields] = useState([]);
   const [isLoadingCustomFields, setIsLoadingCustomFields] = useState(false);
 
@@ -93,6 +93,10 @@ const TransactionModal = ({
           }
         });
       }
+    } else if (!isEditMode && record?.day && record?.month && record?.year) {
+      const dayStr = record.day.toString().padStart(2, '0');
+      const monthStr = record.month.toString().padStart(2, '0');
+      formData.transactionDate = `${record.year}-${monthStr}-${dayStr}`;
     }
 
     reset(formData);
