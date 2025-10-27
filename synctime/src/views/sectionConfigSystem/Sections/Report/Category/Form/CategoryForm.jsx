@@ -120,6 +120,32 @@ const CategoryForm = () => {
     fetchCategoryData();
   }, [id]);
 
+  useEffect(() => {
+    const fetchRecordTypes = async () => {
+      try {
+        const response = await ServiceRecordType.getByAllRecordType(
+          1,
+          '',
+          '',
+          ''
+        );
+        if (response.data.status === 'OK') {
+          setRecordTypes(
+            response.data.data.map((rt) => ({
+              value: rt.id,
+              label: rt.name
+            }))
+          );
+        }
+      } catch (error) {
+        console.error('Erro ao buscar tipos de registros:', error);
+        setFlashMessage('Erro ao buscar tipos de registros', 'error');
+      }
+    };
+
+    fetchRecordTypes();
+  }, []);
+
   const onSubmit = async (data) => {
     try {
       setLoading(true);
