@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Filter,
   GripVertical,
   ChevronUp,
   ChevronDown,
   ChevronRight,
-  Plus
+  Plus,
+  X
 } from 'lucide-react';
 
 // 💅 Estilos
@@ -57,6 +58,7 @@ const TableWithDate = ({
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentGroupBy, setCurrentGroupBy] = useState(groupBy || null);
   const [showGroupByDropdown, setShowGroupByDropdown] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const monthNames = [
     'JAN',
@@ -75,8 +77,16 @@ const TableWithDate = ({
   const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
 
   useEffect(() => {
-    setCurrentGroupBy(groupBy || null);
-  }, [groupBy]);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    setCurrentGroupBy(isMobile && !groupBy ? 'date' : groupBy || null);
+  }, [groupBy, isMobile]);
 
   useEffect(() => {
     const memorizedConfig = getMemorizedConfig();
@@ -141,20 +151,89 @@ const TableWithDate = ({
     setExpandedDays(newExpanded);
   };
 
-  const getAllGroupKeys = () => {
+  // Lógica de ordenação
+  const sortedData = React.useMemo(() => {
+    if (!sortConfig?.key) return data;
+    return [...data].sort((a, b) => {
+      const aVal = getValue(a, sortConfig.key);
+      const bVal = getValue(b, sortConfig.key);
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [data, sortConfig]);
+
+  const groupedData = React.useMemo(() => {
+    if (!currentGroupBy || !sortedData.length) return null;
+
+    const result = sortedData.reduce((acc, row) => {
+      const [yearStr, monthStr, dayStr] = row.transaction_date.split('-');
+      const yearNum = parseInt(yearStr, 10);
+      const monthNum = parseInt(monthStr, 10);
+      const dayNum = parseInt(dayStr, 10);
+
+      if (monthNum === month && yearNum === year) {
+        let groupKey;
+        if (currentGroupBy === 'date') {
+          groupKey = dayNum;
+        } else if (currentGroupBy === 'week') {
+          groupKey = Math.ceil(dayNum / 7);
+        }
+
+        if (groupKey && !acc[groupKey]) {
+          acc[groupKey] = [];
+        }
+        if (groupKey) {
+          acc[groupKey].push(row);
+        }
+      }
+      return acc;
+    }, {});
+
+    return result;
+  }, [sortedData, currentGroupBy, month, year]);
+
+  const orderedColumns = columnOrder
+    .map((key) => columns.find((col) => col.key === key))
+    .filter((col) => col && visibleColumns.includes(col.key));
+
+  const getAllGroups = useCallback(() => {
     if (!groupedData || !currentGroupBy) return [];
+    const monthAbbr = monthNames[month - 1];
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const allGroups = [];
+
     if (currentGroupBy === 'date') {
-      return Object.keys(groupedData).map(Number);
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month - 1, day);
+        const dayAbbr = dayNames[date.getDay()];
+        const headerText = `${day.toString().padStart(2, '0')} ${monthAbbr}/${year
+          .toString()
+          .slice(-2)} ${dayAbbr}`;
+        const groupRows = groupedData[day] || [];
+
+        allGroups.push({ groupKey: day, headerText, rows: groupRows });
+      }
     } else if (currentGroupBy === 'week') {
-      const daysInMonth = new Date(year, month, 0).getDate();
-      return Array.from({ length: Math.ceil(daysInMonth / 7) }, (_, i) => i + 1);
+      const numWeeks = Math.ceil(daysInMonth / 7);
+      for (let week = 1; week <= numWeeks; week++) {
+        const startDay = (week - 1) * 7 + 1;
+        const endDay = Math.min(week * 7, daysInMonth);
+        const headerText = isMobile 
+          ? `Sem ${week}: ${startDay.toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')} ${monthAbbr}/${year.toString().slice(-2)}`
+          : `Semana ${week} (${startDay.toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')} ${monthAbbr}/${year.toString().slice(-2)})`;
+        const groupRows = groupedData[week] || [];
+
+        allGroups.push({ groupKey: week, headerText, rows: groupRows, startDay });
+      }
     }
-    return [];
-  };
+
+    return allGroups;
+  }, [groupedData, currentGroupBy, month, year, monthNames, dayNames, isMobile]);
 
   const expandAll = () => {
-    const allGroups = getAllGroupKeys();
-    setExpandedDays(new Set(allGroups));
+    const allGroups = getAllGroups();
+    setExpandedDays(new Set(allGroups.filter(g => g.rows.length > 0).map(g => g.groupKey)));
   };
 
   const collapseAll = () => {
@@ -212,18 +291,6 @@ const TableWithDate = ({
     }
   };
 
-  // Lógica de ordenação
-  const sortedData = React.useMemo(() => {
-    if (!sortConfig?.key) return data;
-    return [...data].sort((a, b) => {
-      const aVal = getValue(a, sortConfig.key);
-      const bVal = getValue(b, sortConfig.key);
-      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [data, sortConfig]);
-
   const handleDragStart = (e, columnKey) => {
     setDraggedColumn(columnKey);
     e.dataTransfer.effectAllowed = 'move';
@@ -250,39 +317,124 @@ const TableWithDate = ({
     setDraggedColumn(null);
   };
 
-  const orderedColumns = columnOrder
-    .map((key) => columns.find((col) => col.key === key))
-    .filter((col) => col && visibleColumns.includes(col.key));
+  const renderCard = useCallback((row) => (
+    <div
+      key={row.id}
+      className={styles.recordCard}
+      onClick={() => openModal(row)}
+      style={{ cursor: 'pointer' }}
+    >
+      {selectable && (
+        <div className={styles.cardCheckbox}>
+          <input
+            type="checkbox"
+            checked={selectedRows.has(row)}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleSelectRow(row);
+            }}
+            className={styles.checkbox}
+            style={{
+              accentColor: emphasisColor || '#0ea5e9'
+            }}
+          />
+        </div>
+      )}
+      <div className={styles.cardContent}>
+        {orderedColumns.map((column) => (
+          <div key={column.key} className={styles.cardField}>
+            <span className={styles.cardLabel}>
+              {column.label}:
+            </span>
+            <span className={styles.cardValue}>
+              {column.render
+                ? column.render(row, row.id, {
+                    onEdit,
+                    onToggleStatus,
+                    onDelete
+                  })
+                : (getValue(row, column.key) || '-')}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ), [selectable, selectedRows, orderedColumns, emphasisColor, onEdit, onToggleStatus, onDelete, openModal, handleSelectRow, getValue]);
 
-  const groupedData = React.useMemo(() => {
-    if (!currentGroupBy || !sortedData.length) return null;
+  const renderAllCards = useCallback(() => (
+    <div className={styles.cardsGrid}>
+      {sortedData.map(renderCard)}
+      <div
+        className={`${styles.recordCard} ${styles.addCard}`}
+        onClick={() => openModal(null, { month, year })}
+      >
+        <div className={styles.addCardContent}>
+          <Plus size={24} className={styles.addIcon} />
+          <span className={styles.addText}>
+            Adicionar Novo Registro
+          </span>
+        </div>
+      </div>
+    </div>
+  ), [sortedData, renderCard, month, year, openModal]);
 
-    const result = sortedData.reduce((acc, row) => {
-      const [yearStr, monthStr, dayStr] = row.transaction_date.split('-');
-      const yearNum = parseInt(yearStr, 10);
-      const monthNum = parseInt(monthStr, 10);
-      const dayNum = parseInt(dayStr, 10);
-
-      if (monthNum === month && yearNum === year) {
-        let groupKey;
-        if (currentGroupBy === 'date') {
-          groupKey = dayNum;
-        } else if (currentGroupBy === 'week') {
-          groupKey = Math.ceil(dayNum / 7);
-        }
-
-        if (groupKey && !acc[groupKey]) {
-          acc[groupKey] = [];
-        }
-        if (groupKey) {
-          acc[groupKey].push(row);
-        }
-      }
-      return acc;
-    }, {});
-
-    return result;
-  }, [sortedData, currentGroupBy, month, year]);
+  const renderGroupedMobile = useCallback(() => {
+    const allGroups = getAllGroups();
+    return allGroups.map(({ groupKey, headerText, rows, startDay }) => (
+      <div key={groupKey} className={styles.mobileGroup}>
+        <div
+          className={`${styles.groupHeaderMobile} ${
+            expandedDays.has(groupKey) ? styles.expanded : ''
+          }`}
+          onClick={() => toggleDay(groupKey)}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className={styles.groupHeaderContent}>
+            <ChevronRight
+              size={16}
+              className={`${styles.expandIcon} ${
+                expandedDays.has(groupKey) ? styles.expanded : ''
+              }`}
+            />
+            <span>{headerText}</span>
+            <span className={styles.recordCount}>
+              {rows.length > 0
+                ? `${rows.length} ${
+                    rows.length === 1 ? 'registro' : 'registros'
+                  }`
+                : 'Sem registros'}
+            </span>
+          </div>
+        </div>
+        {expandedDays.has(groupKey) && (
+          <div className={styles.cardsContainerMobile}>
+            {rows.length === 0 ? (
+              <div className={styles.emptyState}>
+                <span className={styles.emptyStateText}>
+                  Nenhum registro neste {currentGroupBy === 'date' ? 'dia' : 'semana'}
+                </span>
+              </div>
+            ) : (
+              <div className={styles.cardsGrid}>
+                {rows.map(renderCard)}
+              </div>
+            )}
+            <div
+              className={`${styles.recordCard} ${styles.addCard}`}
+              onClick={() => openModal(null, { month, year, day: startDay || groupKey })}
+            >
+              <div className={styles.addCardContent}>
+                <Plus size={24} className={styles.addIcon} />
+                <span className={styles.addText}>
+                  Adicionar Novo Registro
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    ));
+  }, [getAllGroups, expandedDays, currentGroupBy, renderCard, month, year, openModal, toggleDay]);
 
   const renderGroupedRows = () => {
     if (!groupedData) {
@@ -316,32 +468,7 @@ const TableWithDate = ({
       ));
     }
 
-    const monthAbbr = monthNames[month - 1];
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const allGroups = [];
-
-    if (currentGroupBy === 'date') {
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month - 1, day);
-        const dayAbbr = dayNames[date.getDay()];
-        const headerText = `${day.toString().padStart(2, '0')} ${monthAbbr}/${year
-          .toString()
-          .slice(-2)} ${dayAbbr}`;
-        const groupRows = groupedData[day] || [];
-
-        allGroups.push({ groupKey: day, headerText, rows: groupRows });
-      }
-    } else if (currentGroupBy === 'week') {
-      const numWeeks = Math.ceil(daysInMonth / 7);
-      for (let week = 1; week <= numWeeks; week++) {
-        const startDay = (week - 1) * 7 + 1;
-        const endDay = Math.min(week * 7, daysInMonth);
-        const headerText = `Semana ${week} (${startDay.toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')} ${monthAbbr}/${year.toString().slice(-2)})`;
-        const groupRows = groupedData[week] || [];
-
-        allGroups.push({ groupKey: week, headerText, rows: groupRows, startDay });
-      }
-    }
+    const allGroups = getAllGroups();
 
     return allGroups.map(({ groupKey, headerText, rows, startDay }) => (
       <React.Fragment key={groupKey}>
@@ -388,49 +515,7 @@ const TableWithDate = ({
                 </div>
               ) : (
                 <div className={styles.cardsGrid}>
-                  {rows.map((row) => (
-                    <div
-                      key={row.id}
-                      className={styles.recordCard}
-                      onClick={() => openModal(row)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {selectable && (
-                        <div className={styles.cardCheckbox}>
-                          <input
-                            type="checkbox"
-                            checked={selectedRows.has(row)}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              handleSelectRow(row);
-                            }}
-                            className={styles.checkbox}
-                            style={{
-                              accentColor: emphasisColor || '#0ea5e9'
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className={styles.cardContent}>
-                        {orderedColumns.map((column) => (
-                          <div key={column.key} className={styles.cardField}>
-                            <span className={styles.cardLabel}>
-                              {column.label}:
-                            </span>
-                            <span className={styles.cardValue}>
-                              {column.render
-                                ? column.render(row, row.id, {
-                                    onEdit,
-                                    onToggleStatus,
-                                    onDelete
-                                  })
-                                : (getValue(row, column.key) || '-')}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                  {rows.map(renderCard)}
                 </div>
               )}
               <div
@@ -454,6 +539,127 @@ const TableWithDate = ({
   const handleGroupBySelect = (groupByOption) => {
     setCurrentGroupBy(groupByOption);
     setShowGroupByDropdown(false);
+  };
+
+  const handleCloseFilter = () => {
+    setShowColumnFilter(false);
+  };
+
+  const renderContent = () => {
+    if (isMobile) {
+      return (
+        <div className={styles.mobileContent}>
+          {currentGroupBy ? renderGroupedMobile() : renderAllCards()}
+        </div>
+      );
+    }
+
+    return (
+      <table className={styles.table}>
+        <thead>
+          <tr className={styles.tableHeaderRow}>
+            {selectable && (
+              <th className={styles.tableHeaderCell}>
+                <input
+                  type="checkbox"
+                  checked={
+                    selectedRows.size === data.length && data.length > 0
+                  }
+                  onChange={handleSelectAll}
+                  className={styles.checkbox}
+                  style={{
+                    accentColor: emphasisColor || '#0ea5e9'
+                  }}
+                />
+              </th>
+            )}
+            {orderedColumns.map((column) => {
+              const isSortable = column.sortable !== false;
+              return (
+                <th
+                  key={column.key}
+                  className={styles.tableHeaderCell}
+                  draggable={reorderable}
+                  onDragStart={(e) =>
+                    reorderable && handleDragStart(e, column.key)
+                  }
+                  onDragOver={reorderable ? handleDragOver : undefined}
+                  onDrop={
+                    reorderable ? (e) => handleDrop(e, column.key) : undefined
+                  }
+                >
+                  <div className={styles.headerCellContent}>
+                    {reorderable && (
+                      <GripVertical size={14} className={styles.dragHandle} />
+                    )}
+                    {!isSortable ? (
+                      <div className={styles.unsortableHeader}>
+                        {column.label}
+                      </div>
+                    ) : (
+                      <div
+                        className={`${styles.sortableHeader} ${
+                          sortConfig?.key === column.key
+                            ? styles.sortedHeader
+                            : ''
+                        }`}
+                      >
+                        {column.label}
+                        <div className={styles.sortIcons}>
+                          <ChevronUp
+                            size={12}
+                            className={`${styles.sortIcon} ${
+                              sortConfig?.key === column.key &&
+                              sortConfig?.direction === 'asc'
+                                ? styles.active
+                                : ''
+                            }`}
+                            style={
+                              sortConfig?.key === column.key &&
+                              sortConfig?.direction === 'asc'
+                                ? {
+                                    color: emphasisColor || '#ec1109'
+                                  }
+                                : {}
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSortAsc(column.key);
+                            }}
+                          />
+                          <ChevronDown
+                            size={12}
+                            className={`${styles.sortIcon} ${
+                              sortConfig?.key === column.key &&
+                              sortConfig?.direction === 'desc'
+                                ? styles.active
+                                : ''
+                            }`}
+                            style={
+                              sortConfig?.key === column.key &&
+                              sortConfig?.direction === 'desc'
+                                ? {
+                                    color: emphasisColor || '#ec1109'
+                                  }
+                                : {}
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSortDesc(column.key);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>{renderGroupedRows()}</tbody>
+      </table>
+    );
   };
 
   return (
@@ -538,132 +744,68 @@ const TableWithDate = ({
         </button>
 
         {showColumnFilter && (
-          <div className={styles.columnFilterDropdown}>
-            {columns
-              .filter((column) => column.key !== 'actions')
-              .map((column) => (
-                <label key={column.key} className={styles.columnFilterItem}>
-                  <input
-                    type="checkbox"
-                    checked={visibleColumns.includes(column.key)}
-                    onChange={() => toggleColumnVisibility(column.key)}
-                    className={styles.checkbox}
-                    style={{
-                      accentColor: emphasisColor || '#0ea5e9'
-                    }}
-                  />
-                  {column.label}
-                </label>
-              ))}
-          </div>
+          <>
+            {!isMobile ? (
+              <div className={styles.columnFilterDropdown}>
+                {columns
+                  .filter((column) => column.key !== 'actions')
+                  .map((column) => (
+                    <label key={column.key} className={styles.columnFilterItem}>
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns.includes(column.key)}
+                        onChange={() => toggleColumnVisibility(column.key)}
+                        className={styles.checkbox}
+                        style={{
+                          accentColor: emphasisColor || '#0ea5e9'
+                        }}
+                      />
+                      {column.label}
+                    </label>
+                  ))}
+              </div>
+            ) : (
+              <div className={styles.columnFilterWrapper}>
+                <div 
+                  className={styles.columnFilterBackdrop} 
+                  onClick={handleCloseFilter}
+                />
+                <div className={styles.columnFilterDropdown}>
+                  <div className={styles.columnFilterHeader}>
+                    <h3 className={styles.columnFilterTitle}>Filtrar Colunas</h3>
+                    <button 
+                      className={styles.closeFilterButton}
+                      onClick={handleCloseFilter}
+                      aria-label="Fechar filtro"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                  {columns
+                    .filter((column) => column.key !== 'actions')
+                    .map((column) => (
+                      <label key={column.key} className={styles.columnFilterItem}>
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.includes(column.key)}
+                          onChange={() => toggleColumnVisibility(column.key)}
+                          className={styles.checkbox}
+                          style={{
+                            accentColor: emphasisColor || '#0ea5e9'
+                          }}
+                        />
+                        {column.label}
+                      </label>
+                    ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
       <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr className={styles.tableHeaderRow}>
-              {selectable && (
-                <th className={styles.tableHeaderCell}>
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedRows.size === data.length && data.length > 0
-                    }
-                    onChange={handleSelectAll}
-                    className={styles.checkbox}
-                    style={{
-                      accentColor: emphasisColor || '#0ea5e9'
-                    }}
-                  />
-                </th>
-              )}
-              {orderedColumns.map((column) => {
-                const isSortable = column.sortable !== false;
-                return (
-                  <th
-                    key={column.key}
-                    className={styles.tableHeaderCell}
-                    draggable={reorderable}
-                    onDragStart={(e) =>
-                      reorderable && handleDragStart(e, column.key)
-                    }
-                    onDragOver={reorderable ? handleDragOver : undefined}
-                    onDrop={
-                      reorderable ? (e) => handleDrop(e, column.key) : undefined
-                    }
-                  >
-                    <div className={styles.headerCellContent}>
-                      {reorderable && (
-                        <GripVertical size={14} className={styles.dragHandle} />
-                      )}
-                      {!isSortable ? (
-                        <div className={styles.unsortableHeader}>
-                          {column.label}
-                        </div>
-                      ) : (
-                        <div
-                          className={`${styles.sortableHeader} ${
-                            sortConfig?.key === column.key
-                              ? styles.sortedHeader
-                              : ''
-                          }`}
-                        >
-                          {column.label}
-                          <div className={styles.sortIcons}>
-                            <ChevronUp
-                              size={12}
-                              className={`${styles.sortIcon} ${
-                                sortConfig?.key === column.key &&
-                                sortConfig?.direction === 'asc'
-                                  ? styles.active
-                                  : ''
-                              }`}
-                              style={
-                                sortConfig?.key === column.key &&
-                                sortConfig?.direction === 'asc'
-                                  ? {
-                                      color: emphasisColor || '#ec1109'
-                                    }
-                                  : {}
-                              }
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSortAsc(column.key);
-                              }}
-                            />
-                            <ChevronDown
-                              size={12}
-                              className={`${styles.sortIcon} ${
-                                sortConfig?.key === column.key &&
-                                sortConfig?.direction === 'desc'
-                                  ? styles.active
-                                  : ''
-                              }`}
-                              style={
-                                sortConfig?.key === column.key &&
-                                sortConfig?.direction === 'desc'
-                                  ? {
-                                      color: emphasisColor || '#ec1109'
-                                    }
-                                  : {}
-                              }
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSortDesc(column.key);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>{renderGroupedRows()}</tbody>
-        </table>
+        {renderContent()}
       </div>
 
       <TransactionModal
