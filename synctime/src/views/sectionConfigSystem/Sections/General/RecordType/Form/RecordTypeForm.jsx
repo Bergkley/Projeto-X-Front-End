@@ -137,9 +137,11 @@ const RecordTypeForm = () => {
       if (id) {
         await ServiceRecordType.editRecordType(id, payload);
         setFlashMessage('Tipo de registro atualizado com sucesso', 'success');
+        window.dispatchEvent(new CustomEvent('refreshSidebar'));
       } else {
         await ServiceRecordType.createRecordType(payload);
         setFlashMessage('Tipo de registro criado com sucesso', 'success');
+        window.dispatchEvent(new CustomEvent('refreshSidebar'));
       }
 
       history.push('/record-type');

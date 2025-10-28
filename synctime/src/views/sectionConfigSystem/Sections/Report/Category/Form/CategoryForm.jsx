@@ -160,9 +160,11 @@ const CategoryForm = () => {
       if (id) {
         await ServiceCategory.editCategory(id, payload);
         setFlashMessage('Categoria atualizada com sucesso', 'success');
+        window.dispatchEvent(new CustomEvent('refreshSidebar'));
       } else {
         await ServiceCategory.createCategory(payload);
         setFlashMessage('Categoria criada com sucesso', 'success');
+        window.dispatchEvent(new CustomEvent('refreshSidebar'));
       }
 
       history.push('/categoria');

@@ -133,6 +133,7 @@ const CategoryList = () => {
       if (response.data.status === 'OK') {
         setCategories(response.data.data);
         setTotalItems(response.data.totalRegisters);
+        window.dispatchEvent(new CustomEvent('refreshSidebar'));
       }
     } catch (error) {
       console.error('Erro ao excluir categoria:', error);

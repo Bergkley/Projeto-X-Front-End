@@ -132,6 +132,7 @@ const RecordTypeList = () => {
       if (response.data.status === 'OK') {
         setRecordTypes(response.data.data);
         setTotalItems(response.data.totalRegisters);
+        window.dispatchEvent(new CustomEvent('refreshSidebar'));
       }
     } catch (error) {
       console.error('Erro ao excluir record Type:', error);

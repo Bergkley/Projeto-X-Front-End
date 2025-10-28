@@ -1,5 +1,5 @@
 // ⚙️ React e bibliotecas externas
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   FaHome,
@@ -40,51 +40,51 @@ function Sidebar({ onToggle }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+ const fetchCategories = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const response = await ServiceCategory.getByAllSideBarCategory(true);
+      const response = await ServiceCategory.getByAllSideBarCategory(true);
 
-        if (response.data.status === 'OK' && response.data.data) {
-          const groupedData = response.data.data.reduce((acc, category) => {
-            const recordTypeId = category.record_type_id;
+      if (response.data.status === 'OK' && response.data.data) {
+        const groupedData = response.data.data.reduce((acc, category) => {
+          const recordTypeId = category.record_type_id;
 
-            if (!acc[recordTypeId]) {
-              acc[recordTypeId] = {
-                id: recordTypeId,
-                name: category.record_type_name,
-                icon: category.record_type_icone,
-                categorias: []
-              };
-            }
+          if (!acc[recordTypeId]) {
+            acc[recordTypeId] = {
+              id: recordTypeId,
+              name: category.record_type_name,
+              icon: category.record_type_icone,
+              categorias: []
+            };
+          }
 
-            acc[recordTypeId].categorias.push({
-              id: category.id,
-              name: category.name,
-              description: category.description,
-              type: category.type,
-              path: `/relatorios/categoria/relatorio-mesal/${category.id}`
-            });
+          acc[recordTypeId].categorias.push({
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            type: category.type,
+            path: `/relatorios/categoria/relatorio-mesal/${category.id}`
+          });
 
-            return acc;
-          }, {});
+          return acc;
+        }, {});
 
-          const menuData = Object.values(groupedData);
-          setRelatoriosSubMenu(menuData);
-        }
-      } catch (err) {
-        console.error('Erro ao buscar categorias:', err);
-        setError('Erro ao carregar categorias');
-      } finally {
-        setIsLoading(false);
+        const menuData = Object.values(groupedData);
+        setRelatoriosSubMenu(menuData);
       }
-    };
+    } catch (err) {
+      console.error('Erro ao buscar categorias:', err);
+      setError('Erro ao carregar categorias');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);  
 
+  useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories])
 
   useEffect(() => {
     const handleResize = () => {
@@ -97,6 +97,18 @@ function Sidebar({ onToggle }) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    const handleRefreshSidebar = () => {
+      fetchCategories();
+    };
+
+    window.addEventListener('refreshSidebar', handleRefreshSidebar);
+
+    return () => {
+      window.removeEventListener('refreshSidebar', handleRefreshSidebar);
+    };
+  }, [fetchCategories])
 
   useEffect(() => {
     if (location.pathname.startsWith('/relatorios')) {
