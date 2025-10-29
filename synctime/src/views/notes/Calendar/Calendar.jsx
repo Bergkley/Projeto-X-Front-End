@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './Calendar.module.css';
-import CreateNote from './Modal/CreateNote';
 import NoteList from './List/NoteList';
 import { useTheme } from './../../../hooks/useTheme';
+import CreateNote from './Modal/CreateNote';
+
 
 
 const Calendar = () => {
