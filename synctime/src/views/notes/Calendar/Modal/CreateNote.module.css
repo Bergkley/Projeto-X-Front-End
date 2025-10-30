@@ -45,7 +45,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
@@ -152,7 +151,7 @@
 
 .typeSelect.light:focus,
 .periodSelect.light:focus {
-  border-color: #667eea;
+  border-color: var(--focus-color, #667eea);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -165,7 +164,7 @@
 
 .typeSelect.dark:focus,
 .periodSelect.dark:focus {
-  border-color: #667eea;
+  border-color: var(--focus-color, #667eea);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
@@ -186,7 +185,6 @@
 .addButton,
 .generateButton {
   margin-top: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -216,9 +214,7 @@
   width: 100%;
 }
 
-.generateButton.dark {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-}
+
 
 .emptyState {
   text-align: center;
@@ -264,6 +260,7 @@
 .noteCard.light:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+  border-color: var(--border-color, #667eea);
 }
 
 .noteCard.dark {
@@ -274,6 +271,7 @@
 .noteCard.dark:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
+  border-color: var(--border-color, #667eea);
 }
 
 .noteCardHeader {
