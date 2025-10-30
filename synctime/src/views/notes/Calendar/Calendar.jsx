@@ -3,12 +3,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './Calendar.module.css';
 import NoteList from './List/NoteList';
 import { useTheme } from './../../../hooks/useTheme';
+import { useEmphasisColor } from './../../../hooks/useEmphasisColor';
 import CreateNote from './Modal/CreateNote';
-
-
 
 const Calendar = () => {
   const { theme } = useTheme();
+  const { emphasisColor } = useEmphasisColor();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [notes, setNotes] = useState({});
@@ -240,7 +240,12 @@ const Calendar = () => {
   return (
     <div className={`${styles.container} ${styles[theme]}`}>
       <div className={`${styles.calendarWrapper} ${styles[theme]}`}>
-        <div className={`${styles.header} ${styles[theme]}`}>
+        <div 
+          className={`${styles.header} ${styles[theme]}`}
+          style={{
+            background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`
+          }}
+        >
           <div className={styles.headerContent}>
             <button onClick={previousMonth} className={`${styles.navButton} ${styles[theme]}`}>
               <ChevronLeft size={24} />
@@ -270,7 +275,13 @@ const Calendar = () => {
           </div>
           
           <div className={styles.todayButtonWrapper}>
-            <button onClick={goToToday} className={`${styles.todayButton} ${styles[theme]}`}>
+            <button 
+              onClick={goToToday} 
+              className={`${styles.todayButton} ${styles[theme]}`}
+              style={{
+                color: emphasisColor || '#667eea'
+              }}
+            >
               Hoje
             </button>
           </div>
@@ -300,6 +311,10 @@ const Calendar = () => {
                 } ${isTodayDay ? styles.dayCellToday : ''} ${
                   isHoliday ? styles.dayCellHoliday : ''
                 } ${isTodayDay && isHoliday ? styles.dayCellTodayHoliday : ''}`}
+                style={isTodayDay && !isHoliday ? {
+                  background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`,
+                  borderColor: emphasisColor || '#667eea'
+                } : {}}
               >
                 <div className={styles.dayNumber}>{item.day}</div>
                 
@@ -319,7 +334,15 @@ const Calendar = () => {
                       title="Ver lista de anotações"
                     >
                       {dayNotes.slice(0, 4).map((note) => (
-                        <div key={note.id} className={styles.notePreviewItem}>
+                        <div 
+                          key={note.id} 
+                          className={styles.notePreviewItem}
+                          style={!isTodayDay && !isHoliday ? {
+                            background: `${emphasisColor || '#667eea'}26`,
+                            color: emphasisColor || '#4f46e5',
+                            borderLeftColor: emphasisColor || '#667eea'
+                          } : {}}
+                        >
                           {note.title}
                         </div>
                       ))}
@@ -330,7 +353,13 @@ const Calendar = () => {
                       )}
                     </div>
                     
-                    <div className={`${styles.notesIndicator} ${styles[theme]}`} title={`${dayNotes.length} anotação(ões)`}></div>
+                    <div 
+                      className={`${styles.notesIndicator} ${styles[theme]}`} 
+                      title={`${dayNotes.length} anotação(ões)`}
+                      style={isTodayDay && !isHoliday ? {
+                        borderColor: emphasisColor || '#667eea'
+                      } : {}}
+                    ></div>
                   </>
                 )}
               </div>
