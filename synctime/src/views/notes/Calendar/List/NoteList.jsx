@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useTheme } from '../../../../hooks/useTheme';
+import { useEmphasisColor } from '../../../../hooks/useEmphasisColor';
 import styles from './NoteList.module.css';
 
 const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNote }) => {
   const { theme } = useTheme();
+  const { emphasisColor } = useEmphasisColor();
   const [activeTab, setActiveTab] = useState('todas');
 
   if (!isOpen) return null;
@@ -37,7 +39,12 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNot
   return (
     <div className={`${styles.noteListOverlay} ${styles[theme]}`} onClick={onClose}>
       <div className={`${styles.noteListContent} ${styles[theme]}`} onClick={(e) => e.stopPropagation()}>
-        <div className={`${styles.noteListHeader} ${styles[theme]}`}>
+        <div 
+          className={`${styles.noteListHeader} ${styles[theme]}`}
+          style={{
+            background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`
+          }}
+        >
           <h2 className={`${styles.noteListTitle} ${styles[theme]}`}>
             Anotações para {formatDate(selectedDate)}
           </h2>
@@ -53,6 +60,9 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNot
                 key={tab.id}
                 className={`${styles.tabButton} ${activeTab === tab.id ? `${styles.active} active` : ''} ${styles[theme]}`}
                 onClick={() => setActiveTab(tab.id)}
+                style={activeTab === tab.id ? {
+                  '--active-border-color': emphasisColor || '#667eea'
+                } : {}}
               >
                 {tab.label}
               </button>
@@ -67,7 +77,13 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNot
             </p>
           ) : (
             filteredNotes.map((note) => (
-              <div key={note.id} className={`${styles.noteItem} ${styles[theme]}`}>
+              <div 
+                key={note.id} 
+                className={`${styles.noteItem} ${styles[theme]}`}
+                style={{
+                  borderLeftColor: emphasisColor || '#667eea'
+                }}
+              >
                 <div className={`${styles.noteHeader} ${styles[theme]}`}>
                   <h3 className={`${styles.noteTitle} ${styles[theme]}`}>
                     {note.title}
@@ -85,6 +101,9 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNot
                     className={`${styles.editButton} ${styles[theme]}`} 
                     onClick={() => {
                       console.log('Editar anotação:', note.id);
+                    }}
+                    style={{
+                      backgroundColor: emphasisColor || '#667eea'
                     }}
                   >
                     Editar
@@ -105,10 +124,19 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNot
           <button 
             className={`${styles.addButton} ${styles[theme]}`} 
             onClick={() => onAddNote(selectedDate)}
+            style={{
+              backgroundColor: emphasisColor || '#667eea'
+            }}
           >
             + Nova Anotação
           </button>
-          <button className={`${styles.closeButton} ${styles[theme]}`} onClick={onClose}>
+          <button 
+            className={`${styles.closeButton} ${styles[theme]}`} 
+            onClick={onClose}
+            style={{
+              backgroundColor: emphasisColor || '#667eea'
+            }}
+          >
             Fechar
           </button>
         </div>
