@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './CreateModalNote.module.css';
+import { useTheme } from './../../../../hooks/useTheme';
 
 const CreateModalNote = () => {
+  const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(true);
   const [formData, setFormData] = useState({
     status: '',
@@ -147,15 +149,15 @@ const CreateModalNote = () => {
 
   return (
     <div
-      className={`${styles.modalOverlay} ${isOpen ? styles.active : ''}`}
+      className={`${styles.modalOverlay} ${styles[theme]} ${isOpen ? styles.active : ''}`}
       onClick={handleOverlayClick}
     >
-      <div className={styles.modalContainer}>
-        <div className={styles.modalHeader}>
-          <h2 className={styles.modalTitle}>Nova Anotação</h2>
+      <div className={`${styles.modalContainer} ${styles[theme]}`}>
+        <div className={`${styles.modalHeader} ${styles[theme]}`}>
+          <h2 className={`${styles.modalTitle} ${styles[theme]}`}>Nova Anotação</h2>
           {isMobile && (
             <button 
-              className={`${styles.toggleBtn} ${showComments ? styles.active : ''}`} 
+              className={`${styles.toggleBtn} ${styles[theme]} ${showComments ? styles.active : ''}`} 
               onClick={toggleComments}
               aria-expanded={showComments}
               aria-label={showComments ? 'Voltar ao formulário' : 'Mostrar comentários'}
@@ -163,23 +165,23 @@ const CreateModalNote = () => {
               {showComments ? '← Voltar ao Form' : '💬 Comentários'}
             </button>
           )}
-          <button className={styles.closeBtn} onClick={closeModal}>
+          <button className={`${styles.closeBtn} ${styles[theme]}`} onClick={closeModal}>
             &times;
           </button>
         </div>
-        <div className={styles.modalBody}>
-          <div className={`${styles.mainContent} ${showComments && isMobile ? styles.hiddenOnMobile : ''}`}>
-            <div className={styles.formSection}>
-              <h3 className={styles.sectionTitle}>Informações Gerais</h3>
+        <div className={`${styles.modalBody} ${styles[theme]}`}>
+          <div className={`${styles.mainContent} ${styles[theme]} ${showComments && isMobile ? styles.hiddenOnMobile : ''}`}>
+            <div className={`${styles.formSection} ${styles[theme]}`}>
+              <h3 className={`${styles.sectionTitle} ${styles[theme]}`}>Informações Gerais</h3>
               <div className={styles.formGrid}>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel} htmlFor="status">
+                  <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="status">
                     Status
                   </label>
                   <select
                     id="status"
                     name="status"
-                    className={styles.formSelect}
+                    className={`${styles.formSelect} ${styles[theme]}`}
                     value={formData.status}
                     onChange={handleInputChange}
                     required
@@ -192,13 +194,13 @@ const CreateModalNote = () => {
                   </select>
                 </div>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel} htmlFor="colaboradores">
+                  <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="colaboradores">
                     Colaboradores Envolvidos
                   </label>
                   <select
                     id="colaboradores"
                     name="colaboradores"
-                    className={styles.formSelect}
+                    className={`${styles.formSelect} ${styles[theme]}`}
                     multiple
                     value={formData.colaboradores}
                     onChange={handleInputChange}
@@ -211,13 +213,13 @@ const CreateModalNote = () => {
                   </select>
                 </div>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel} htmlFor="prioridade">
+                  <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="prioridade">
                     Prioridade
                   </label>
                   <select
                     id="prioridade"
                     name="prioridade"
-                    className={styles.formSelect}
+                    className={`${styles.formSelect} ${styles[theme]}`}
                     value={formData.prioridade}
                     onChange={handleInputChange}
                     required
@@ -230,13 +232,13 @@ const CreateModalNote = () => {
                   </select>
                 </div>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel} htmlFor="categoria">
+                  <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="categoria">
                     Categoria Relacionada
                   </label>
                   <select
                     id="categoria"
                     name="categoria"
-                    className={styles.formSelect}
+                    className={`${styles.formSelect} ${styles[theme]}`}
                     value={formData.categoria}
                     onChange={handleInputChange}
                     required
@@ -252,18 +254,18 @@ const CreateModalNote = () => {
               </div>
             </div>
 
-            <div className={styles.formSection}>
-              <h3 className={styles.sectionTitle}>Detalhes da Atividade</h3>
+            <div className={`${styles.formSection} ${styles[theme]}`}>
+              <h3 className={`${styles.sectionTitle} ${styles[theme]}`}>Detalhes da Atividade</h3>
               <div className={styles.formGrid}>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel} htmlFor="atividade">
+                  <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="atividade">
                     Atividade
                   </label>
                   <input
                     type="text"
                     id="atividade"
                     name="atividade"
-                    className={styles.formInput}
+                    className={`${styles.formInput} ${styles[theme]}`}
                     placeholder="Ex: Reunião de equipe"
                     value={formData.atividade}
                     onChange={handleInputChange}
@@ -271,13 +273,13 @@ const CreateModalNote = () => {
                   />
                 </div>
                 <div className={styles.formGroup}>
-                  <label className={styles.formLabel} htmlFor="tipoAtividade">
+                  <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="tipoAtividade">
                     Tipo de Atividade
                   </label>
                   <select
                     id="tipoAtividade"
                     name="tipoAtividade"
-                    className={styles.formSelect}
+                    className={`${styles.formSelect} ${styles[theme]}`}
                     value={formData.tipoAtividade}
                     onChange={handleInputChange}
                     required
@@ -292,24 +294,24 @@ const CreateModalNote = () => {
                   </select>
                 </div>
                 <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                  <label className={styles.formLabel} htmlFor="descricao">
+                  <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="descricao">
                     Descrição do que foi feito
                   </label>
                   <textarea
                     id="descricao"
                     name="descricao"
-                    className={styles.formTextarea}
+                    className={`${styles.formTextarea} ${styles[theme]}`}
                     placeholder="Descreva em detalhes o que foi realizado..."
                     value={formData.descricao}
                     onChange={handleTextareaChange}
                   />
                 </div>
                 <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                  <label className={styles.formLabel}>Período do Horário</label>
+                  <label className={`${styles.formLabel} ${styles[theme]}`}>Período do Horário</label>
                   <div className={styles.timeRangeGroup}>
                     <div className={styles.formGroup}>
                       <label
-                        className={styles.formLabel}
+                        className={`${styles.formLabel} ${styles[theme]}`}
                         htmlFor="horarioInicio"
                       >
                         Início
@@ -318,21 +320,21 @@ const CreateModalNote = () => {
                         type="time"
                         id="horarioInicio"
                         name="horarioInicio"
-                        className={styles.formInput}
+                        className={`${styles.formInput} ${styles[theme]}`}
                         value={formData.horarioInicio}
                         onChange={handleInputChange}
                         required
                       />
                     </div>
                     <div className={styles.formGroup}>
-                      <label className={styles.formLabel} htmlFor="horarioFim">
+                      <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="horarioFim">
                         Fim
                       </label>
                       <input
                         type="time"
                         id="horarioFim"
                         name="horarioFim"
-                        className={styles.formInput}
+                        className={`${styles.formInput} ${styles[theme]}`}
                         value={formData.horarioFim}
                         onChange={handleInputChange}
                         required
@@ -344,47 +346,47 @@ const CreateModalNote = () => {
             </div>
           </div>
 
-          <div className={`${styles.sidebar} ${showComments && isMobile ? styles.expanded : ''}`}>
+          <div className={`${styles.sidebar} ${styles[theme]} ${showComments && isMobile ? styles.expanded : ''}`}>
             {showComments && isMobile && (
               <button 
-                className={styles.backBtn}
+                className={`${styles.backBtn} ${styles[theme]}`}
                 onClick={toggleComments}
                 aria-label="Voltar ao formulário"
               >
                 ← Voltar
               </button>
             )}
-            <h3 className={styles.sectionTitle}>Comentários</h3>
-            <div className={styles.commentsList} ref={commentsRef}>
+            <h3 className={`${styles.sectionTitle} ${styles[theme]}`}>Comentários</h3>
+            <div className={`${styles.commentsList} ${styles[theme]}`} ref={commentsRef}>
               {comments.map((comment, index) => (
-                <div key={index} className={styles.commentItem}>
-                  <div className={styles.commentAuthor}>{comment.author}</div>
-                  <div className={styles.commentText}>{comment.text}</div>
-                  <div className={styles.commentDate}>{comment.date}</div>
+                <div key={index} className={`${styles.commentItem} ${styles[theme]}`}>
+                  <div className={`${styles.commentAuthor} ${styles[theme]}`}>{comment.author}</div>
+                  <div className={`${styles.commentText} ${styles[theme]}`}>{comment.text}</div>
+                  <div className={`${styles.commentDate} ${styles[theme]}`}>{comment.date}</div>
                 </div>
               ))}
             </div>
-            <div className={styles.addCommentGroup}>
+            <div className={`${styles.addCommentGroup} ${styles[theme]}`}>
               <input
                 type="text"
-                className={styles.addCommentInput}
+                className={`${styles.addCommentInput} ${styles[theme]}`}
                 placeholder="Adicione um comentário..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 onKeyPress={handleCommentKeyPress}
               />
-              <button className={styles.addCommentBtn} onClick={addComment}>
+              <button className={`${styles.addCommentBtn} ${styles[theme]}`} onClick={addComment}>
                 Adicionar
               </button>
             </div>
           </div>
         </div>
         {showFooter && (
-          <div className={styles.modalFooter}>
-            <button className={styles.btnSecondary} onClick={closeModal}>
+          <div className={`${styles.modalFooter} ${styles[theme]}`}>
+            <button className={`${styles.btnSecondary} ${styles[theme]}`} onClick={closeModal}>
               Cancelar
             </button>
-            <button className={styles.btnPrimary} onClick={saveActivity}>
+            <button className={`${styles.btnPrimary} ${styles[theme]}`} onClick={saveActivity}>
               Salvar Anotação
             </button>
           </div>
