@@ -60,7 +60,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .modalTitle {
@@ -93,7 +92,7 @@
 
 .toggleBtn {
   display: none;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid transparent;
   color: white;
   padding: 8px 12px;
   border-radius: 6px;
@@ -101,15 +100,15 @@
   font-size: 14px;
   transition: background 0.2s ease;
   margin-left: auto;
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
 }
 
 .toggleBtn.light:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(102, 126, 234, 0.1);
 }
 
 .toggleBtn.dark:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(102, 126, 234, 0.2);
 }
 
 .toggleBtn.active {
@@ -180,7 +179,7 @@
     content: '';
     width: 4px;
     height: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--section-bar-color, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
     margin-right: 12px;
     border-radius: 2px;
 }
@@ -216,13 +215,19 @@
 }
 
 .formInput,
-.formSelect,
 .formTextarea {
-    padding: 14px 16px;
+    padding: 12px 16px;
     font-size: 16px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     background: white;
 }
+.formSelect {
+     padding: 15px 16px;
+    font-size: 16px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: white;
+}
+
 
 .formInput.light,
 .formSelect.light,
@@ -235,7 +240,7 @@
 .formSelect.light:focus,
 .formTextarea.light:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--focus-color, #667eea);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -251,7 +256,7 @@
 .formSelect.dark:focus,
 .formTextarea.dark:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--focus-color, #667eea);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
@@ -288,7 +293,7 @@
     border-radius: 8px;
     padding: 18px;
     margin-bottom: 16px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid transparent;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -304,14 +309,6 @@
 .commentAuthor {
     font-weight: 600;
     margin-bottom: 6px;
-}
-
-.commentAuthor.light {
-    color: #667eea;
-}
-
-.commentAuthor.dark {
-    color: #93c5fd;
 }
 
 .commentText {
@@ -363,7 +360,6 @@
 }
 
 .addCommentBtn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     padding: 14px 20px;
@@ -377,9 +373,6 @@
     transform: translateY(-1px);
 }
 
-.addCommentBtn.dark {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-}
 
 .modalFooter {
     padding: 24px 40px;
@@ -434,7 +427,6 @@
     font-size: 16px;
     font-weight: 600;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .btnPrimary.light:hover {
@@ -442,9 +434,6 @@
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.btnPrimary.dark {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-}
 
 .btnPrimary.dark:hover {
     transform: translateY(-1px);
@@ -501,16 +490,8 @@
   background: none;
 }
 
-.backBtn.light {
-    color: #667eea;
-}
-
 .backBtn.light:hover {
   background: rgba(102, 126, 234, 0.1);
-}
-
-.backBtn.dark {
-    color: #93c5fd;
 }
 
 .backBtn.dark:hover {

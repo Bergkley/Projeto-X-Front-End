@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './CreateModalNote.module.css';
 import { useTheme } from './../../../../hooks/useTheme';
+import { useEmphasisColor } from './../../../../hooks/useEmphasisColor';
 
 const CreateModalNote = () => {
   const { theme } = useTheme();
+  const { emphasisColor } = useEmphasisColor();
   const [isOpen, setIsOpen] = useState(true);
   const [formData, setFormData] = useState({
     status: '',
@@ -153,7 +155,12 @@ const CreateModalNote = () => {
       onClick={handleOverlayClick}
     >
       <div className={`${styles.modalContainer} ${styles[theme]}`}>
-        <div className={`${styles.modalHeader} ${styles[theme]}`}>
+        <div 
+          className={`${styles.modalHeader} ${styles[theme]}`}
+          style={{
+            background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`
+          }}
+        >
           <h2 className={`${styles.modalTitle} ${styles[theme]}`}>Nova Anotação</h2>
           {isMobile && (
             <button 
@@ -161,6 +168,10 @@ const CreateModalNote = () => {
               onClick={toggleComments}
               aria-expanded={showComments}
               aria-label={showComments ? 'Voltar ao formulário' : 'Mostrar comentários'}
+              style={{
+                borderColor: emphasisColor || '#667eea',
+                background: `rgba(${emphasisColor || '#667eea'}, 0.2)`
+              }}
             >
               {showComments ? '← Voltar ao Form' : '💬 Comentários'}
             </button>
@@ -172,7 +183,9 @@ const CreateModalNote = () => {
         <div className={`${styles.modalBody} ${styles[theme]}`}>
           <div className={`${styles.mainContent} ${styles[theme]} ${showComments && isMobile ? styles.hiddenOnMobile : ''}`}>
             <div className={`${styles.formSection} ${styles[theme]}`}>
-              <h3 className={`${styles.sectionTitle} ${styles[theme]}`}>Informações Gerais</h3>
+              <h3 className={`${styles.sectionTitle} ${styles[theme]}`} style={{ '--section-bar-color': emphasisColor || '#667eea' }}>
+                Informações Gerais
+              </h3>
               <div className={styles.formGrid}>
                 <div className={styles.formGroup}>
                   <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="status">
@@ -185,6 +198,9 @@ const CreateModalNote = () => {
                     value={formData.status}
                     onChange={handleInputChange}
                     required
+                    style={{
+                      '--focus-color': emphasisColor || '#667eea'
+                    }}
                   >
                     <option value="">Selecione...</option>
                     <option value="em_andamento">Em Andamento</option>
@@ -204,6 +220,9 @@ const CreateModalNote = () => {
                     multiple
                     value={formData.colaboradores}
                     onChange={handleInputChange}
+                    style={{
+                      '--focus-color': emphasisColor || '#667eea'
+                    }}
                   >
                     <option value="joao_silva">João Silva</option>
                     <option value="maria_oliveira">Maria Oliveira</option>
@@ -223,6 +242,9 @@ const CreateModalNote = () => {
                     value={formData.prioridade}
                     onChange={handleInputChange}
                     required
+                    style={{
+                      '--focus-color': emphasisColor || '#667eea'
+                    }}
                   >
                     <option value="">Selecione...</option>
                     <option value="baixa">Baixa</option>
@@ -242,6 +264,9 @@ const CreateModalNote = () => {
                     value={formData.categoria}
                     onChange={handleInputChange}
                     required
+                    style={{
+                      '--focus-color': emphasisColor || '#667eea'
+                    }}
                   >
                     <option value="">Selecione...</option>
                     <option value="projeto_a">Projeto A</option>
@@ -255,7 +280,9 @@ const CreateModalNote = () => {
             </div>
 
             <div className={`${styles.formSection} ${styles[theme]}`}>
-              <h3 className={`${styles.sectionTitle} ${styles[theme]}`}>Detalhes da Atividade</h3>
+              <h3 className={`${styles.sectionTitle} ${styles[theme]}`} style={{ '--section-bar-color': emphasisColor || '#667eea' }}>
+                Detalhes da Atividade
+              </h3>
               <div className={styles.formGrid}>
                 <div className={styles.formGroup}>
                   <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="atividade">
@@ -270,6 +297,9 @@ const CreateModalNote = () => {
                     value={formData.atividade}
                     onChange={handleInputChange}
                     required
+                    style={{
+                      '--focus-color': emphasisColor || '#667eea'
+                    }}
                   />
                 </div>
                 <div className={styles.formGroup}>
@@ -283,6 +313,9 @@ const CreateModalNote = () => {
                     value={formData.tipoAtividade}
                     onChange={handleInputChange}
                     required
+                    style={{
+                      '--focus-color': emphasisColor || '#667eea'
+                    }}
                   >
                     <option value="">Selecione...</option>
                     <option value="fisica">Atividade Física</option>
@@ -304,6 +337,9 @@ const CreateModalNote = () => {
                     placeholder="Descreva em detalhes o que foi realizado..."
                     value={formData.descricao}
                     onChange={handleTextareaChange}
+                    style={{
+                      '--focus-color': emphasisColor || '#667eea'
+                    }}
                   />
                 </div>
                 <div className={`${styles.formGroup} ${styles.fullWidth}`}>
@@ -324,6 +360,9 @@ const CreateModalNote = () => {
                         value={formData.horarioInicio}
                         onChange={handleInputChange}
                         required
+                        style={{
+                          '--focus-color': emphasisColor || '#667eea'
+                        }}
                       />
                     </div>
                     <div className={styles.formGroup}>
@@ -338,6 +377,9 @@ const CreateModalNote = () => {
                         value={formData.horarioFim}
                         onChange={handleInputChange}
                         required
+                        style={{
+                          '--focus-color': emphasisColor || '#667eea'
+                        }}
                       />
                     </div>
                   </div>
@@ -352,15 +394,28 @@ const CreateModalNote = () => {
                 className={`${styles.backBtn} ${styles[theme]}`}
                 onClick={toggleComments}
                 aria-label="Voltar ao formulário"
+                style={{
+                  color: emphasisColor || '#667eea'
+                }}
               >
                 ← Voltar
               </button>
             )}
-            <h3 className={`${styles.sectionTitle} ${styles[theme]}`}>Comentários</h3>
+            <h3 className={`${styles.sectionTitle} ${styles[theme]}`} style={{ '--section-bar-color': emphasisColor || '#667eea' }}>
+              Comentários
+            </h3>
             <div className={`${styles.commentsList} ${styles[theme]}`} ref={commentsRef}>
               {comments.map((comment, index) => (
-                <div key={index} className={`${styles.commentItem} ${styles[theme]}`}>
-                  <div className={`${styles.commentAuthor} ${styles[theme]}`}>{comment.author}</div>
+                <div 
+                  key={index} 
+                  className={`${styles.commentItem} ${styles[theme]}`}
+                  style={{
+                    borderLeftColor: emphasisColor || '#667eea'
+                  }}
+                >
+                  <div className={`${styles.commentAuthor} ${styles[theme]}`} style={{ color: emphasisColor || '#667eea' }}>
+                    {comment.author}
+                  </div>
                   <div className={`${styles.commentText} ${styles[theme]}`}>{comment.text}</div>
                   <div className={`${styles.commentDate} ${styles[theme]}`}>{comment.date}</div>
                 </div>
@@ -374,8 +429,17 @@ const CreateModalNote = () => {
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 onKeyPress={handleCommentKeyPress}
+                style={{
+                  '--focus-color': emphasisColor || '#667eea'
+                }}
               />
-              <button className={`${styles.addCommentBtn} ${styles[theme]}`} onClick={addComment}>
+              <button 
+                className={`${styles.addCommentBtn} ${styles[theme]}`} 
+                onClick={addComment}
+                style={{
+                  background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`
+                }}
+              >
                 Adicionar
               </button>
             </div>
@@ -383,10 +447,20 @@ const CreateModalNote = () => {
         </div>
         {showFooter && (
           <div className={`${styles.modalFooter} ${styles[theme]}`}>
-            <button className={`${styles.btnSecondary} ${styles[theme]}`} onClick={closeModal}>
+            <button 
+              className={`${styles.btnSecondary} ${styles[theme]}`} 
+              onClick={closeModal}
+            >
               Cancelar
             </button>
-            <button className={`${styles.btnPrimary} ${styles[theme]}`} onClick={saveActivity}>
+            <button 
+              className={`${styles.btnPrimary} ${styles[theme]}`} 
+              onClick={saveActivity}
+              style={{
+                background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`,
+                '--hover-shadow-color': emphasisColor || '#667eea'
+              }}
+            >
               Salvar Anotação
             </button>
           </div>
