@@ -307,7 +307,6 @@
 }
 
 .notePreviewItem {
-  /* Background e cores movidas para inline para flexibilidade; fallback aqui */
   padding: 4px 6px;
   border-radius: 6px;
   white-space: nowrap;
@@ -320,7 +319,6 @@
 }
 
 .notePreviewItem:hover {
-  /* Ajuste hover pode ser mantido ou ajustado dinamicamente se necessário */
   opacity: 0.9;
 }
 
