@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './CreateModalNote.module.css';
 
 const CreateModalNote = () => {
@@ -31,6 +31,8 @@ const CreateModalNote = () => {
   const [showComments, setShowComments] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
+
+  const commentsRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -94,6 +96,11 @@ const CreateModalNote = () => {
     };
     setComments((prev) => [...prev, comment]);
     setNewComment('');
+    setTimeout(() => {
+      if (commentsRef?.current) {
+        commentsRef.current.scrollTop = commentsRef?.current?.scrollHeight;
+      }
+    }, 0);
   };
 
   const handleCommentKeyPress = (e) => {
@@ -348,7 +355,7 @@ const CreateModalNote = () => {
               </button>
             )}
             <h3 className={styles.sectionTitle}>Comentários</h3>
-            <div className={styles.commentsList}>
+            <div className={styles.commentsList} ref={commentsRef}>
               {comments.map((comment, index) => (
                 <div key={index} className={styles.commentItem}>
                   <div className={styles.commentAuthor}>{comment.author}</div>
