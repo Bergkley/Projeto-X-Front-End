@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './CreateModalNote.module.css';
 
 const CreateModalNote = () => {
@@ -28,6 +28,21 @@ const CreateModalNote = () => {
   ]);
   const [newComment, setNewComment] = useState('');
 
+  const [showComments, setShowComments] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      setShowComments(!mobile); 
+    };
+    handleResize(); 
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const closeModal = () => {
     setIsOpen(false);
     document.body.style.overflow = 'auto';
@@ -43,6 +58,7 @@ const CreateModalNote = () => {
       horarioFim: ''
     });
     setNewComment('');
+    setShowComments(false);
   };
 
   const handleOverlayClick = (e) => {
@@ -86,6 +102,10 @@ const CreateModalNote = () => {
     }
   };
 
+  const toggleComments = () => {
+    setShowComments(!showComments);
+  };
+
   const saveActivity = () => {
     const {
       status,
@@ -116,6 +136,7 @@ const CreateModalNote = () => {
     alert('Anotação salva com sucesso!');
     closeModal();
   };
+  const showFooter = !isMobile || !showComments;
 
   return (
     <div
@@ -124,13 +145,23 @@ const CreateModalNote = () => {
     >
       <div className={styles.modalContainer}>
         <div className={styles.modalHeader}>
-          <h2 className={styles.modalTitle}>Nova Anotação / Transação</h2>
+          <h2 className={styles.modalTitle}>Nova Anotação</h2>
+          {isMobile && (
+            <button 
+              className={`${styles.toggleBtn} ${showComments ? styles.active : ''}`} 
+              onClick={toggleComments}
+              aria-expanded={showComments}
+              aria-label={showComments ? 'Voltar ao formulário' : 'Mostrar comentários'}
+            >
+              {showComments ? '← Voltar ao Form' : '💬 Comentários'}
+            </button>
+          )}
           <button className={styles.closeBtn} onClick={closeModal}>
             &times;
           </button>
         </div>
         <div className={styles.modalBody}>
-          <div className={styles.mainContent}>
+          <div className={`${styles.mainContent} ${showComments && isMobile ? styles.hiddenOnMobile : ''}`}>
             <div className={styles.formSection}>
               <h3 className={styles.sectionTitle}>Informações Gerais</h3>
               <div className={styles.formGrid}>
@@ -306,7 +337,16 @@ const CreateModalNote = () => {
             </div>
           </div>
 
-          <div className={styles.sidebar}>
+          <div className={`${styles.sidebar} ${showComments && isMobile ? styles.expanded : ''}`}>
+            {showComments && isMobile && (
+              <button 
+                className={styles.backBtn}
+                onClick={toggleComments}
+                aria-label="Voltar ao formulário"
+              >
+                ← Voltar
+              </button>
+            )}
             <h3 className={styles.sectionTitle}>Comentários</h3>
             <div className={styles.commentsList}>
               {comments.map((comment, index) => (
@@ -332,14 +372,16 @@ const CreateModalNote = () => {
             </div>
           </div>
         </div>
-        <div className={styles.modalFooter}>
-          <button className={styles.btnSecondary} onClick={closeModal}>
-            Cancelar
-          </button>
-          <button className={styles.btnPrimary} onClick={saveActivity}>
-            Salvar Anotação
-          </button>
-        </div>
+        {showFooter && (
+          <div className={styles.modalFooter}>
+            <button className={styles.btnSecondary} onClick={closeModal}>
+              Cancelar
+            </button>
+            <button className={styles.btnPrimary} onClick={saveActivity}>
+              Salvar Anotação
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
