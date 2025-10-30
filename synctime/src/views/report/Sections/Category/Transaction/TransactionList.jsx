@@ -167,7 +167,10 @@ const TransactionList = () => {
       <div className={styles.actionsCell}>
         <button
           className={styles.editButton}
-          onClick={() => onEdit(row.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(row.id);
+          }}
           title="Editar registro"
           style={{
             backgroundColor: emphasisColor || '#0ea5e9'
@@ -177,7 +180,10 @@ const TransactionList = () => {
         </button>
         <button
           className={styles.deleteButton}
-          onClick={() => onDelete(row.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(row.id);
+          }}
           title="Excluir registro"
         >
           <Trash2 size={16} />
