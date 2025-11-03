@@ -1,5 +1,5 @@
 import { Plus, X } from 'lucide-react';
-import styles from './CreateNote.module.css'; 
+import styles from './CreateRoutine.module.css'; 
 import { useTheme } from '../../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../../hooks/useEmphasisColor';
 
