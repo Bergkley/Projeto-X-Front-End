@@ -3,7 +3,7 @@ import styles from './CreateNote.module.css';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../../hooks/useEmphasisColor';
 
-const CreateNote = ({
+const CreateRoutine = ({
   isOpen,
   onClose,
   selectedDate,
@@ -47,7 +47,7 @@ const CreateNote = ({
 
         <div className={`${styles.modalContent} ${styles[theme]}`}>
           <div className={`${styles.newNoteBox} ${styles[theme]}`}>
-            <label className={`${styles.typeLabel} ${styles[theme]}`}>Tipo de anotação:</label>
+            <label className={`${styles.typeLabel} ${styles[theme]}`}>Tipo de rotina:</label>
             <select
               value={noteType}
               onChange={(e) => {
@@ -62,7 +62,7 @@ const CreateNote = ({
               }}
             >
               <option value="">-- Escolha um tipo --</option>
-              <option value="periodo">Anotação por período</option>
+              <option value="periodo">Rotina por período</option>
               <option value="resumo">Resumo do dia</option>
             </select>
 
@@ -84,7 +84,7 @@ const CreateNote = ({
                   <option value="Noite">Noite</option>
                 </select>
                 {hasPeriodSelected && (
-                  <p className={`${styles.periodWarning} ${styles[theme]}`}>Já existe uma anotação para este período.</p>
+                  <p className={`${styles.periodWarning} ${styles[theme]}`}>Já existe uma rotina para este período.</p>
                 )}
                 <button 
                   onClick={onAddNote} 
@@ -123,7 +123,7 @@ const CreateNote = ({
             {selectedDateNotes.length === 0 ? (
               <div className={`${styles.emptyState} ${styles[theme]}`}>
                 <div className={styles.emptyIcon}>📅</div>
-                <p className={`${styles.emptyText} ${styles[theme]}`}>Nenhuma anotação para este dia</p>
+                <p className={`${styles.emptyText} ${styles[theme]}`}>Nenhuma rotina para este dia</p>
               </div>
             ) : (
               <div className={`${styles.notesList} ${styles[theme]}`}>
@@ -154,4 +154,4 @@ const CreateNote = ({
   );
 };
 
-export default CreateNote;
+export default CreateRoutine;

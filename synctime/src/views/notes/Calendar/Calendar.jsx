@@ -4,7 +4,7 @@ import styles from './Calendar.module.css';
 import NoteList from './List/NoteList';
 import { useTheme } from './../../../hooks/useTheme';
 import { useEmphasisColor } from './../../../hooks/useEmphasisColor';
-import CreateNote from './Modal/CreateNote';
+import CreateRoutine from './Modal/CreateRoutine';
 
 const Calendar = () => {
   const { theme } = useTheme();
@@ -368,7 +368,7 @@ const Calendar = () => {
         </div>
       </div>
 
-      <CreateNote
+      <CreateRoutine
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         selectedDate={selectedDate}
