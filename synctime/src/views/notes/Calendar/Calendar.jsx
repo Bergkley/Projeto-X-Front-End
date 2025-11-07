@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './Calendar.module.css';
 import NoteList from './List/NoteList';
 import { useTheme } from './../../../hooks/useTheme';
 import { useEmphasisColor } from './../../../hooks/useEmphasisColor';
 import CreateRoutine from './Modal/CreateRoutine';
+import useFlashMessage from '../../../hooks/userFlashMessage';
+import ServiceRoutines from './services/ServiceRoutines';
 
 const Calendar = () => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
+  const { setFlashMessage } = useFlashMessage();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [notes, setNotes] = useState({});
@@ -96,6 +99,41 @@ const Calendar = () => {
     fetchHolidays();
   }, [currentDate.getFullYear(), API_KEY]);
 
+  const loadRoutines = useCallback(async () => {
+    try {
+      const response = await ServiceRoutines.getByAllRoutines();
+      if (response.data.status === 'OK') {
+        const routinesData = response.data.data || [];
+        const grouped = {};
+        routinesData.forEach(routine => {
+          const routineDate = new Date(routine.created_at).toISOString().split('T')[0];
+          const title = routine.type === 'periodo' ? routine.period : routine.type === 'resumo' ? 'Resumo do Dia' : routine.type;
+          const processedRoutine = {
+            id: routine.id,
+            title,
+            content: '',
+            time: new Date(routine.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+          };
+          if (!grouped[routineDate]) {
+            grouped[routineDate] = [];
+          }
+          grouped[routineDate].push(processedRoutine);
+        });
+        Object.keys(grouped).forEach(dateKey => {
+          grouped[dateKey] = sortNotes(grouped[dateKey]);
+        });
+        setNotes(grouped);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar rotinas:', error);
+      setFlashMessage('Erro ao carregar rotinas', 'error');
+    }
+  }, []);
+
+  useEffect(() => {
+    loadRoutines();
+  }, [loadRoutines]);
+
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -162,54 +200,16 @@ const Calendar = () => {
     }
   };
 
-  const addNote = () => {
-    if (selectedDate && noteType === 'periodo' && selectedPeriod) {
-      const dateKey = formatDateKey(selectedDate);
-      const existingPeriodNote = notes[dateKey]?.find(note => note.title === selectedPeriod);
-      if (existingPeriodNote) return;
-
-      const newNote = {
-        id: Date.now(),
-        title: selectedPeriod,
-        content: '',
-        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      };
-      
-      setNotes({
-        ...notes,
-        [dateKey]: [...(notes[dateKey] || []), newNote]
-      });
-      
-      setSelectedPeriod('');
+  const deleteNote = async (noteId) => {
+    try {
+      await ServiceRoutines.deleteRoutines(noteId);
+      setFlashMessage('Rotina deletada com sucesso', 'success');
+      loadRoutines();
+    } catch (error) {
+      console.error('Erro ao deletar rotina:', error);
+      const errorMsg = error.response?.data?.errors?.[0] || 'Erro ao deletar rotina';
+      setFlashMessage(errorMsg, 'error');
     }
-  };
-
-  const generateSummary = () => {
-    if (selectedDate) {
-      const dateKey = formatDateKey(selectedDate);
-      const existingSummary = notes[dateKey]?.find(note => note.title === 'Resumo do Dia');
-      if (existingSummary) return;
-
-      const newSummary = {
-        id: Date.now(),
-        title: 'Resumo do Dia',
-        content: `Resumo gerado automaticamente em ${new Date().toLocaleString('pt-BR')}.`,
-        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      };
-      
-      setNotes({
-        ...notes,
-        [dateKey]: [...(notes[dateKey] || []), newSummary]
-      });
-    }
-  };
-
-  const deleteNote = (noteId) => {
-    const dateKey = formatDateKey(selectedDate);
-    setNotes({
-      ...notes,
-      [dateKey]: notes[dateKey].filter(note => note.id !== noteId)
-    });
   };
 
   const isToday = (day) => {
@@ -236,6 +236,8 @@ const Calendar = () => {
 
   const days = getDaysInMonth(currentDate);
   const selectedDateNotes = selectedDate ? sortNotes(notes[formatDateKey(selectedDate)] || []) : [];
+  const formattedSelectedDate = selectedDate ? formatDateKey(selectedDate) : '';
+  const refreshNotesForDate = loadRoutines;
 
   return (
     <div className={`${styles.container} ${styles[theme]}`}>
@@ -376,10 +378,9 @@ const Calendar = () => {
         onNoteTypeChange={setNoteType}
         selectedPeriod={selectedPeriod}
         onSelectedPeriodChange={setSelectedPeriod}
-        onAddNote={addNote}
+        formattedDate={formattedSelectedDate}
         selectedDateNotes={selectedDateNotes}
-        onDeleteNote={deleteNote}
-        onGenerateSummary={generateSummary}
+        onRefresh={refreshNotesForDate}
       />
 
       <NoteList
