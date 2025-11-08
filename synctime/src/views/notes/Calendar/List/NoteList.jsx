@@ -3,7 +3,7 @@ import { useTheme } from '../../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../../hooks/useEmphasisColor';
 import styles from './NoteList.module.css';
 
-const NoteList = ({ isOpen, onClose, selectedDate, notes, selectedRoutine, onDeleteNote, onAddNote }) => {
+const NoteList = ({ isOpen, onClose, selectedDate, notes, selectedRoutine, onDeleteNote, onOpenCreateNote, onEditNote }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
   const [activeTab, setActiveTab] = useState('todas');
@@ -123,9 +123,7 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, selectedRoutine, onDel
                 <div className={`${styles.noteActions} ${styles[theme]}`}>
                   <button 
                     className={`${styles.editButton} ${styles[theme]}`} 
-                    onClick={() => {
-                      console.log('Editar anotação:', note.id);
-                    }}
+                    onClick={() => onEditNote?.(note)}
                     style={{
                       backgroundColor: emphasisColor || '#667eea'
                     }}
@@ -147,7 +145,7 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, selectedRoutine, onDel
         <div className={`${styles.noteListFooter} ${styles[theme]}`}>
           <button 
             className={`${styles.addButton} ${styles[theme]}`} 
-            onClick={() => onAddNote(selectedDate)}
+            onClick={() => onOpenCreateNote?.(selectedRoutine)}
             style={{
               backgroundColor: emphasisColor || '#667eea'
             }}
