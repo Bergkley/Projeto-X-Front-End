@@ -207,6 +207,14 @@ const Calendar = () => {
     }
   };
 
+  const handleOpenRoutineInModal = useCallback((routine) => {
+    if (selectedDate && routine) {
+      setSelectedRoutine(routine);
+      setShowNoteList(true);
+      setShowModal(false);
+    }
+  }, [selectedDate]);
+
   const handleOpenCreateNote = useCallback((routine = selectedRoutine) => {
     setSelectedRoutine(routine);
     setNoteToEdit(null);
@@ -455,6 +463,7 @@ const Calendar = () => {
         formattedDate={formattedSelectedDate}
         selectedDateNotes={selectedDateNotesForCreate}
         onRefresh={refreshNotesForDate}
+        onOpenNoteList={handleOpenRoutineInModal}
       />
 
       <NoteList

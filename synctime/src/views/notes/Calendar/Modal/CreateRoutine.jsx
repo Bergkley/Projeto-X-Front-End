@@ -18,7 +18,8 @@ const CreateRoutine = ({
   onSelectedPeriodChange,
   formattedDate,
   selectedDateNotes,
-  onRefresh
+  onRefresh,
+  onOpenNoteList
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
@@ -265,16 +266,24 @@ const CreateRoutine = ({
                     style={{
                       '--border-color': emphasisColor || '#667eea'
                     }}
+                    onClick={() => onOpenNoteList?.(note)}
                   >
                     <div className={`${styles.noteCardHeader} ${styles[theme]}`}>
                       <h3 className={`${styles.noteCardTitle} ${styles[theme]}`}>{note.title}</h3>
-                      <button onClick={() => handleDeleteNote(note.id)} className={`${styles.deleteButton} ${styles[theme]}`} disabled={loading}>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteNote(note.id);
+                        }} 
+                        className={`${styles.deleteButton} ${styles[theme]}`} 
+                        disabled={loading}
+                      >
                         <X size={18} />
                       </button>
                     </div>
                     {note.notes && note.notes.length > 0 && (
                       <div className={`${styles.noteCount} ${styles[theme]}`}>
-                        {note.notes.length} atividade(s)
+                        {note.notes.length} anotação(s)
                       </div>
                     )}
                   </div>
