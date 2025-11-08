@@ -3,7 +3,7 @@ import { useTheme } from '../../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../../hooks/useEmphasisColor';
 import styles from './NoteList.module.css';
 
-const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNote }) => {
+const NoteList = ({ isOpen, onClose, selectedDate, notes, selectedRoutine, onDeleteNote, onAddNote }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
   const [activeTab, setActiveTab] = useState('todas');
@@ -22,16 +22,40 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNot
   const tabs = [
     { id: 'todas', label: 'Todas' },
     { id: 'emAndamento', label: 'Em Andamento' },
-    { id: 'feito', label: 'Feito' },
+    { id: 'concluido', label: 'Concluído' },
     { id: 'naoRealizado', label: 'Não Realizado' },
-    { id: 'resumo', label: `Resumo` }
+    { id: 'resumo', label: 'Resumo' }
   ];
+
+  const tabToStatus = {
+    emAndamento: 'Em Andamento',
+    concluido: 'Concluído',
+    naoRealizado: 'Não Realizado'
+  };
 
   const getFilteredNotes = () => {
     if (activeTab === 'todas') {
       return notes;
     }
-    return notes.filter(note => note.status === activeTab);
+    if (selectedRoutine) {
+      if (activeTab === 'resumo') {
+        return selectedRoutine.title === 'Resumo do Dia' ? notes : [];
+      }
+      const targetStatus = tabToStatus[activeTab];
+      if (targetStatus) {
+        return notes.filter(note => note.status === targetStatus);
+      }
+      return [];
+    } else {
+      if (activeTab === 'resumo') {
+        return notes.filter(note => note.routineTitle === 'Resumo do Dia');
+      }
+      const targetStatus = tabToStatus[activeTab];
+      if (targetStatus) {
+        return notes.filter(note => note.status === targetStatus);
+      }
+      return [];
+    }
   };
 
   const filteredNotes = getFilteredNotes();
@@ -46,7 +70,7 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNot
           }}
         >
           <h2 className={`${styles.noteListTitle} ${styles[theme]}`}>
-            Anotações para {formatDate(selectedDate)}
+            Anotações {selectedRoutine ? `do ${selectedRoutine.title}` : ''} para {formatDate(selectedDate)}
           </h2>
           <button className={`${styles.noteListClose} ${styles[theme]}`} onClick={onClose}>
             ×
@@ -88,12 +112,12 @@ const NoteList = ({ isOpen, onClose, selectedDate, notes, onDeleteNote, onAddNot
                   <h3 className={`${styles.noteTitle} ${styles[theme]}`}>
                     {note.title}
                     {note.status && (
-                      <span className={`${styles.noteStatus} ${styles[note.status.toLowerCase().replace(/\s+/g, '')]} ${styles[theme]}`}>
+                      <span className={`${styles.noteStatus} ${styles[note.status.toLowerCase().replace(/ /g, '')]} ${styles[theme]}`}>
                         {note.status}
                       </span>
                     )}
                   </h3>
-                  <span className={`${styles.noteTime} ${styles[theme]}`}>{note.time}</span>
+                  <span className={`${styles.noteTime} ${styles[theme]}`}>{note.time} {note.routineTitle ? `(${note.routineTitle})` : ''}</span>
                 </div>
                 <p className={`${styles.noteContent} ${styles[theme]}`}>{note.content}</p>
                 <div className={`${styles.noteActions} ${styles[theme]}`}>

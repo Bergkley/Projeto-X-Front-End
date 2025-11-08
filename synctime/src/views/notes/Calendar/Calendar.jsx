@@ -7,6 +7,7 @@ import { useEmphasisColor } from './../../../hooks/useEmphasisColor';
 import CreateRoutine from './Modal/CreateRoutine';
 import useFlashMessage from '../../../hooks/userFlashMessage';
 import ServiceRoutines from './services/ServiceRoutines';
+import CreateModalNote from './Form/CreateModalNote';
 
 const Calendar = () => {
   const { theme } = useTheme();
@@ -14,6 +15,7 @@ const Calendar = () => {
   const { setFlashMessage } = useFlashMessage();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedRoutine, setSelectedRoutine] = useState(null);
   const [notes, setNotes] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [showNoteList, setShowNoteList] = useState(false);
@@ -112,7 +114,8 @@ const Calendar = () => {
             id: routine.id,
             title,
             content: '',
-            time: new Date(routine.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            time: new Date(routine.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            notes: routine.notes || []
           };
           if (!grouped[routineDate]) {
             grouped[routineDate] = [];
@@ -192,10 +195,11 @@ const Calendar = () => {
     }
   };
 
-  const handleOpenNoteList = (day) => {
+  const handleOpenNoteList = (day, routine = null) => {
     if (day) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
       setSelectedDate(date);
+      setSelectedRoutine(routine);
       setShowNoteList(true);
     }
   };
@@ -235,9 +239,50 @@ const Calendar = () => {
   };
 
   const days = getDaysInMonth(currentDate);
-  const selectedDateNotes = selectedDate ? sortNotes(notes[formatDateKey(selectedDate)] || []) : [];
+  const selectedDateRoutines = selectedDate ? notes[formatDateKey(selectedDate)] || [] : [];
+  const selectedDateNotesForCreate = selectedDateRoutines;
+  const selectedDateNotesForList = selectedDate ? selectedDateRoutines.flatMap(routine =>
+    routine.notes.map(note => ({
+      id: note.id,
+      title: note.activity || 'Atividade sem título',
+      content: note.description || '',
+      time: note.startTime ? note.startTime.slice(0, 5) : '',
+      status: note.status || 'Pendente',
+      routineTitle: routine.title,
+      priority: note.priority,
+      startTime: note.startTime,
+      endTime: note.endTime,
+      collaborators: note.collaborators,
+      comments: note.comments,
+      ...note
+    }))
+  ) : [];
+  const listNotes = selectedRoutine 
+    ? selectedRoutine.notes.map(note => ({
+        id: note.id,
+        title: note.activity || 'Atividade sem título',
+        content: note.description || '',
+        time: note.startTime ? note.startTime.slice(0, 5) : '',
+        status: note.status || 'Pendente',
+        priority: note.priority,
+        startTime: note.startTime,
+        endTime: note.endTime,
+        collaborators: note.collaborators,
+        comments: note.comments,
+        ...note
+      }))
+    : selectedDateNotesForList;
   const formattedSelectedDate = selectedDate ? formatDateKey(selectedDate) : '';
   const refreshNotesForDate = loadRoutines;
+
+  const handleAddNote = () => {
+    setShowModal(true);
+  };
+
+  const closeNoteList = () => {
+    setShowNoteList(false);
+    setSelectedRoutine(null);
+  };
 
   return (
     <div className={`${styles.container} ${styles[theme]}`}>
@@ -299,7 +344,9 @@ const Calendar = () => {
 
         <div className={styles.daysGrid}>
           {days.map((item, index) => {
-            const dayNotes = item.isCurrentMonth ? getNotesForDay(item.day) : [];
+            const dayRoutines = item.isCurrentMonth ? getNotesForDay(item.day) : [];
+            const totalNotesCount = dayRoutines.reduce((acc, rut) => acc + (rut.notes?.length || 0), 0);
+            const hasRoutines = dayRoutines.length > 0;
             const holidayName = item.isCurrentMonth ? getHolidayForDay(item.day) : null;
             const isHoliday = !!holidayName;
             const isTodayDay = isToday(item.day);
@@ -325,39 +372,47 @@ const Calendar = () => {
                     {holidayName.length > 15 ? `${holidayName.substring(0, 12)}...` : holidayName}
                   </div>
                 )}
-                 {item.isCurrentMonth && dayNotes.length > 0 && (
+                 {item.isCurrentMonth && hasRoutines && (
                   <>
                     <div 
                       className={styles.notesPreview}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenNoteList(item.day);
-                      }}
-                      title="Ver lista de anotações"
+                      title="Ver rotinas"
                     >
-                      {dayNotes.slice(0, 4).map((note) => (
+                      {dayRoutines.slice(0, 4).map((routine) => (
                         <div 
-                          key={note.id} 
+                          key={routine.id} 
                           className={styles.notePreviewItem}
                           style={!isTodayDay && !isHoliday ? {
                             background: `${emphasisColor || '#667eea'}26`,
                             color: emphasisColor || '#4f46e5',
                             borderLeftColor: emphasisColor || '#667eea'
                           } : {}}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenNoteList(item.day, routine);
+                          }}
                         >
-                          {note.title}
+                          {routine.title}
                         </div>
                       ))}
-                      {dayNotes.length > 4 && (
-                        <div className={`${styles.notePreviewMore} ${styles[theme]}`}>
-                          +{dayNotes.length - 4}
+                      {dayRoutines.length > 4 && (
+                        <div 
+                          className={`${styles.notePreviewMore} ${styles[theme]}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenNoteList(item.day);
+                          }}
+                          title="Ver todas as rotinas"
+                        >
+                          +{dayRoutines.length - 4}
                         </div>
                       )}
                     </div>
                     
                     <div 
                       className={`${styles.notesIndicator} ${styles[theme]}`} 
-                      title={`${dayNotes.length} anotação(ões)`}
+                      title={totalNotesCount > 0 ? `${totalNotesCount} anotação(ões)` : 'Rotinas sem anotações'}
+                      onClick={() => handleOpenNoteList(item.day)}
                       style={isTodayDay && !isHoliday ? {
                         borderColor: emphasisColor || '#667eea'
                       } : {}}
@@ -379,16 +434,22 @@ const Calendar = () => {
         selectedPeriod={selectedPeriod}
         onSelectedPeriodChange={setSelectedPeriod}
         formattedDate={formattedSelectedDate}
-        selectedDateNotes={selectedDateNotes}
+        selectedDateNotes={selectedDateNotesForCreate}
         onRefresh={refreshNotesForDate}
       />
 
       <NoteList
         isOpen={showNoteList}
-        onClose={() => setShowNoteList(false)}
+        onClose={closeNoteList}
         selectedDate={selectedDate}
-        notes={selectedDateNotes}
+        notes={listNotes}
+        selectedRoutine={selectedRoutine}
         onDeleteNote={deleteNote}
+        onAddNote={handleAddNote}
+      />
+
+      <CreateModalNote
+       
       />
     </div>
   );

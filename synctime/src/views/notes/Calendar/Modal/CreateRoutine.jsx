@@ -272,7 +272,11 @@ const CreateRoutine = ({
                         <X size={18} />
                       </button>
                     </div>
-                    {note.content && <p className={`${styles.noteCardContent} ${styles[theme]}`}>{note.content}</p>}
+                    {note.notes && note.notes.length > 0 && (
+                      <div className={`${styles.noteCount} ${styles[theme]}`}>
+                        {note.notes.length} atividade(s)
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
