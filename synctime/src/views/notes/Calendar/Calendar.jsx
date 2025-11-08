@@ -8,6 +8,7 @@ import CreateRoutine from './Modal/CreateRoutine';
 import useFlashMessage from '../../../hooks/userFlashMessage';
 import ServiceRoutines from './services/ServiceRoutines';
 import CreateModalNote from './Form/CreateModalNote';
+import ServiceNotes from './services/ServiceNotes';
 
 const Calendar = () => {
   const { theme } = useTheme();
@@ -19,6 +20,8 @@ const Calendar = () => {
   const [notes, setNotes] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [showNoteList, setShowNoteList] = useState(false);
+  const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
+  const [noteToEdit, setNoteToEdit] = useState(null);
   const [noteType, setNoteType] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('');
   const [holidays, setHolidays] = useState({}); 
@@ -204,6 +207,23 @@ const Calendar = () => {
     }
   };
 
+  const handleOpenCreateNote = useCallback((routine = selectedRoutine) => {
+    setSelectedRoutine(routine);
+    setNoteToEdit(null);
+    setShowCreateNoteModal(true);
+  }, [selectedRoutine]);
+
+  const handleEditNote = useCallback( async(note) => {
+    if(note){
+     const response = await ServiceNotes.getByIdNotes(note.id);
+     if(response.data.status === 'OK'){
+      const noteData = response.data.data;
+      setNoteToEdit(noteData);
+     }
+    }
+    setShowCreateNoteModal(true);
+  }, []);
+
   const deleteNote = async (noteId) => {
     try {
       await ServiceRoutines.deleteRoutines(noteId);
@@ -257,8 +277,11 @@ const Calendar = () => {
       ...note
     }))
   ) : [];
-  const listNotes = selectedRoutine 
-    ? selectedRoutine.notes.map(note => ({
+  const currentSelectedRoutine = selectedDate && selectedRoutine 
+    ? selectedDateRoutines.find(r => r.id === selectedRoutine.id) || selectedRoutine 
+    : selectedRoutine;
+  const listNotes = currentSelectedRoutine 
+    ? currentSelectedRoutine.notes.map(note => ({
         id: note.id,
         title: note.activity || 'Atividade sem título',
         content: note.description || '',
@@ -274,10 +297,6 @@ const Calendar = () => {
     : selectedDateNotesForList;
   const formattedSelectedDate = selectedDate ? formatDateKey(selectedDate) : '';
   const refreshNotesForDate = loadRoutines;
-
-  const handleAddNote = () => {
-    setShowModal(true);
-  };
 
   const closeNoteList = () => {
     setShowNoteList(false);
@@ -443,13 +462,18 @@ const Calendar = () => {
         onClose={closeNoteList}
         selectedDate={selectedDate}
         notes={listNotes}
-        selectedRoutine={selectedRoutine}
+        selectedRoutine={currentSelectedRoutine}
         onDeleteNote={deleteNote}
-        onAddNote={handleAddNote}
+        onOpenCreateNote={handleOpenCreateNote}
+        onEditNote={handleEditNote}
       />
 
       <CreateModalNote
-       
+        isOpen={showCreateNoteModal}
+        onClose={() => setShowCreateNoteModal(false)}
+        selectedRoutine={currentSelectedRoutine}
+        noteToEdit={noteToEdit}
+        onRefresh={loadRoutines}
       />
     </div>
   );
