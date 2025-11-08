@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { ErrorMessage } from '@hookform/error-message';
+import CreatableSelect from 'react-select/creatable';
 import styles from './CreateModalNote.module.css';
 import { useTheme } from './../../../../hooks/useTheme';
 import { useEmphasisColor } from './../../../../hooks/useEmphasisColor';
@@ -297,6 +298,68 @@ const CreateModalNote = ({
     }
   };
 
+  const getCustomStyles = (error, theme, emphasisColor) => ({
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: theme === 'light' ? 'white' : '#334155',
+      borderColor: error 
+        ? '#ef4444' 
+        : state.isFocused 
+          ? emphasisColor 
+          : theme === 'light' 
+            ? '#e1e5e9' 
+            : '#475569',
+      boxShadow: state.isFocused 
+        ? `0 0 0 3px ${theme === 'light' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.2)'}` 
+        : error 
+          ? '0 0 0 1px #ef4444' 
+          : 'none',
+      minHeight: '50px',
+      maxHeight: '80px',
+      '&:hover': {
+        borderColor: error ? '#ef4444' : emphasisColor,
+      },
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: theme === 'light' ? '#e1e5e9' : '#475569',
+      borderRadius: '4px',
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: theme === 'light' ? '#374151' : '#f1f5f9',
+    }),
+    multiValueRemove: (provided) => ({
+      ...provided,
+      color: theme === 'light' ? '#6b7280' : '#94a3b8',
+      '&:hover': {
+        backgroundColor: theme === 'light' ? '#d1d5db' : '#475569',
+        color: theme === 'light' ? '#374151' : '#f1f5f9',
+      },
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: theme === 'light' ? '#6b7280' : '#94a3b8',
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: theme === 'light' ? '#374151' : '#f1f5f9',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused 
+        ? theme === 'light' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.2)' 
+        : 'transparent',
+      color: theme === 'light' ? '#374151' : '#f1f5f9',
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: theme === 'light' ? 'white' : '#1e293b',
+      border: `1px solid ${theme === 'light' ? '#e1e5e9' : '#334155'}`,
+      borderRadius: '8px',
+    }),
+  });
+
   if (!isOpen) return null;
 
   const showFooter = !isMobile || (isMobile && !showComments);
@@ -328,14 +391,6 @@ const CreateModalNote = ({
     { value: 'Híbrida', label: 'Híbrida' },
     { value: 'Remota', label: 'Remota' },
     { value: 'Outros', label: 'Outros' }
-  ];
-
-  const collaboratorOptions = [
-    { value: 'user-123', label: 'João Silva' },
-    { value: 'user-456', label: 'Maria Oliveira' },
-    { value: 'user-789', label: 'Pedro Santos' },
-    { value: 'user-012', label: 'Ana Costa' },
-    { value: 'user-345', label: 'Outros (especifique)' }
   ];
 
   return (
@@ -413,26 +468,29 @@ const CreateModalNote = ({
                     <Controller
                       name="collaborators"
                       control={control}
-                      render={({ field }) => (
-                        <select
-                          {...field}
-                          id="collaborators"
-                          multiple
-                          className={`${styles.formSelect} ${styles[theme]} ${errors.collaborators ? styles.error : ''}`}
-                          style={{ '--focus-color': emphasisColor || '#667eea' }}
-                        >
-                          {collaboratorOptions.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    />
-                    <ErrorMessage
-                      errors={errors}
-                      name="collaborators"
-                      render={({ message }) => <div className={styles.errorMessage}>{message}</div>}
+                      render={({ field, fieldState }) => {
+                        const { error } = fieldState;
+                        const selectedValue = field.value ? field.value.map(val => ({ value: val, label: val })) : [];
+                        return (
+                          <div className={error ? `${styles.formGroup} ${styles.error}` : styles.formGroup}>
+                            <CreatableSelect
+                              isMulti
+                              options={[]}
+                              value={selectedValue}
+                              onChange={(newValue) => field.onChange(newValue ? newValue.map(opt => opt.value) : [])}
+                              placeholder="Digite colaboradores..."
+                              styles={getCustomStyles(error, theme, emphasisColor)}
+                              isClearable
+                              isSearchable
+                            />
+                            <ErrorMessage
+                              errors={errors}
+                              name="collaborators"
+                              render={({ message }) => <div className={styles.errorMessage}>{message}</div>}
+                            />
+                          </div>
+                        );
+                      }}
                     />
                   </div>
                   <div className={styles.formGroup}>
