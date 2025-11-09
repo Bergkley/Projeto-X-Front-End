@@ -14,6 +14,7 @@ const NoteList = ({
   onOpenCreateNote,
   onEditNote,
   onGenerateSummary,
+  onViewSummary,
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
@@ -71,8 +72,17 @@ const NoteList = ({
 
   const handleGenerate = async () => {
     if (selectedRoutine && onGenerateSummary) {
-      await onGenerateSummary(selectedRoutine.id);
+      await onGenerateSummary(selectedRoutine.id, selectedDate);
     }
+  };
+
+  const hasSummary = isSummaryRoutine && filteredNotes.length > 0 && filteredNotes[0]?.summaryDay;
+
+  const getNoteContent = (note) => {
+    if (note.routineTitle === 'Resumo do Dia') {
+      return note.summaryDay || note.content || 'Nenhum resumo gerado ainda.';
+    }
+    return note.content;
   };
 
   return (
@@ -167,31 +177,37 @@ const NoteList = ({
                       </span>
                     )}
                   </h3>
-                  <span className={`${styles.noteTime} ${styles[theme]}`}>
-                    {note.startTime?.slice(0, 5)} - {note.endTime?.slice(0, 5)}{' '}
-                    {note.routineTitle ? `(${note.routineTitle})` : ''}
-                  </span>
+                  {!isSummaryRoutine && (
+                    <span className={`${styles.noteTime} ${styles[theme]}`}>
+                      {note.startTime?.slice(0, 5)} - {note.endTime?.slice(0, 5)}{' '}
+                      {note.routineTitle ? `(${note.routineTitle})` : ''}
+                    </span>
+                  )}
                 </div>
-                <p className={`${styles.noteContent} ${styles[theme]}`}>
-                  {note.content}
-                </p>
-                <div className={`${styles.noteActions} ${styles[theme]}`}>
-                  <button
-                    className={`${styles.editButton} ${styles[theme]}`}
-                    onClick={() => onEditNote?.(note)}
-                    style={{
-                      backgroundColor: emphasisColor || '#667eea'
-                    }}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className={`${styles.deleteButton} ${styles[theme]}`}
-                    onClick={() => onDeleteNote(note.id)}
-                  >
-                    Deletar
-                  </button>
-                </div>
+                {!isSummaryRoutine && (
+                  <p className={`${styles.noteContent} ${styles[theme]}`}>
+                    {getNoteContent(note)}
+                  </p>
+                )}
+                {!isSummaryRoutine && (
+                  <div className={`${styles.noteActions} ${styles[theme]}`}>
+                    <button
+                      className={`${styles.editButton} ${styles[theme]}`}
+                      onClick={() => onEditNote?.(note)}
+                      style={{
+                        backgroundColor: emphasisColor || '#667eea'
+                      }}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className={`${styles.deleteButton} ${styles[theme]}`}
+                      onClick={() => onDeleteNote(note.id)}
+                    >
+                      Deletar
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -208,7 +224,7 @@ const NoteList = ({
             >
               + Nova Anotação
             </button>
-          ) : (
+          ) : !hasSummary ? (
             <button
               className={`${styles.addButton} ${styles[theme]}`}
               onClick={handleGenerate}
@@ -219,6 +235,27 @@ const NoteList = ({
               <Plus size={18} />
               Gerar resumo do dia
             </button>
+          ) : (
+            <>
+              <button
+                className={`${styles.addButton} ${styles[theme]}`}
+                onClick={() => onViewSummary(filteredNotes[0].summaryDay)}
+                style={{
+                  backgroundColor: emphasisColor || '#667eea'
+                }}
+              >
+                Ver Resumo
+              </button>
+              <button
+                className={`${styles.addButton} ${styles[theme]}`}
+                onClick={handleGenerate}
+                style={{
+                  backgroundColor: emphasisColor || '#667eea'
+                }}
+              >
+                Gerar novo resumo
+              </button>
+            </>
           )}
           <button
             className={`${styles.closeButton} ${styles[theme]}`}

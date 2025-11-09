@@ -16,6 +16,9 @@ class ServiceNotes {
   createNotes(data) {
     return api.post(`/notes/create`, data);
   }
+  generateSummary(data) {
+    return api.post(`/notes/create/summary-day`, data);
+  }
 
   editNotes(id, data) {
     return api.patch(`/notes/edit/${id}`, data);

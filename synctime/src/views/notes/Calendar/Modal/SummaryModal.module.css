@@ -26,9 +26,15 @@
   width: 90%;
   max-width: 600px;
   max-height: 80vh;
-  overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: modalSlideIn 0.3s ease-out;
+}
+.modal {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    
 }
 
 .modal.light {
@@ -118,19 +124,109 @@
 .summaryText {
   font-size: 1rem;
   line-height: 1.6;
-  white-space: pre-wrap;
 }
 
-.summaryText p {
-  margin: 0 0 1rem 0;
+/* Estilos para renderização Markdown - Formal e Estruturado */
+.summaryText .markdownH2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem 0;
+  color: inherit;
+  border-bottom: 2px solid currentColor;
+  padding-bottom: 0.25rem;
 }
 
-.summaryText.light {
+.summaryText .markdownH2.light {
+  color: #1f2937;
+  border-bottom-color: #1f2937;
+}
+
+.summaryText .markdownH2.dark {
+  color: #f9fafb;
+  border-bottom-color: #f9fafb;
+}
+
+.summaryText .markdownH3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem 0;
+  color: inherit;
+}
+
+.summaryText .markdownH3.light {
   color: #374151;
 }
 
-.summaryText.dark {
+.summaryText .markdownH3.dark {
   color: #d1d5db;
+}
+
+.summaryText .markdownStrong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.summaryText .markdownStrong.light {
+  color: #1f2937;
+}
+
+.summaryText .markdownStrong.dark {
+  color: #f9fafb;
+}
+
+.summaryText .markdownP {
+  margin: 0 0 1rem 0;
+  color: inherit;
+}
+
+.summaryText .markdownP.light {
+  color: #374151;
+}
+
+.summaryText .markdownP.dark {
+  color: #d1d5db;
+}
+
+.summaryText .markdownUl {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0.5rem 0;
+}
+
+.summaryText .markdownLi {
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.summaryText .markdownLi::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: inherit;
+  font-weight: bold;
+}
+
+.summaryText .markdownLi.light::before {
+  color: #374151;
+}
+
+.summaryText .markdownLi.dark::before {
+  color: #d1d5db;
+}
+
+.summaryText .markdownEm {
+  font-style: italic;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.summaryText .markdownEm.light {
+  color: #6b7280;
+}
+
+.summaryText .markdownEm.dark {
+  color: #9ca3af;
 }
 
 .modalFooter {
@@ -212,6 +308,14 @@
   }
 
   .modalTitle {
+    font-size: 1.125rem;
+  }
+
+  .summaryText .markdownH2 {
+    font-size: 1.25rem;
+  }
+
+  .summaryText .markdownH3 {
     font-size: 1.125rem;
   }
 }
