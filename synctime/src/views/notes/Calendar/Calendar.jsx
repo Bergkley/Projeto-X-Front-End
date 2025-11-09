@@ -234,8 +234,8 @@ const Calendar = () => {
 
   const deleteNote = async (noteId) => {
     try {
-      await ServiceRoutines.deleteRoutines(noteId);
-      setFlashMessage('Rotina deletada com sucesso', 'success');
+      await ServiceNotes.deleteNotes(noteId);
+      setFlashMessage('Anotação deletada com sucesso', 'success');
       loadRoutines();
     } catch (error) {
       console.error('Erro ao deletar rotina:', error);

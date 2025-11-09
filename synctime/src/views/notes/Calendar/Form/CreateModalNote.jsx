@@ -302,6 +302,7 @@ const CreateModalNote = ({
     control: (provided, state) => ({
       ...provided,
       backgroundColor: theme === 'light' ? 'white' : '#334155',
+      borderRadius: '12px',
       borderColor: error 
         ? '#ef4444' 
         : state.isFocused 
@@ -367,10 +368,9 @@ const CreateModalNote = ({
   const modalTitle = isEditMode ? 'Editar Anotação' : 'Nova Anotação';
 
   const statusOptions = [
-    { value: 'Pendente', label: 'Pendente' },
+    { value: 'Não Realizado', label: 'Não Realizado' },
     { value: 'Em Andamento', label: 'Em Andamento' },
-    { value: 'Finalizado', label: 'Finalizado' },
-    { value: 'Pausado', label: 'Pausado' }
+    { value: 'Concluído', label: 'Concluído' },
   ];
 
   const priorityOptions = [
