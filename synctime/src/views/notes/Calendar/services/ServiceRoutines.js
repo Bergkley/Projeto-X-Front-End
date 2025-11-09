@@ -1,12 +1,13 @@
 import api from "../../../../services/api";
 
 class ServiceRoutines {
-  getByAllRoutines() {
-    const params = new URLSearchParams();
-    
-
-    return api.get(`/routines/userId?${params.toString()}`, {
-      params: { isCalendar: true },
+  getByAllRoutines(year, month) {
+    return api.get(`/routines/userId`, {
+      params: { 
+        isCalendar: true, 
+        year,
+        month 
+      },
     });
   }
   getByIdRoutines(id) {

@@ -109,7 +109,9 @@ const Calendar = () => {
 
   const loadRoutines = useCallback(async () => {
     try {
-      const response = await ServiceRoutines.getByAllRoutines();
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+      const response = await ServiceRoutines.getByAllRoutines(year, month);
       if (response.data.status === 'OK') {
         const routinesData = response.data.data || [];
         const grouped = {};
@@ -137,7 +139,7 @@ const Calendar = () => {
       console.error('Erro ao buscar rotinas:', error);
       setFlashMessage('Erro ao carregar rotinas', 'error');
     }
-  }, []);
+  }, [currentDate]);
 
   useEffect(() => {
     loadRoutines();
