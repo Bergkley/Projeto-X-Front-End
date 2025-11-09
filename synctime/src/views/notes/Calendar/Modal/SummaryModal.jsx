@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../../hooks/useEmphasisColor';
+import ReactMarkdown from 'react-markdown'; 
 import styles from './SummaryModal.module.css';
 
 const SummaryModal = ({ isOpen, onClose, content }) => {
@@ -27,7 +28,19 @@ const SummaryModal = ({ isOpen, onClose, content }) => {
         <div className={`${styles.modalContent} ${styles[theme]}`}>
           <div className={`${styles.summaryText} ${styles[theme]}`}>
             {content ? (
-              <p>{content}</p>
+              <ReactMarkdown
+                components={{
+                  h2: ({ children }) => <h2 className={styles.markdownH2}>{children}</h2>,
+                  h3: ({ children }) => <h3 className={styles.markdownH3}>{children}</h3>,
+                  strong: ({ children }) => <strong className={styles.markdownStrong}>{children}</strong>,
+                  p: ({ children }) => <p className={styles.markdownP}>{children}</p>,
+                  ul: ({ children }) => <ul className={styles.markdownUl}>{children}</ul>,
+                  li: ({ children }) => <li className={styles.markdownLi}>{children}</li>,
+                  em: ({ children }) => <em className={styles.markdownEm}>{children}</em>,
+                }}
+              >
+                {content}
+              </ReactMarkdown>
             ) : (
               <p>Nenhum conteúdo gerado ainda.</p>
             )}

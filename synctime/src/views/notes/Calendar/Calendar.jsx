@@ -143,11 +143,12 @@ const Calendar = () => {
     loadRoutines();
   }, [loadRoutines]);
 
-  const handleGenerateSummary = useCallback(async (routineId) => {
+  const handleGenerateSummary = useCallback(async (routineId,date) => {
     try {
-      const response = await ServiceRoutines.generateSummary(routineId);
+      const data = { routine_id: routineId, date: formatDateKey(date) };
+      const response = await ServiceNotes.generateSummary(data);
       if (response.data.status === 'OK') {
-        const summaryText = response.data.summary || '';
+        const summaryText = response.data.data || '';
         setSummaryContent(summaryText);
         setShowSummaryModal(true);
         loadRoutines();
@@ -158,6 +159,11 @@ const Calendar = () => {
       const errorMsg = error.response?.data?.errors?.[0] || 'Erro ao gerar resumo';
       setFlashMessage(errorMsg, 'error');
     }
+  }, []);
+
+  const handleViewSummary = useCallback((content) => {
+    setSummaryContent(content);
+    setShowSummaryModal(true);
   }, []);
 
   const getDaysInMonth = (date) => {
@@ -302,6 +308,7 @@ const Calendar = () => {
       endTime: note.endTime,
       collaborators: note.collaborators,
       comments: note.comments,
+      summaryDay: note.summaryDay,
       ...note
     }))
   ) : [];
@@ -315,11 +322,13 @@ const Calendar = () => {
         content: note.description || '',
         time: note.startTime ? note.startTime.slice(0, 5) : '',
         status: note.status || 'Pendente',
+        routineTitle: currentSelectedRoutine.title,
         priority: note.priority,
         startTime: note.startTime,
         endTime: note.endTime,
         collaborators: note.collaborators,
         comments: note.comments,
+        summaryDay: note.summaryDay,
         ...note
       }))
     : selectedDateNotesForList;
@@ -496,6 +505,7 @@ const Calendar = () => {
         onOpenCreateNote={handleOpenCreateNote}
         onEditNote={handleEditNote}
         onGenerateSummary={handleGenerateSummary}
+        onViewSummary={handleViewSummary}
       />
 
       <CreateModalNote
