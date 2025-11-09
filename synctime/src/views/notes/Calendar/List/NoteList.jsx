@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../../hooks/useEmphasisColor';
+import { Plus } from 'lucide-react';
 import styles from './NoteList.module.css';
 
 const NoteList = ({
@@ -11,11 +12,16 @@ const NoteList = ({
   selectedRoutine,
   onDeleteNote,
   onOpenCreateNote,
-  onEditNote
+  onEditNote,
+  onGenerateSummary,
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
-  const [activeTab, setActiveTab] = useState('todas');
+  const isSummaryRoutine =
+    selectedRoutine && selectedRoutine.title === 'Resumo do Dia';
+  const [activeTab, setActiveTab] = useState(
+    isSummaryRoutine ? 'resumo' : 'todas'
+  );
 
   if (!isOpen) return null;
 
@@ -28,13 +34,14 @@ const NoteList = ({
     });
   };
 
-  const tabs = [
-    { id: 'todas', label: 'Todas' },
-    { id: 'emAndamento', label: 'Em Andamento' },
-    { id: 'concluido', label: 'Concluído' },
-    { id: 'naoRealizado', label: 'Não Realizado' },
-    { id: 'resumo', label: 'Resumo' }
-  ];
+  const tabs = isSummaryRoutine
+    ? [{ id: 'resumo', label: 'Resumo' }]
+    : [
+        { id: 'todas', label: 'Todas' },
+        { id: 'emAndamento', label: 'Em Andamento' },
+        { id: 'concluido', label: 'Concluído' },
+        { id: 'naoRealizado', label: 'Não Realizado' }
+      ];
 
   const tabToStatus = {
     emAndamento: 'Em Andamento',
@@ -43,31 +50,30 @@ const NoteList = ({
   };
 
   const getFilteredNotes = () => {
+    if (isSummaryRoutine) {
+      return notes;
+    }
+
     if (activeTab === 'todas') {
       return notes;
     }
-    if (selectedRoutine) {
-      if (activeTab === 'resumo') {
-        return selectedRoutine.title === 'Resumo do Dia' ? notes : [];
-      }
-      const targetStatus = tabToStatus[activeTab];
-      if (targetStatus) {
-        return notes.filter((note) => note.status === targetStatus);
-      }
-      return [];
-    } else {
-      if (activeTab === 'resumo') {
-        return notes.filter((note) => note.routineTitle === 'Resumo do Dia');
-      }
-      const targetStatus = tabToStatus[activeTab];
-      if (targetStatus) {
-        return notes.filter((note) => note.status === targetStatus);
-      }
-      return [];
+    if (activeTab === 'resumo') {
+      return notes.filter((note) => note.routineTitle === 'Resumo do Dia');
     }
+    const targetStatus = tabToStatus[activeTab];
+    if (targetStatus) {
+      return notes.filter((note) => note.status === targetStatus);
+    }
+    return [];
   };
 
   const filteredNotes = getFilteredNotes();
+
+  const handleGenerate = async () => {
+    if (selectedRoutine && onGenerateSummary) {
+      await onGenerateSummary(selectedRoutine.id);
+    }
+  };
 
   return (
     <div
@@ -87,12 +93,18 @@ const NoteList = ({
           }}
         >
           <h2 className={`${styles.noteListTitle} ${styles[theme]}`}>
-            Anotações{' '}
-            {selectedRoutine &&
-              (['Manhã', 'Tarde', 'Noite'].includes(selectedRoutine.title)
-                ? `da ${selectedRoutine.title.toLowerCase()}`
-                : `do ${selectedRoutine.title.toLowerCase()}`)}{' '}
-            para {formatDate(selectedDate)}
+            {isSummaryRoutine ? (
+              <>Resumo do dia para {formatDate(selectedDate)}</>
+            ) : (
+              <>
+                Anotações{' '}
+                {selectedRoutine &&
+                  (['Manhã', 'Tarde', 'Noite'].includes(selectedRoutine.title)
+                    ? `da ${selectedRoutine.title.toLowerCase()}`
+                    : `do ${selectedRoutine.title.toLowerCase()}`)}{' '}
+                para {formatDate(selectedDate)}
+              </>
+            )}
           </h2>
 
           <button
@@ -129,7 +141,9 @@ const NoteList = ({
         <div className={`${styles.notesList} ${styles[theme]}`}>
           {filteredNotes.length === 0 ? (
             <p className={`${styles.noNotes} ${styles[theme]}`}>
-              Nenhuma anotação encontrada para este status.
+              {isSummaryRoutine
+                ? 'Nenhum resumo gerado ainda.'
+                : 'Nenhuma anotação encontrada para este status.'}
             </p>
           ) : (
             filteredNotes.map((note) => (
@@ -184,15 +198,28 @@ const NoteList = ({
         </div>
 
         <div className={`${styles.noteListFooter} ${styles[theme]}`}>
-          <button
-            className={`${styles.addButton} ${styles[theme]}`}
-            onClick={() => onOpenCreateNote?.(selectedRoutine)}
-            style={{
-              backgroundColor: emphasisColor || '#667eea'
-            }}
-          >
-            + Nova Anotação
-          </button>
+          {!isSummaryRoutine ? (
+            <button
+              className={`${styles.addButton} ${styles[theme]}`}
+              onClick={() => onOpenCreateNote?.(selectedRoutine)}
+              style={{
+                backgroundColor: emphasisColor || '#667eea'
+              }}
+            >
+              + Nova Anotação
+            </button>
+          ) : (
+            <button
+              className={`${styles.addButton} ${styles[theme]}`}
+              onClick={handleGenerate}
+              style={{
+                backgroundColor: emphasisColor || '#667eea'
+              }}
+            >
+              <Plus size={18} />
+              Gerar resumo do dia
+            </button>
+          )}
           <button
             className={`${styles.closeButton} ${styles[theme]}`}
             onClick={onClose}

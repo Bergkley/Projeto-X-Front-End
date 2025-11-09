@@ -9,6 +9,7 @@ import useFlashMessage from '../../../hooks/userFlashMessage';
 import ServiceRoutines from './services/ServiceRoutines';
 import CreateModalNote from './Form/CreateModalNote';
 import ServiceNotes from './services/ServiceNotes';
+import SummaryModal from './Modal/SummaryModal';
 
 const Calendar = () => {
   const { theme } = useTheme();
@@ -21,6 +22,8 @@ const Calendar = () => {
   const [showModal, setShowModal] = useState(false);
   const [showNoteList, setShowNoteList] = useState(false);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [summaryContent, setSummaryContent] = useState('');
   const [noteToEdit, setNoteToEdit] = useState(null);
   const [noteType, setNoteType] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('');
@@ -139,6 +142,23 @@ const Calendar = () => {
   useEffect(() => {
     loadRoutines();
   }, [loadRoutines]);
+
+  const handleGenerateSummary = useCallback(async (routineId) => {
+    try {
+      const response = await ServiceRoutines.generateSummary(routineId);
+      if (response.data.status === 'OK') {
+        const summaryText = response.data.summary || '';
+        setSummaryContent(summaryText);
+        setShowSummaryModal(true);
+        loadRoutines();
+        setFlashMessage('Resumo gerado com sucesso', 'success');
+      }
+    } catch (error) {
+      console.error('Erro ao gerar resumo:', error);
+      const errorMsg = error.response?.data?.errors?.[0] || 'Erro ao gerar resumo';
+      setFlashMessage(errorMsg, 'error');
+    }
+  }, []);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -475,6 +495,7 @@ const Calendar = () => {
         onDeleteNote={deleteNote}
         onOpenCreateNote={handleOpenCreateNote}
         onEditNote={handleEditNote}
+        onGenerateSummary={handleGenerateSummary}
       />
 
       <CreateModalNote
@@ -483,6 +504,12 @@ const Calendar = () => {
         selectedRoutine={currentSelectedRoutine}
         noteToEdit={noteToEdit}
         onRefresh={loadRoutines}
+      />
+
+      <SummaryModal
+        isOpen={showSummaryModal}
+        onClose={() => setShowSummaryModal(false)}
+        content={summaryContent}
       />
     </div>
   );
