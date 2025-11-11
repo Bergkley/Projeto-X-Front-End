@@ -1,5 +1,5 @@
 // ⚙️ React e bibliotecas externas
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, Zap } from 'lucide-react';
 
 // 💅 Estilos
@@ -12,19 +12,50 @@ import ProfileDropdown from '../settings/ProfileDropdown';
 
 // 🧠 Hooks customizados
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
-
+import ServiceUsers from '../../services/ServiceUsers';
 
 const Header = () => {
   const { emphasisColor } = useEmphasisColor();
   const [notificationCount, setNotificationCount] = useState(3);
-  const [streakDays, setStreakDays] = useState(30);
+  const [streakDays, setStreakDays] = useState(0);
+  const [weekProgress, setWeekProgress] = useState([false, false, false, false, false, false, false]);
+  const [completedDaysThisWeek, setCompletedDaysThisWeek] = useState(0);
+  const [streakLoading, setStreakLoading] = useState(true);
+  const [streakError, setStreakError] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-  const weekProgress = [true, true, true, true, true, true, true];
-  const completedDaysThisWeek = weekProgress.filter((d) => d).length;
+
+  const fetchStreakData = async () => {
+    try {
+      setStreakLoading(true);
+      setStreakError(null);
+      const response = await ServiceUsers.getStreak();
+      console.log('Dados de streak recebidos:', response);
+      if (response.data.status === 'OK') {
+        const { streakDays: days, weekProgress: progress, completedDaysThisWeek: completed } = response.data.data;
+        setStreakDays(days);
+        setWeekProgress(progress);
+        setCompletedDaysThisWeek(completed);
+      } else {
+        throw new Error('Resposta inválida da API');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar streak:', error);
+      setStreakError(error.message);
+      setStreakDays(30);
+      setWeekProgress([true, true, true, true, true, true, true]);
+      setCompletedDaysThisWeek(7);
+    } finally {
+      setStreakLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStreakData();
+  }, []);
 
   const getFlameColor = () => {
     if (streakDays >= 30) return '#ff0000';
@@ -52,61 +83,71 @@ const Header = () => {
                   onClick={() => setShowStreakModal(true)}
                   className={styles.streakButton}
                   aria-label="Ver progresso de sequência"
+                  disabled={streakLoading}
                 >
-                  <div
-                    style={{
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <Zap
-                      className={styles.flameIcon}
-                      style={{
-                        color: getFlameColor(),
-                        filter:
-                          streakDays >= 7
-                            ? 'drop-shadow(0 0 8px currentColor)'
-                            : 'none'
-                      }}
-                      fill={streakDays >= 3 ? getFlameColor() : 'none'}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      gap: '0.125rem'
-                    }}
-                  >
-                    <span
-                      className={styles.streakNumber}
-                      style={{
-                        color: getFlameColor(),
-                        textShadow:
-                          streakDays >= 7
-                            ? `0 0 10px ${getFlameColor()}40`
-                            : 'none',
-                        lineHeight: '1'
-                      }}
-                    >
-                      {streakDays}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '0.625rem',
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontWeight: '500',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        lineHeight: '1'
-                      }}
-                    >
-                      dias
-                    </span>
-                  </div>
+                  {streakLoading ? (
+                    <div className={styles.loadingSpinner}></div> 
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          position: 'relative',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <Zap
+                          className={styles.flameIcon}
+                          style={{
+                            color: getFlameColor(),
+                            filter:
+                              streakDays >= 7
+                                ? 'drop-shadow(0 0 8px currentColor)'
+                                : 'none'
+                          }}
+                          fill={streakDays >= 3 ? getFlameColor() : 'none'}
+                        />
+                      </div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          gap: '0.125rem'
+                        }}
+                      >
+                        <span
+                          className={styles.streakNumber}
+                          style={{
+                            color: getFlameColor(),
+                            textShadow:
+                              streakDays >= 7
+                                ? `0 0 10px ${getFlameColor()}40`
+                                : 'none',
+                            lineHeight: '1'
+                          }}
+                        >
+                          {streakDays}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.625rem',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontWeight: '500',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            lineHeight: '1'
+                          }}
+                        >
+                          dias
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </button>
+                {streakError && (
+                  <span className={styles.errorText}>Erro ao carregar streak</span>
+                )}
               </div>
 
               {/* Notifications */}
@@ -149,7 +190,7 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Render Steak Modal */}
+      {/* Render Streak Modal */}
       {showStreakModal && (
         <Streak
           streakDays={streakDays}

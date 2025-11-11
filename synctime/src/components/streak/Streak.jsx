@@ -12,6 +12,8 @@ const Streak = ({
 }) => {
   const { theme } = useTheme();
 
+  const currentDayIndex = new Date().getDay();
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div 
@@ -41,7 +43,7 @@ const Streak = ({
               {weekDays.map((day, index) => (
                 <div key={index} className={styles.dayColumn}>
                   <span
-                    className={index === 4 ? styles.dayActive : styles.day} 
+                    className={index === currentDayIndex ? styles.dayActive : styles.day} 
                   >
                     {day}
                   </span>
