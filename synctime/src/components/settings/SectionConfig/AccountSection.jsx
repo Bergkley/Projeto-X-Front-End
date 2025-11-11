@@ -69,7 +69,7 @@ useEffect(() => {
     try {
       await ServiceUsers.deleteUser(getMemorizedFilters()?.id);
       setShowDeleteModal(false);
-      logout(false,true);
+      await logout(false,true);
     } catch (error) {
       console.error('error deleting account', error);
       setFlashMessage('Erro ao excluir conta', 'error');

@@ -4,6 +4,9 @@ class ServiceAUTH {
   login(data) {
     return api.post(`/user/login`, data);
   }
+  logout(data) {
+    return api.post(`/user/logout`, data);
+  }
 
   register(data) {
     return api.post(`/user/register`, data);

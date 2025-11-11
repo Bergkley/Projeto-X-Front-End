@@ -20,13 +20,13 @@ const ProfileDropdown = ({ onClose }) => {
   const { theme } = useTheme();
   const {logout} = useAuth();
 
-  const handleItemClick = (action) => {
+  const handleItemClick = async (action) => {
     if (action === 'configuracoes') {
       setShowSettings(true);
     } else if (action === 'alterar-senha') {
       setShowAlterPassword(true);
     } else if (action === 'sair'){
-      logout();
+     await logout();
     }
     else {
       console.error(`Ação selecionada: ${action}`);

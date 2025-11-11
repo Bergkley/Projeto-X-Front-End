@@ -12,8 +12,10 @@ import {
   useMemorizeFilters,
   POSSIBLE_FILTERS_ENTITIES
 } from './useMemorizeInputsFilters';
-import { useMemorizeTableColumns,TABLE_CONFIG_KEYS } from './useMemorizeTableColumns';
-
+import {
+  useMemorizeTableColumns,
+  TABLE_CONFIG_KEYS
+} from './useMemorizeTableColumns';
 
 export default function useAuth() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -30,13 +32,12 @@ export default function useAuth() {
     memorizeFilters: memorizeFiltersSystem
   } = useMemorizeFilters(POSSIBLE_FILTERS_ENTITIES.SYSTEM_CONFIG);
 
-  const {
-    clearAllMemorizedConfigs: clearAllMemorizedConfigs
-  } = useMemorizeTableColumns(TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS);
+  const { clearAllMemorizedConfigs: clearAllMemorizedConfigs } =
+    useMemorizeTableColumns(TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS);
 
   async function validateToken() {
     const token = localStorage.getItem('token');
-    
+
     if (!token) {
       setAuthenticated(false);
       setLoading(false);
@@ -45,14 +46,16 @@ export default function useAuth() {
 
     try {
       api.defaults.headers.Authorization = `Bearer ${token}`;
-      await api.get('/auth/validate')
-      
+      await api.post('/auth/validate', {
+        sessionId: getMemorizedFiltersUsers()?.sessionId
+      });
+
       setAuthenticated(true);
       setLoading(false);
       return true;
     } catch (error) {
       console.error('Token expirado ou inválido', error);
-      await logout(true); 
+      await logout(true);
       return false;
     }
   }
@@ -82,13 +85,13 @@ export default function useAuth() {
     let msgType = '';
 
     try {
-      const data = await ServiceAUTH.register(user).then((response) => {
+      await ServiceAUTH.register(user).then((response) => {
         msgText = response.data.message;
         msgType = 'success';
         return response.data;
       });
 
-      await authUser(data.data);
+      history.push('/login');
     } catch (error) {
       msgText = error.response.data.errors[0];
       msgType = 'error';
@@ -128,7 +131,7 @@ export default function useAuth() {
         return response.data;
       });
 
-       await authUser(data.data);
+      await authUser(data.data);
     } catch (error) {
       msgText = error?.response?.data?.errors[0];
       msgType = 'error';
@@ -144,7 +147,8 @@ export default function useAuth() {
       ...getMemorizedFiltersUsers(),
       login: data?.user?.login,
       email: data?.user?.email,
-      id: data?.user?.id
+      id: data?.user?.id,
+      sessionId: data?.user?.sessionId
     });
     memorizeFiltersSystem({
       ...getMemorizedFiltersSystem(),
@@ -156,13 +160,19 @@ export default function useAuth() {
     history.push('/inicio');
   }
 
-  function logout(silent = false, deleteAccount = false) {
+  async function logout(silent = false, deleteAccount = false) {
+    console.log('chegou aqui no logout');
+    await ServiceAUTH.logout({
+      sessionId: getMemorizedFiltersUsers()?.sessionId
+    }).catch((error) => {
+      console.error('Error during logout API call', error);
+    });
     setAuthenticated(false);
     clearMemorizedFiltersUsers();
     clearAllMemorizedConfigs();
     localStorage.removeItem('token');
     api.defaults.headers.Authorization = undefined;
-    
+
     if (!silent && !deleteAccount) {
       const msgText = 'Logout realizado com sucesso!';
       const msgType = 'success';
@@ -176,7 +186,7 @@ export default function useAuth() {
       const msgType = 'success';
       setFlashMessage(msgText, msgType);
     }
-    
+
     history.push('/login');
   }
 

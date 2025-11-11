@@ -24,6 +24,7 @@ import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 
 // 📡 Services
 import ServiceCategory from '../../views/sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
+import useAuth from '../../hooks/userAuth';
 
 function Sidebar({ onToggle }) {
   const location = useLocation();
@@ -39,6 +40,8 @@ function Sidebar({ onToggle }) {
   const [relatoriosSubMenu, setRelatoriosSubMenu] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+    const { logout } = useAuth();
+  
 
  const fetchCategories = useCallback(async () => {
     try {
@@ -136,9 +139,8 @@ function Sidebar({ onToggle }) {
     }
   }, [isMinimized, isHovered, isMobile, onToggle]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/';
+  const handleLogout = async() => {
+    await logout();
   };
 
   const isActive = (path) => {
