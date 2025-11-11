@@ -25,6 +25,7 @@ const Home = () => {
   const [presenceStats, setPresenceStats] = useState({ presentDays: 0, totalSessions: 0, rate: 0 });
   const [location, setLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
+  const [dataVisible, setDataVisible] = useState(false); 
 
   const months = [
     { value: '1', label: 'Janeiro' },
@@ -41,12 +42,16 @@ const Home = () => {
     { value: '12', label: 'Dezembro' }
   ];
 
-  const years = [2023, 2024, 2025, 2026];
+  const years = [2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035];
 
   const fetchPresenceData = async (month, year) => {
+    const startTime = Date.now();
+    const minLoadingTime = 500; 
+
     try {
       setPresenceLoading(true);
       setPresenceError(null);
+      setDataVisible(false); 
       const response = await ServiceUsers.getPresence(month, year);
 
       if (response.status !== 200) {
@@ -74,9 +79,27 @@ const Home = () => {
         rate: Math.round((mockData.filter(d => d.present).length / mockData.length) * 100),
       });
     } finally {
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = minLoadingTime - elapsedTime;
+
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+
       setPresenceLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!presenceLoading && presenceData.length > 0) {
+      const timer = setTimeout(() => {
+        setDataVisible(true);
+      }, 150);
+      return () => clearTimeout(timer);
+    } else {
+      setDataVisible(false);
+    }
+  }, [presenceLoading, presenceData]);
 
   useEffect(() => {
     fetchPresenceData(selectedMonth, selectedYear);
@@ -309,7 +332,7 @@ const Home = () => {
                   <p>Dados mock serão exibidos.</p>
                 </div>
               ) : (
-                <>
+                <div className={`${styles.dataContainer} ${dataVisible ? styles.visible : ''}`}>
                   <div className={styles.statsGrid}>
                     <div className={styles.statBox}>
                       <p className={styles.statLabel}>Dias Presentes</p>
@@ -327,7 +350,13 @@ const Home = () => {
                   
                   <div className={styles.presenceList}>
                     {presenceData.map((day, index) => (
-                      <div key={index} className={styles.presenceRow}>
+                      <div 
+                        key={index} 
+                        className={`${styles.presenceRow} ${dataVisible ? styles.rowAnimate : ''}`}
+                        style={{ 
+                          transitionDelay: dataVisible ? `${Math.min(index * 0.05, 0.5)}s` : '0s' 
+                        }}
+                      >
                         <span className={styles.dayLabel}>{day.day}</span>
                         <div className={styles.progressBar}>
                           {day.present && (
@@ -353,7 +382,7 @@ const Home = () => {
                       Taxa de presença: <span className={styles.rateValue}>{presenceStats.rate}%</span>
                     </p>
                   </div>
-                </>
+                </div>
               )}
             </div>
           </div>
