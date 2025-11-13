@@ -1,5 +1,5 @@
 // ⚙️ React e bibliotecas externas
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 // 🔐 Serviços / API
@@ -35,6 +35,8 @@ export default function useAuth() {
   const { clearAllMemorizedConfigs: clearAllMemorizedConfigs } =
     useMemorizeTableColumns(TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS);
 
+  const hasValidated = useRef(false);
+
   async function validateToken() {
     const token = localStorage.getItem('token');
 
@@ -47,7 +49,7 @@ export default function useAuth() {
     try {
       api.defaults.headers.Authorization = `Bearer ${token}`;
       await api.post('/auth/validate', {
-        sessionId: getMemorizedFiltersUsers()?.sessionId
+        sessionId: getMemorizedFiltersUsers()?.sessionId,
       });
 
       setAuthenticated(true);
@@ -61,8 +63,12 @@ export default function useAuth() {
   }
 
   useEffect(() => {
-    validateToken();
+    if (!hasValidated.current) {
+      hasValidated.current = true;
+      validateToken();
+    }
   }, []);
+
 
   useEffect(() => {
     const interceptor = api.interceptors.response.use(

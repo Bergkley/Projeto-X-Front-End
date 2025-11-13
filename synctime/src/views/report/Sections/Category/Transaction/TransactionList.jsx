@@ -14,6 +14,10 @@ import TableWithDate from '../../../../../components/table/TableWithDate';
 import ServiceTransactionsRecord from '../services/ServiceTransactionsRecord';
 import ServiceCustomFields from '../../../../sectionConfigSystem/Sections/General/CustomFields/services/ServiceCustomFields';
 import ServiceCategory from '../../../../sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
+import {
+  useMemorizeTableColumns,
+  TABLE_CONFIG_KEYS
+} from '../../../../../hooks/useMemorizeTableColumns';
 
 // 💅 Estilos
 
@@ -43,9 +47,19 @@ const TransactionList = () => {
   const [sortBy, setSortBy] = useState('');
   const [order, setOrder] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  
 
-  const dados = { categoryId: idCategory ?? categoryId, recordTypeId, monthlyRecordId, month, year };
+  const effectiveTableKey = `${TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS}_${
+    idCategory || categoryId || 'general'
+  }`;
+  const { getMemorizedConfig } = useMemorizeTableColumns(effectiveTableKey);
+
+  const dados = {
+    categoryId: idCategory ?? categoryId,
+    recordTypeId,
+    monthlyRecordId,
+    month,
+    year
+  };
 
   const filterColumnsBase = [
     { id: 'title', label: 'Título', type: 'text' },
@@ -64,7 +78,58 @@ const TransactionList = () => {
     return sortByParam;
   };
 
+  const handleExport = async (format) => {
+    try {
+      const config = getMemorizedConfig();
+      const columnOrder = (config?.columnOrder || []).filter(
+        (c) => c !== 'actions'
+      );
+      const visibleColumns = (config?.visibleColumns || []).filter(
+        (c) => c !== 'actions'
+      );
 
+      const filtersToSend = activeFilters
+        .filter((filter) => filter.value && filter.value.trim() !== '')
+        .map((filter) => ({
+          field: filter.column,
+          operator: filter.operator,
+          value: filter.value,
+          value2: filter.value2 || null
+        }));
+
+      const adjustedSortBy = getAdjustedSortBy(sortBy);
+
+      const response = await ServiceTransactionsRecord.exportTransactions(
+        monthlyRecordId,
+        format,
+        adjustedSortBy,
+        order,
+        filtersToSend,
+        columnOrder,
+        visibleColumns
+      );
+
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type']
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const ext = format === 'pdf' ? 'pdf' : format === 'csv' ? 'csv' : 'xlsx';
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString('pt-BR').replace(/\//g, '-');
+      a.download = `transacoes_${formattedDate}_exportacao.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      setFlashMessage('Exportação realizada com sucesso', 'success');
+    } catch (error) {
+      console.error('Erro na exportação:', error);
+      setFlashMessage('Erro na exportação', 'error');
+    }
+  };
 
   useEffect(() => {
     if (recordTypeId && categoryId) {
@@ -88,7 +153,6 @@ const TransactionList = () => {
       setCustomFieldsDefs([]);
     }
   }, [recordTypeId, categoryId]);
-  
 
   useEffect(() => {
     if (customFieldsDefs.length > 0 && transactionRecords.length > 0) {
@@ -329,36 +393,46 @@ const TransactionList = () => {
   };
 
   const handleBack = () => {
-    history.push(`/relatorios/categoria/relatorio-mesal/${categoryId || idCategory}`);
+    history.push(
+      `/relatorios/categoria/relatorio-mesal/${categoryId || idCategory}`
+    );
   };
 
   const handleCreate = async () => {
-  let updatedDados = { ...dados };
+    let updatedDados = { ...dados };
 
-  if (!updatedDados.recordTypeId) {
-    try {
-      const response = await ServiceCategory.getByIdCategory(
-        updatedDados.categoryId
-      );
-      console.log('response berg', response);
+    if (!updatedDados.recordTypeId) {
+      try {
+        const response = await ServiceCategory.getByIdCategory(
+          updatedDados.categoryId
+        );
+        console.log('response berg', response);
 
-      if (response.data.status === 'OK' && response.data.data) {
-        updatedDados.recordTypeId = response.data.data.record_type_id;
-        
-        setRecordTypeId(updatedDados.recordTypeId);
-      } else {
-        setFlashMessage('Nenhum tipo de registro disponível para esta categoria.', 'error');
+        if (response.data.status === 'OK' && response.data.data) {
+          updatedDados.recordTypeId = response.data.data.record_type_id;
+
+          setRecordTypeId(updatedDados.recordTypeId);
+        } else {
+          setFlashMessage(
+            'Nenhum tipo de registro disponível para esta categoria.',
+            'error'
+          );
+          return;
+        }
+      } catch (error) {
+        console.error('Erro ao buscar tipo de registro:', error);
+        setFlashMessage(
+          'Erro ao carregar configurações para criar transação',
+          'error'
+        );
         return;
       }
-    } catch (error) {
-      console.error('Erro ao buscar tipo de registro:', error);
-      setFlashMessage('Erro ao carregar configurações para criar transação', 'error');
-      return; 
     }
-  }
 
-  history.push('/relatorios/categoria/transações/form', { dados: updatedDados });
-};
+    history.push('/relatorios/categoria/transações/form', {
+      dados: updatedDados
+    });
+  };
   const handleSelectionChange = (selectedItems) => {
     console.log('Itens selecionados:', selectedItems);
   };
@@ -395,6 +469,7 @@ const TransactionList = () => {
     ? { key: sortBy, direction: order }
     : { key: null, direction: null };
 
+
   if (loading && transactionRecords.length === 0 && !status) {
     return (
       <LoadingSpinner message="Carregando registros dos registros mensais..." />
@@ -414,6 +489,8 @@ const TransactionList = () => {
         title="Transações"
         columns={filterColumns}
         onFiltersChange={handleFiltersChange}
+        isExportacao={true}
+        onExport={handleExport}
       />
 
       {transactionRecords.length === 0 && !loading ? (
@@ -449,6 +526,7 @@ const TransactionList = () => {
             dados={dados}
             onCreateRecord={createTransactionRecord}
             onUpdateRecord={editTransactionRecord}
+            tableKey={TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS}
           />
         </>
       )}

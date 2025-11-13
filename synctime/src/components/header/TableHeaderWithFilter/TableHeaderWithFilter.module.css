@@ -43,12 +43,14 @@
   flex-wrap: wrap;
 }
 
-.filterContainer {
+.filterContainer,
+.exportContainer {
   position: relative;
   display: inline-block;
 }
 
-.filterButton {
+.filterButton,
+.exportButton {
   position: relative;
   display: flex;
   align-items: center;
@@ -66,64 +68,76 @@
   white-space: nowrap;
 }
 
-.headerContainer.dark .filterButton {
+.headerContainer.dark .filterButton,
+.headerContainer.dark .exportButton {
   background-color: #374151;
   color: #f3f4f6;
   border-color: #4b5563;
 }
 
-.headerContainer.light .filterButton {
+.headerContainer.light .filterButton,
+.headerContainer.light .exportButton {
   background-color: white;
   color: #1f2937;
   border-color: #d1d5db;
 }
 
-.filterButton:hover:not(.active) {
+.filterButton:hover:not(.active),
+.exportButton:hover:not(.active) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.headerContainer.dark .filterButton:hover:not(.active) {
+.headerContainer.dark .filterButton:hover:not(.active),
+.headerContainer.dark .exportButton:hover:not(.active) {
   background-color: #4b5563;
   border-color: #6b7280;
 }
 
-.headerContainer.light .filterButton:hover:not(.active) {
+.headerContainer.light .filterButton:hover:not(.active),
+.headerContainer.light .exportButton:hover:not(.active) {
   background-color: #f9fafb;
   border-color: #9ca3af;
 }
 
-.filterButton.active {
+.filterButton.active,
+.exportButton.active {
   background-color: var(--accent-color, #0ea5e9);
   color: white;
   border-color: var(--accent-color, #0ea5e9);
   box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
 }
 
-.filterButton:focus {
+.filterButton:focus,
+.exportButton:focus {
   border-color: var(--focus-border-color, #0ea5e9);
   box-shadow: 0 0 0 3px var(--focus-shadow-color, rgba(14, 165, 233, 0.2));
 }
 
 
 .filterIcon,
+.exportIcon,
 .chevronIcon {
   transition: all 0.3s ease;
   flex-shrink: 0;
 }
 
 .headerContainer.dark .filterIcon,
+.headerContainer.dark .exportIcon,
 .headerContainer.dark .chevronIcon {
   color: currentColor;
 }
 
 .headerContainer.light .filterIcon,
+.headerContainer.light .exportIcon,
 .headerContainer.light .chevronIcon {
   color: currentColor;
 }
 
 .filterButton.active .filterIcon,
-.filterButton.active .chevronIcon {
+.filterButton.active .chevronIcon,
+.exportButton.active .exportIcon,
+.exportButton.active .chevronIcon {
   color: white;
 }
 
@@ -163,7 +177,8 @@
   }
 }
 
-.filterPanel {
+.filterPanel,
+.exportDropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
@@ -178,14 +193,21 @@
   overflow: hidden;
 }
 
-.headerContainer.dark .filterPanel {
+.exportDropdown {
+  min-width: 180px;
+  max-width: 200px;
+}
+
+.headerContainer.dark .filterPanel,
+.headerContainer.dark .exportDropdown {
   background-color: #1f2937;
   border-color: #374151;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 
               0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
-.headerContainer.light .filterPanel {
+.headerContainer.light .filterPanel,
+.headerContainer.light .exportDropdown {
   background-color: white;
   border-color: #e5e7eb;
 }
@@ -453,7 +475,7 @@
   border-radius: 6px;
   transition: all 0.2s ease;
   display: flex;
-  align-items: center;
+  align-items:  center;
   justify-content: center;
   flex-shrink: 0;
 }
@@ -580,6 +602,52 @@
   cursor: not-allowed;
 }
 
+.exportOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-size: 14px;
+  border-bottom: 1px solid transparent;
+}
+
+.exportOption:hover {
+  background-color: rgba(14, 165, 233, 0.1);
+  color: var(--accent-color, #0ea5e9);
+}
+
+.headerContainer.dark .exportOption:hover {
+  background-color: rgba(14, 165, 233, 0.05);
+}
+
+.exportOption:last-child {
+  border-bottom: none;
+}
+
+.exportOptionIcon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.exportOptionLabel {
+  font-weight: 500;
+}
+
+.headerContainer.dark .exportOptionLabel {
+  color: #f3f4f6;
+}
+
+.headerContainer.light .exportOptionLabel {
+  color: #1f2937;
+}
+
 
 .checkboxLabel {
   display: flex;
@@ -626,18 +694,25 @@
     justify-content: space-between;
   }
 
-  .filterButton {
+  .filterButton,
+  .exportButton {
     flex: 1;
     justify-content: center;
   }
 
-  .filterPanel {
+  .filterPanel,
+  .exportDropdown {
     right: 0;
     left: 0;
     min-width: unset;
     max-width: unset;
     margin-left: 20px;
     margin-right: 20px;
+  }
+
+  .exportDropdown {
+    min-width: unset;
+    max-width: unset;
   }
 
   .filterItem {
@@ -678,11 +753,13 @@
     gap: 12px;
   }
 
-  .filterButton {
+  .filterButton,
+  .exportButton {
     width: 100%;
   }
 
-  .filterPanel {
+  .filterPanel,
+  .exportDropdown {
     position: fixed;
     top: auto;
     bottom: 0;
@@ -707,6 +784,10 @@
 
   .filterBody {
     max-height: calc(70vh - 65px);
+  }
+
+  .exportDropdown {
+    max-height: 70vh;
   }
 
   .filterItem {
@@ -753,11 +834,13 @@
   }
 }
 
-.headerContainer.dark .filterButton:active {
+.headerContainer.dark .filterButton:active,
+.headerContainer.dark .exportButton:active {
   background-color: #1f2937;
 }
 
-.headerContainer.light .filterButton:active {
+.headerContainer.light .filterButton:active,
+.headerContainer.light .exportButton:active {
   background-color: #e5e7eb;
 }
 
@@ -766,7 +849,9 @@
 .removeFilterButton:focus-visible,
 .addFilterButton:focus-visible,
 .applyButton:focus-visible,
-.cancelButton:focus-visible {
+.cancelButton:focus-visible,
+.exportButton:focus-visible,
+.exportOption:focus-visible {
   outline: 2px solid var(--accent-color, #0ea5e9);
   outline-offset: 2px;
 }

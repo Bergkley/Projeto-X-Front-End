@@ -12,6 +12,29 @@ class ServiceTransactionsRecord {
       params: { sortBy, order, monthlyRecordId }
     });
   }
+
+  exportTransactions(monthlyRecordId, format, sortBy, order, filters, columnOrder, visibleColumns) {
+    const params = new URLSearchParams({
+      monthlyRecordId,
+      format
+    });
+
+    if (sortBy) params.append('sortBy', sortBy);
+    if (order) params.append('order', order);
+    if (filters && filters.length > 0) {
+      params.append('filters', JSON.stringify(filters));
+    }
+    if (columnOrder && columnOrder.length > 0) {
+      params.append('columnOrder', columnOrder.join(','));
+    }
+    if (visibleColumns && visibleColumns.length > 0) {
+      params.append('visibleColumns', visibleColumns.join(','));
+    }
+
+    return api.get(`/transactions/export?${params.toString()}`, {
+      responseType: 'blob'
+    });
+  }
   getByIdTransactionsRecord(id) {
     return api.get(`/transactions/${id}`);
   }
@@ -28,6 +51,7 @@ class ServiceTransactionsRecord {
   deleteTransactionsRecord(id) {
     return api.delete(`/transactions/delete/${id}`);
   }
+
 }
 
 export default new ServiceTransactionsRecord();

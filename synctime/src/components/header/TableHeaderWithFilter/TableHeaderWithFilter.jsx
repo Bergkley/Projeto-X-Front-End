@@ -1,24 +1,30 @@
 import { useState, useRef, useEffect } from 'react';
-import { Filter, X, Plus, ChevronDown, Check, RotateCcw } from 'lucide-react';
+import { Filter, X, Plus, ChevronDown, Check, RotateCcw, Download } from 'lucide-react';
 import styles from './TableHeaderWithFilter.module.css';
 import { useTheme } from '../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../hooks/useEmphasisColor';
-
+import xlsxImage from '../../../assets/xlsx.png';
+import pdfImage from '../../../assets/pdf.png';
+import csvImage from '../../../assets/csv.png';
 const TableHeaderWithFilter = ({ 
   title, 
   columns = [], 
   onFiltersChange,
   showDisabledToggle = false,
   showDisabled = false,
-  onToggleDisabled 
+  onToggleDisabled,
+  isExportacao = false,
+  onExport
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [filters, setFilters] = useState([]); 
   const [draftFilters, setDraftFilters] = useState([]); 
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const panelRef = useRef(null);
+  const exportRef = useRef(null);
 
   const accentColor = emphasisColor || '#0ea5e9';
 
@@ -45,6 +51,12 @@ const TableHeaderWithFilter = ({
     ]
   };
 
+  const exportFormats = [
+    { value: 'csv', label: 'CSV', icon: <img src={csvImage} alt="CSV" style={{ width: '16px', height: '16px' }} /> },
+    { value: 'xlsx', label: 'XLSX', icon: <img src={xlsxImage} alt="XLSX" style={{ width: '16px', height: '16px' }} /> },
+    { value: 'pdf', label: 'PDF', icon: <img src={pdfImage} alt="PDF" style={{ width: '16px', height: '16px' }} /> }
+  ];
+
   const addAlpha = (color, alpha) => {
     if (color.startsWith('#')) {
       const r = parseInt(color.slice(1, 3), 16);
@@ -60,14 +72,17 @@ const TableHeaderWithFilter = ({
       if (panelRef.current && !panelRef.current.contains(event.target)) {
         handleCancel();
       }
+      if (exportRef.current && !exportRef.current.contains(event.target)) {
+        setShowExportDropdown(false);
+      }
     };
 
-    if (showFilterPanel) {
+    if (showFilterPanel || showExportDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showFilterPanel]);
+  }, [showFilterPanel, showExportDropdown]);
 
   useEffect(() => {
     const activeCount = filters.filter(f => f.value && f.value.trim() !== '').length;
@@ -143,6 +158,13 @@ const TableHeaderWithFilter = ({
   };
 
   const hasDraftChanges = JSON.stringify(draftFilters) !== JSON.stringify(filters);
+
+  const handleExportClick = (format) => {
+    if (onExport) {
+      onExport(format);
+    }
+    setShowExportDropdown(false);
+  };
 
   return (
     <div className={`${styles.headerContainer} ${styles[theme]}`}>
@@ -315,6 +337,45 @@ const TableHeaderWithFilter = ({
             </div>
           )}
         </div>
+
+        {isExportacao && (
+          <div className={styles.exportContainer} ref={exportRef}>
+            <button
+              className={`${styles.exportButton} ${showExportDropdown ? styles.active : ''}`}
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              style={{
+                '--focus-border-color': accentColor,
+                '--focus-shadow-color': addAlpha(accentColor, theme === 'dark' ? 0.2 : 0.1),
+                '--accent-color': accentColor
+              }}
+            >
+              <Download size={18} className={styles.exportIcon} />
+              Exportar
+              <ChevronDown 
+                size={16} 
+                className={`${styles.chevronIcon} ${showExportDropdown ? styles.rotated : ''}`} 
+              />
+            </button>
+
+            {showExportDropdown && (
+              <div className={styles.exportDropdown}>
+                {exportFormats.map((fmt) => (
+                  <button
+                    key={fmt.value}
+                    className={styles.exportOption}
+                    onClick={() => handleExportClick(fmt.value)}
+                    style={{
+                      '--accent-color': accentColor
+                    }}
+                  >
+                    <span className={styles.exportOptionIcon}>{fmt.icon}</span>
+                    <span className={styles.exportOptionLabel}>{fmt.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {showDisabledToggle && (
           <label className={styles.checkboxLabel}>
