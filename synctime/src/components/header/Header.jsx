@@ -1,6 +1,6 @@
 // ⚙️ React e bibliotecas externas
 import { useState, useEffect } from 'react';
-import { Bell, Zap } from 'lucide-react';
+import { Bell, Zap, User } from 'lucide-react';
 
 // 💅 Estilos
 import styles from './Header.module.css';
@@ -12,28 +12,52 @@ import ProfileDropdown from '../settings/ProfileDropdown';
 
 // 🧠 Hooks customizados
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
+import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from '../../hooks/useMemorizeInputsFilters';
 import ServiceUsers from '../../services/ServiceUsers';
 
 const Header = () => {
   const { emphasisColor } = useEmphasisColor();
+  const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
+    POSSIBLE_FILTERS_ENTITIES.USERS
+  );
   const [notificationCount, setNotificationCount] = useState(3);
   const [streakDays, setStreakDays] = useState(0);
   const [weekProgress, setWeekProgress] = useState([false, false, false, false, false, false, false]);
   const [completedDaysThisWeek, setCompletedDaysThisWeek] = useState(0);
   const [streakLoading, setStreakLoading] = useState(true);
   const [streakError, setStreakError] = useState(null);
+  const [userAvatar, setUserAvatar] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
+  const fetchUserData = async () => {
+    const currentUser = getMemorizedFilters();
+    if (currentUser?.id) {
+      try {
+        const response = await ServiceUsers.getByUser(currentUser.id);
+        if (response.data.status === 'OK') {
+          const user = response.data.data.user;
+          memorizeFilters({
+            ...currentUser,
+            name: user.name,
+            imageUrl: user.imageUrl
+          });
+          setUserAvatar(user.imageUrl || null);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+      }
+    }
+  };
+
   const fetchStreakData = async () => {
     try {
       setStreakLoading(true);
       setStreakError(null);
       const response = await ServiceUsers.getStreak();
-      console.log('Dados de streak recebidos:', response);
       if (response.data.status === 'OK') {
         const { streakDays: days, weekProgress: progress, completedDaysThisWeek: completed } = response.data.data;
         setStreakDays(days);
@@ -54,6 +78,7 @@ const Header = () => {
   };
 
   useEffect(() => {
+    fetchUserData();
     fetchStreakData();
   }, []);
 
@@ -63,6 +88,10 @@ const Header = () => {
     if (streakDays >= 7) return '#ffa500';
     if (streakDays >= 3) return '#ffd700';
     return '#fed7aa';
+  };
+
+  const handleAvatarClick = () => {
+    setShowProfileDropdown(!showProfileDropdown);
   };
 
   return (
@@ -177,13 +206,18 @@ const Header = () => {
 
               {/* User Profile */}
               <div className={styles.profileContainer}>
-                <img
-                  src="https://img.freepik.com/fotos-gratis/retrato-de-homem-branco-isolado_53876-40306.jpg"
-                  alt="User Avatar"
-                  className={styles.avatar}
-                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                  style={{ cursor: 'pointer' }}
-                />
+                {userAvatar ? (
+                  <img
+                    src={userAvatar}
+                    alt="User Avatar"
+                    className={styles.avatar}
+                    onClick={handleAvatarClick}
+                  />
+                ) : (
+                  <div className={styles.defaultAvatar} onClick={handleAvatarClick}>
+                    <User className={styles.userIcon} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
