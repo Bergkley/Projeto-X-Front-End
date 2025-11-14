@@ -117,6 +117,8 @@ const ProfileSection = () => {
 
       await fetchUser();
 
+      window.dispatchEvent(new CustomEvent('profileUpdated'));
+
       setFlashMessage('Perfil atualizado com sucesso!', 'success');
     } catch (error) {
       console.error('Error updating profile:', error);

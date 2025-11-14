@@ -12,7 +12,10 @@ import ProfileDropdown from '../settings/ProfileDropdown';
 
 // 🧠 Hooks customizados
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
-import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from '../../hooks/useMemorizeInputsFilters';
+import {
+  useMemorizeFilters,
+  POSSIBLE_FILTERS_ENTITIES
+} from '../../hooks/useMemorizeInputsFilters';
 import ServiceUsers from '../../services/ServiceUsers';
 
 const Header = () => {
@@ -22,7 +25,15 @@ const Header = () => {
   );
   const [notificationCount, setNotificationCount] = useState(3);
   const [streakDays, setStreakDays] = useState(0);
-  const [weekProgress, setWeekProgress] = useState([false, false, false, false, false, false, false]);
+  const [weekProgress, setWeekProgress] = useState([
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ]);
   const [completedDaysThisWeek, setCompletedDaysThisWeek] = useState(0);
   const [streakLoading, setStreakLoading] = useState(true);
   const [streakError, setStreakError] = useState(null);
@@ -59,7 +70,11 @@ const Header = () => {
       setStreakError(null);
       const response = await ServiceUsers.getStreak();
       if (response.data.status === 'OK') {
-        const { streakDays: days, weekProgress: progress, completedDaysThisWeek: completed } = response.data.data;
+        const {
+          streakDays: days,
+          weekProgress: progress,
+          completedDaysThisWeek: completed
+        } = response.data.data;
         setStreakDays(days);
         setWeekProgress(progress);
         setCompletedDaysThisWeek(completed);
@@ -80,6 +95,18 @@ const Header = () => {
   useEffect(() => {
     fetchUserData();
     fetchStreakData();
+  }, []);
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchUserData();
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
   }, []);
 
   const getFlameColor = () => {
@@ -115,7 +142,7 @@ const Header = () => {
                   disabled={streakLoading}
                 >
                   {streakLoading ? (
-                    <div className={styles.loadingSpinner}></div> 
+                    <div className={styles.loadingSpinner}></div>
                   ) : (
                     <>
                       <div
@@ -175,7 +202,9 @@ const Header = () => {
                   )}
                 </button>
                 {streakError && (
-                  <span className={styles.errorText}>Erro ao carregar streak</span>
+                  <span className={styles.errorText}>
+                    Erro ao carregar streak
+                  </span>
                 )}
               </div>
 
@@ -214,7 +243,10 @@ const Header = () => {
                     onClick={handleAvatarClick}
                   />
                 ) : (
-                  <div className={styles.defaultAvatar} onClick={handleAvatarClick}>
+                  <div
+                    className={styles.defaultAvatar}
+                    onClick={handleAvatarClick}
+                  >
                     <User className={styles.userIcon} />
                   </div>
                 )}
