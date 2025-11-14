@@ -395,10 +395,15 @@
 }
 
 /* Avatar */
+.fileInput {
+  display: none;
+}
+
 .avatarContainer {
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-top: 8px;
 }
 
 @media (max-width: 768px) {
@@ -415,7 +420,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, rgb(20, 18, 129) 0%, rgb(40, 38, 159) 100%);
+  color: white;
+  overflow: hidden;
+  border: 3px solid;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modalContainer.light .avatar {
+  border-color: #f0f0f0;
+}
+
+.modalContainer.dark .avatar {
+  border-color: #3a3a3a;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 768px) {
@@ -425,23 +448,29 @@
   }
 }
 
-.modalContainer.dark .avatar {
-  background: #3a3a3a;
-  color: #999;
-}
-
-.modalContainer.light .avatar {
-  background: #e8e8e8;
-  color: #666;
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .changeAvatarBtn {
-  padding: 8px 16px;
+  background: linear-gradient(135deg, rgb(20, 18, 129) 0%, rgb(40, 38, 159) 100%);
+  color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(20, 18, 129, 0.3);
+}
+
+.changeAvatarBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(20, 18, 129, 0.4);
+  background: linear-gradient(135deg, rgb(40, 38, 159) 0%, rgb(20, 18, 129) 100%);
 }
 
 @media (max-width: 768px) {
@@ -449,24 +478,6 @@
     font-size: 13px;
     padding: 8px 12px;
   }
-}
-
-.modalContainer.dark .changeAvatarBtn {
-  background: #3a3a3a;
-  color: #fff;
-}
-
-.modalContainer.dark .changeAvatarBtn:hover {
-  background: #4a4a4a;
-}
-
-.modalContainer.light .changeAvatarBtn {
-  background: #e8e8e8;
-  color: #000;
-}
-
-.modalContainer.light .changeAvatarBtn:hover {
-  background: #d8d8d8;
 }
 
 /* Buttons */

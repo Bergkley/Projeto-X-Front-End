@@ -1,5 +1,5 @@
 // ⚙️ React e bibliotecas externas
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import { Button } from 'reactstrap';
@@ -25,16 +25,23 @@ const ProfileSection = () => {
     control,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
+    watch
   } = useForm({
     defaultValues: {
       name: '',
-      bio: ''
+      bio: '',
+      avatar: null
     }
   });
   const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
     POSSIBLE_FILTERS_ENTITIES.USERS
   );
+
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const fileInputRef = useRef(null);
+  const watchedAvatar = watch('avatar');
 
   useEffect(() => {
     async function fetchUser() {
@@ -43,31 +50,72 @@ const ProfileSection = () => {
         ...getMemorizedFilters(),
         name: response.data.data.user.name
       });
+      setCurrentAvatarUrl(response.data.data.user.imageUrl || null);
       reset({
         name: response.data.data.user.name || '',
-        bio: response.data.data.user.bio || ''
+        bio: response.data.data.user.bio || '',
+        avatar: null
       });
     }
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    if (watchedAvatar && watchedAvatar[0]) {
+      const file = watchedAvatar[0];
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [watchedAvatar]);
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const fetchUser = async () => {
+    const response = await ServiceUsers.getByUser(getMemorizedFilters()?.id);
+    memorizeFilters({
+      ...getMemorizedFilters(),
+      name: response.data.data.user.name
+    });
+    setCurrentAvatarUrl(response.data.data.user.imageUrl || null);
+    reset({
+      name: response.data.data.user.name || '',
+      bio: response.data.data.user.bio || '',
+      avatar: null
+    });
+  };
+
   const onSubmit = async (data) => {
     try {
       const currentUser = getMemorizedFilters();
 
-      
+      let payload;
+      if (data.avatar && data.avatar[0]) {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('bio', data.bio || '');
+        formData.append('avatar', data.avatar[0]);
+        payload = formData;
+      } else {
+        payload = {
+          name: data.name,
+          bio: data.bio || ''
+        };
+      }
 
-      const formatData = {
-        name: data.name,
-        bio: data.bio || ''
-      };
-
-      await ServiceUsers.editUser(currentUser.id, formatData);
+      await ServiceUsers.editUser(currentUser.id, payload);
 
       memorizeFilters({
         ...currentUser,
         name: data.name
       });
+
+      await fetchUser();
 
       setFlashMessage('Perfil atualizado com sucesso!', 'success');
     } catch (error) {
@@ -75,19 +123,75 @@ const ProfileSection = () => {
       setFlashMessage('Erro ao atualizar perfil', 'error');
     }
   };
-// TODO: LIDAR COM FOTO
+
+  const avatarSrc = previewUrl || currentAvatarUrl;
+  const hasAvatar = !!avatarSrc;
+  const buttonText = hasAvatar ? 'Alterar foto' : 'Adicionar foto';
+
   return (
     <div className={styles.section}>
       <h3 className={styles.sectionTitle}>Perfil</h3>
 
       <div className={styles.formGroup}>
-        <label className={styles.label}>Foto de perfil</label>
-        <div className={styles.avatarContainer}>
-          <div className={styles.avatar}>
-            <User size={40} />
-          </div>
-          <button className={styles.changeAvatarBtn}>Alterar foto</button>
-        </div>
+        <Controller
+          name="avatar"
+          control={control}
+          rules={{
+            validate: {
+              isImage: (files) => {
+                if (!files || !files[0]) return true;
+                const file = files[0];
+                return file.type.startsWith('image/') || 'Apenas imagens são permitidas';
+              },
+              maxSize: (files) => {
+                if (!files || !files[0]) return true;
+                const file = files[0];
+                return file.size <= 5 * 1024 * 1024 || 'A imagem deve ter no máximo 5MB';
+              }
+            }
+          }}
+          render={({ field }) => (
+            <>
+              <input
+                type="file"
+                id="avatar"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={(e) => {
+                  const files = e.target.files ? Array.from(e.target.files) : [];
+                  field.onChange(files);
+                }}
+                className={styles.fileInput}
+                style={{ display: 'none' }}
+              />
+              <div className={styles.avatarContainer}>
+                <div className={styles.avatar}>
+                  {avatarSrc ? (
+                    <img 
+                      src={avatarSrc} 
+                      alt="Avatar" 
+                      className={styles.avatarImg}
+                    />
+                  ) : (
+                    <User size={40} />
+                  )}
+                </div>
+                <button 
+                  type="button"
+                  className={styles.changeAvatarBtn}
+                  onClick={handleButtonClick}
+                >
+                  {buttonText}
+                </button>
+              </div>
+            </>
+          )}
+        />
+        <ErrorMessage
+          errors={errors}
+          name="avatar"
+          render={({ message }) => errorFormMessage(message)}
+        />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
