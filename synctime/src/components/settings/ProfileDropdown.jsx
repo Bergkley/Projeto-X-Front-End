@@ -1,5 +1,6 @@
 // ⚙️ React e bibliotecas externas
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Settings, Key, LogOut } from 'lucide-react';
 
 // 💅 Estilos
@@ -34,8 +35,9 @@ const ProfileDropdown = ({ onClose }) => {
     }
   };
 
-  return (
-    <div className={styles.dropdownOverlay} onClick={onClose}>
+  return createPortal(
+    <>
+      <div className={styles.dropdownOverlay} onClick={onClose} />
       <div 
         className={`${styles.dropdown} ${styles[theme]}`} 
         onClick={(e) => e.stopPropagation()}
@@ -76,7 +78,8 @@ const ProfileDropdown = ({ onClose }) => {
         isOpen={showAlterPassword}
         onClose={() => setShowAlterPassword(false)}
       />
-    </div>
+    </>,
+    document.body
   );
 };
 
