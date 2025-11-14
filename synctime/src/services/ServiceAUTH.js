@@ -9,7 +9,11 @@ class ServiceAUTH {
   }
 
   register(data) {
-    return api.post(`/user/register`, data);
+    return api.post(`/user/register`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   }
 
   forgotPassword(data) {

@@ -19,7 +19,12 @@ class ServiceUSERS {
   }
 
   editUser(id, data){
-    return api.patch(`/user/edit/${id}`, data);
+    const config = data instanceof FormData ? {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    } : {};
+    return api.patch(`/user/edit/${id}`, data, config);
   }
 
   deleteUser(id){
