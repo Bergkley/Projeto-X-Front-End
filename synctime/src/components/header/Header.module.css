@@ -1,6 +1,5 @@
 /* Header Container */
 .header {
-  /* background removido - será aplicado via inline style */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
@@ -18,7 +17,7 @@
 
 /* Brand */
 .brand {
-  width: 0; /* Collapse brand space */
+  width: 0; 
 }
 
 /* Actions Container */
@@ -132,7 +131,6 @@
   top: -0.25rem;
   right: -0.25rem;
   background: #fbbf24;
-  /* color removido - será aplicado via inline style */
   font-size: 0.75rem;
   font-weight: bold;
   border-radius: 9999px;
@@ -179,7 +177,6 @@
 }
 
 .dropdownHeader {
-  /* background removido - será aplicado via prop ou context */
   padding: 0.75rem 1rem;
 }
 
@@ -225,7 +222,6 @@
 }
 
 .viewAllButton {
-  /* color removido - será aplicado via prop ou context */
   font-size: 0.875rem;
   font-weight: 500;
   background: none;
