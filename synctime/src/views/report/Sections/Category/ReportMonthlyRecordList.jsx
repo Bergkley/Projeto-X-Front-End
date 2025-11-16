@@ -128,10 +128,11 @@ const ReportMonthlyRecordList = () => {
 
   const formatStatus = (status) => {
     const statusMap = {
-      active: 'Ativo',
-      completed: 'Completo',
-      cancelled: 'Cancelado',
-      pending: 'Pendente'
+      em_andamento: 'EM ANDAMENTO',
+      concluido: 'CONCLUÍDO',
+      cancelado: 'CANCELADO',
+      pendente: 'PENDENTE',
+      pausado: 'PAUSADO'
     };
     return statusMap[status] || status;
   };
@@ -261,7 +262,8 @@ const ReportMonthlyRecordList = () => {
         currentPage,
         sortBy,
         order,
-        filtersToSend
+        filtersToSend,
+        idCategory
       );
 
       if (response.data.status === 'OK') {
