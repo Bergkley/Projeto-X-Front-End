@@ -162,7 +162,7 @@ const ReportMonthlyRecordForm = () => {
         setFlashMessage('Registro mensal criado com sucesso', 'success');
       }
 
-      history.push('/relatorios/categoria/relatorio-mesal');
+      history.push(`/relatorios/categoria/relatorio-mesal/${dados.categoryId}`);
     } catch (error) {
       console.error('Erro ao salvar registro mensal:', error);
       const errorMessage = id
