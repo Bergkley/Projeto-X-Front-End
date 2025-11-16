@@ -1,6 +1,8 @@
 // ⚙️ React e bibliotecas externas
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Filter, Trash2, ExternalLink, X, Check, Bell } from 'lucide-react';
+import { useHistory } from 'react-router-dom';
+
 
 // 💅 Estilos
 import styles from './NotificationsDropdown.module.css';
@@ -8,6 +10,11 @@ import styles from './NotificationsDropdown.module.css';
 // 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
+import useFlashMessage from '../../hooks/userFlashMessage';
+
+
+// 📡 Serviço de notificações
+import ServiceNotification from './services/ServiceNotification';
 
 
 const NotificationsDropdown = ({ onClose }) => {
@@ -16,107 +23,139 @@ const NotificationsDropdown = ({ onClose }) => {
   const [filter, setFilter] = useState('todas');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [typeFilter, setTypeFilter] = useState('todos');
-  const [notifications, setNotifications] = useState([
-    { 
-      id: 1, 
-      text: 'Novo protocolo #1234 atribuído', 
-      time: '5 min atrás', 
-      read: false, 
-      type: 'protocolo',
-      link: '/protocolos/1234'
-    },
-    { 
-      id: 2, 
-      text: 'Relatório mensal disponível', 
-      time: '1 hora atrás', 
-      read: false, 
-      type: 'relatorio',
-      link: '/relatorios/mensal'
-    },
-    { 
-      id: 3, 
-      text: 'Atualização de status do ticket #5678', 
-      time: '2 horas atrás', 
-      read: true, 
-      type: 'ticket',
-      link: '/tickets/5678'
-    },
-    { 
-      id: 4, 
-      text: 'Nova mensagem da equipe', 
-      time: '3 horas atrás', 
-      read: false, 
-      type: 'mensagem',
-      link: '/mensagens/1'
-    },
-    { 
-      id: 5, 
-      text: 'Tarefa #789 foi concluída', 
-      time: '5 horas atrás', 
-      read: true, 
-      type: 'tarefa',
-      link: '/tarefas/789'
-    },
-    { 
-      id: 6, 
-      text: 'Relatório semanal pronto para revisão', 
-      time: '1 dia atrás', 
-      read: false, 
-      type: 'relatorio',
-      link: '/relatorios/semanal'
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const history = useHistory();
+  const { setFlashMessage } = useFlashMessage();
+    
 
+
+const formatRelativeTime = (dateStr) => {
+
+  const utcDate = new Date(dateStr);
+
+  const brDate = new Date(utcDate.getTime() - 3 * 60 * 60 * 1000);
+
+  const nowUtc = new Date();
+  const nowBr = new Date(nowUtc.getTime());
+
+  const diff = nowBr - brDate;
+
+  if (diff < 0) return "Agora";
+
+  const minutes = Math.floor(diff / 60000);
+
+  if (minutes < 1) return "Agora";
+  if (minutes < 60) return `${minutes} min atrás`;
+
+  const hours = Math.floor(minutes / 60);
+
+  if (hours < 24) return `${hours} hora${hours > 1 ? "s" : ""} atrás`;
+
+  const days = Math.floor(hours / 24);
+
+  const result = `${days} dia${days > 1 ? "s" : ""} atrás`;
+
+  return result;
+};
+
+
+  const getTypeColor = (entity) => {
+    const colors = {
+      'Registro Mensal': styles.typeRelatorio, 
+    };
+    return colors[entity] || styles.typeDefault; 
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await ServiceNotification.getByAllNotification();
+      if (response.data.status === 'OK') {
+        const mappedNotifications = response.data.data.map((n) => ({
+          id: n.id,
+          text: n.title, 
+          time: formatRelativeTime(n.created_at),
+          read: n.isRead,
+          entity: n.entity, 
+          link: n.path,
+        }));
+        setNotifications(mappedNotifications);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar notificações:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const uniqueEntities = [...new Set(notifications.map(n => n.entity))];
   const typeOptions = [
     { value: 'todos', label: 'Todos os tipos' },
-    { value: 'protocolo', label: 'Protocolos' },
-    { value: 'relatorio', label: 'Relatórios' },
-    { value: 'ticket', label: 'Tickets' },
-    { value: 'mensagem', label: 'Mensagens' },
-    { value: 'tarefa', label: 'Tarefas' },
-  ];
+    ...uniqueEntities.map(entity => ({ value: entity, label: entity }))
+  ].sort((a, b) => a.label.localeCompare(b.label)); 
 
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
+  const markAsRead = async (id) => {
+    try {
+      await ServiceNotification.markReadNotification({ ids: [id] });
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    } catch (error) {
+      console.error('Erro ao marcar como lida:', error);
+    }
   };
 
-  const clearReadNotifications = () => {
-    setNotifications(notifications.filter(n => !n.read));
+  const clearReadNotifications = async () => {
+    const readNotifications = notifications.filter((n) => n.read);
+    if (readNotifications.length === 0) return;
+
+    const readIds = readNotifications.map((n) => n.id);
+    try {
+      await ServiceNotification.deleteNotification({ ids: readIds });
+      setNotifications((prev) => prev.filter((n) => !n.read));
+      setFlashMessage('Notificações lidas limpas com sucesso', 'success');
+    } catch (error) {
+      console.error('Erro ao limpar notificações lidas:', error);
+    }
   };
 
-  const filteredNotifications = notifications.filter(n => {
+  const filteredNotifications = notifications.filter((n) => {
     if (filter === 'lidas' && !n.read) return false;
     if (filter === 'naoLidas' && n.read) return false;
-    if (typeFilter !== 'todos' && n.type !== typeFilter) return false;
+    if (typeFilter !== 'todos' && n.entity !== typeFilter) return false;
     return true;
   });
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-  const readCount = notifications.filter(n => n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const readCount = notifications.filter((n) => n.read).length;
 
-  const getTypeColor = (type) => {
-    const colors = {
-      protocolo: styles.typeProtocolo,
-      relatorio: styles.typeRelatorio,
-      ticket: styles.typeTicket,
-      mensagem: styles.typeMensagem,
-      tarefa: styles.typeTarefa,
-    };
-    return colors[type] || styles.typeDefault;
-  };
-
-  const getTypeLabel = (type) => {
-    const labels = {
-      protocolo: 'Protocolo',
-      relatorio: 'Relatório',
-      ticket: 'Ticket',
-      mensagem: 'Mensagem',
-      tarefa: 'Tarefa',
-    };
-    return labels[type] || type;
-  };
+  if (loading) {
+    return (
+      <div className={`${styles.dropdown} ${styles[theme]}`}>
+        <div className={styles.dropdownHeader} style={{ background: emphasisColor || 'rgb(20, 18, 129)' }}>
+          <div className={styles.dropdownHeaderInner}>
+            <div className={styles.dropdownHeaderLeft}>
+              <Bell className={styles.dropdownBellIcon} />
+              <h2 className={styles.dropdownTitle}>Notificações</h2>
+            </div>
+            <button onClick={onClose} className={styles.closeButton}>
+              <X className={styles.closeIcon} />
+            </button>
+          </div>
+        </div>
+        <div className={styles.notificationsList}>
+          <div className={styles.emptyState}>
+            <p>Carregando notificações...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -290,8 +329,8 @@ const NotificationsDropdown = ({ onClose }) => {
                       </p>
                       
                       <div className={styles.notificationMeta}>
-                        <span className={`${styles.typeBadge} ${getTypeColor(notification.type)}`}>
-                          {getTypeLabel(notification.type)}
+                        <span className={`${styles.typeBadge} ${getTypeColor(notification.entity)}`}>
+                          {notification.entity}
                         </span>
                         <span className={styles.notificationTime}>{notification.time}</span>
                       </div>
@@ -301,10 +340,13 @@ const NotificationsDropdown = ({ onClose }) => {
                     <a
                       href={notification.link}
                       className={styles.actionButton}
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.preventDefault();
-                        markAsRead(notification.id);
-                        alert(`Navegando para: ${notification.link}`);
+                        if (!notification.read) {
+                          await markAsRead(notification.id);
+                        }
+                        history.push(notification.link);
+                        onClose();
                       }}
                     >
                       <ExternalLink className={styles.externalIcon} />
