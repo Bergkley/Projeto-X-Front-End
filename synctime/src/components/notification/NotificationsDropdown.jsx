@@ -65,6 +65,8 @@ const formatRelativeTime = (dateStr) => {
   const getTypeColor = (entity) => {
     const colors = {
       'Registro Mensal': styles.typeRelatorio, 
+      'Anotação': styles.typeAnotacao,
+      'Usuario': styles.typeUsuario,
     };
     return colors[entity] || styles.typeDefault; 
   };
@@ -102,6 +104,14 @@ const formatRelativeTime = (dateStr) => {
     ...uniqueEntities.map(entity => ({ value: entity, label: entity }))
   ].sort((a, b) => a.label.localeCompare(b.label)); 
 
+  const baseNotifications = notifications.filter((n) =>
+    typeFilter === 'todos' || n.entity === typeFilter
+  );
+
+  const unreadCount = baseNotifications.filter((n) => !n.read).length;
+  const readCount = baseNotifications.filter((n) => n.read).length;
+  const totalCount = baseNotifications.length;
+
   const markAsRead = async (id) => {
     try {
       await ServiceNotification.markReadNotification({ ids: [id] });
@@ -110,6 +120,17 @@ const formatRelativeTime = (dateStr) => {
       );
     } catch (error) {
       console.error('Erro ao marcar como lida:', error);
+    }
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+      await ServiceNotification.deleteNotification({ ids: [id] });
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      setFlashMessage('Notificação deletada', 'success');
+    } catch (error) {
+      console.error('Erro ao deletar notificação:', error);
+      setFlashMessage('Erro ao deletar notificação', 'error');
     }
   };
 
@@ -165,28 +186,27 @@ const formatRelativeTime = (dateStr) => {
   };
 
   const clearReadNotifications = async () => {
-    const readNotifications = notifications.filter((n) => n.read);
+    const readNotifications = baseNotifications.filter((n) => n.read);
     if (readNotifications.length === 0) return;
 
     const readIds = readNotifications.map((n) => n.id);
     try {
       await ServiceNotification.deleteNotification({ ids: readIds });
-      setNotifications((prev) => prev.filter((n) => !n.read));
+      setNotifications((prev) => {
+        const deletedIds = new Set(readIds);
+        return prev.filter((n) => !deletedIds.has(n.id));
+      });
       setFlashMessage('Notificações lidas limpas com sucesso', 'success');
     } catch (error) {
       console.error('Erro ao limpar notificações lidas:', error);
     }
   };
 
-  const filteredNotifications = notifications.filter((n) => {
+  const filteredNotifications = baseNotifications.filter((n) => {
     if (filter === 'lidas' && !n.read) return false;
     if (filter === 'naoLidas' && n.read) return false;
-    if (typeFilter !== 'todos' && n.entity !== typeFilter) return false;
     return true;
   });
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const readCount = notifications.filter((n) => n.read).length;
 
   if (loading) {
     return (
@@ -260,7 +280,7 @@ const formatRelativeTime = (dateStr) => {
               >
                 Todas
                 <span className={`${styles.filterBadge} ${filter === 'todas' ? styles.filterBadgeActive : ''}`}>
-                  {notifications.length}
+                  {totalCount}
                 </span>
               </button>
               <button
@@ -390,21 +410,33 @@ const formatRelativeTime = (dateStr) => {
                       </div>
                     </div>
 
-                    {/* Action Button */}
-                    <a
-                      href={notification.link}
-                      className={styles.actionButton}
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        if (!notification.read) {
-                          await markAsRead(notification.id);
-                        }
-                        await handleNavigateToNote(notification); 
-                        onClose();
-                      }}
-                    >
-                      <ExternalLink className={styles.externalIcon} />
-                    </a>
+                    {/* Action Buttons */}
+                    <div className={styles.actionButtons}>
+                      <button
+                        type="button"
+                        className={styles.actionButton}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (!notification.read) {
+                            await markAsRead(notification.id);
+                          }
+                          await handleNavigateToNote(notification); 
+                          onClose();
+                        }}
+                      >
+                        <ExternalLink className={styles.externalIcon} />
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.deleteButton}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await deleteNotification(notification.id);
+                        }}
+                      >
+                        <Trash2 className={styles.trashIconSmall} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -417,7 +449,7 @@ const formatRelativeTime = (dateStr) => {
           <div className={styles.footerStats}>
             <div className={styles.footerStat}>
               <p className={styles.footerStatLabel}>Total</p>
-              <p className={styles.footerStatValue}>{notifications.length}</p>
+              <p className={styles.footerStatValue}>{totalCount}</p>
             </div>
             <div className={styles.footerStat}>
               <p className={styles.footerStatLabel}>Não Lidas</p>

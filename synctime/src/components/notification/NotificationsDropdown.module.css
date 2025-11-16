@@ -574,29 +574,19 @@
   font-weight: 500;
 }
 
-.typeProtocolo {
-  background-color: #dbeafe;
-  color: #1d4ed8;
-}
-
 .typeRelatorio {
   background-color: #f3e8ff;
   color: #7c3aed;
 }
 
-.typeTicket {
-  background-color: #fed7aa;
-  color: #c2410c;
+.typeAnotacao {
+  background-color: #dbeafe;
+  color: #1d4ed8;
 }
 
-.typeMensagem {
+.typeUsuario {
   background-color: #d1fae5;
   color: #065f46;
-}
-
-.typeTarefa {
-  background-color: #fce7f3;
-  color: #be185d;
 }
 
 .typeDefault {
@@ -626,17 +616,28 @@
   color: #6b7280;
 }
 
-/* Action Button */
-.actionButton {
+/* Action Buttons */
+.actionButtons {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.notificationItem:hover .actionButtons {
+  opacity: 1;
+}
+
+/* Action Button (Navigate) */
+.actionButton {
   padding: 0.375rem;
   background: transparent;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
-  opacity: 0;
-  text-decoration: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -650,10 +651,6 @@
   color: #9ca3af;
 }
 
-.notificationItem:hover .actionButton {
-  opacity: 1;
-}
-
 .actionButton:hover {
   color: #6366f1 !important;
   background-color: #eef2ff !important;
@@ -664,14 +661,51 @@
   height: 1rem;
 }
 
+/* Delete Button */
+.deleteButton {
+  padding: 0.375rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+}
+
+.dropdown.dark .deleteButton {
+  color: #6b7280;
+}
+
+.dropdown.light .deleteButton {
+  color: #9ca3af;
+}
+
+.deleteButton:hover {
+  color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+}
+
+.trashIconSmall {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
 /* Mobile: Always visible */
 @media (max-width: 640px) {
-  .actionButton {
+  .actionButtons {
     opacity: 1;
+  }
+  
+  .actionButton,
+  .deleteButton {
     padding: 0.5rem;
   }
   
-  .externalIcon {
+  .externalIcon,
+  .trashIconSmall {
     width: 1.125rem;
     height: 1.125rem;
   }
