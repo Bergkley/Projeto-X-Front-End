@@ -15,6 +15,7 @@ const NoteList = ({
   onEditNote,
   onGenerateSummary,
   onViewSummary,
+  targetNoteId, 
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
@@ -69,6 +70,8 @@ const NoteList = ({
   };
 
   const filteredNotes = getFilteredNotes();
+
+  const isTargetNote = (noteId) => targetNoteId && noteId === targetNoteId;
 
   const handleGenerate = async () => {
     if (selectedRoutine && onGenerateSummary) {
@@ -159,9 +162,13 @@ const NoteList = ({
             filteredNotes.map((note) => (
               <div
                 key={note.id}
-                className={`${styles.noteItem} ${styles[theme]}`}
+                className={`${styles.noteItem} ${styles[theme]} ${isTargetNote(note.id) ? styles.targetNote : ''}`} 
                 style={{
-                  borderLeftColor: emphasisColor || '#667eea'
+                  borderLeftColor: emphasisColor || '#667eea',
+                  ...(isTargetNote(note.id) && { 
+                    borderLeftWidth: '4px',
+                    backgroundColor: `${emphasisColor || '#667eea'}10`
+                  })
                 }}
               >
                 <div className={`${styles.noteHeader} ${styles[theme]}`}>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './Calendar.module.css';
 import NoteList from './List/NoteList';
@@ -15,6 +16,8 @@ const Calendar = () => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
   const { setFlashMessage } = useFlashMessage();
+  const history = useHistory();
+  const location = useLocation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedRoutine, setSelectedRoutine] = useState(null);
@@ -28,6 +31,9 @@ const Calendar = () => {
   const [noteType, setNoteType] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('');
   const [holidays, setHolidays] = useState({}); 
+  const [openNoteListFromNotification, setOpenNoteListFromNotification] = useState(false); // Flag para controle de abertura via notificação
+  const [targetRoutineId, setTargetRoutineId] = useState(null); // Para definir a rotina específica
+  const [targetNoteId, setTargetNoteId] = useState(null); // Para destacar nota específica, se necessário
 
   const API_KEY = import.meta.env.VITE_KEY_API_HOLIDAY || ''; 
 
@@ -106,6 +112,76 @@ const Calendar = () => {
 
     fetchHolidays();
   }, [currentDate.getFullYear(), API_KEY]);
+
+  useEffect(() => {
+    let searchString = location.state?.search;
+    if (!searchString && location.state?.search) {
+      searchString = location.state.search;
+    }
+    const queryParams = new URLSearchParams(searchString);
+    const shouldOpen = queryParams.get('openNoteList') === 'true';
+    const dateParam = queryParams.get('date');
+    const routineIdParam = queryParams.get('routineId');
+    const noteIdParam = queryParams.get('noteId');
+
+    if (shouldOpen && dateParam && routineIdParam) {
+      try {
+        const targetDate = new Date(dateParam + 'T12:00:00');
+        setCurrentDate(targetDate);
+        setSelectedDate(targetDate);
+        setTargetRoutineId(routineIdParam);
+        setTargetNoteId(noteIdParam);
+        setOpenNoteListFromNotification(true);
+
+        if (location.state?.search) {
+          history.replace(location.pathname);
+        } else {
+          history.replace('/anotacoes');
+        }
+      } catch (error) {
+        console.error('Erro ao processar params de notificação:', error);
+        setFlashMessage('Erro ao abrir anotação da notificação', 'error');
+        if (location.state?.search) {
+          history.replace(location.pathname);
+        } else {
+          history.replace('/anotacoes');
+        }
+      }
+    }
+  }, [location.search, location.state]); 
+
+useEffect(() => {
+  if (openNoteListFromNotification && notes && Object.keys(notes).length > 0) {
+    let targetRoutine = null;
+    let targetDateKey = null;
+
+    for (const dateKey in notes) {
+      const dateRoutines = notes[dateKey] || [];
+      targetRoutine = dateRoutines.find(r => r.id === targetRoutineId);
+      if (targetRoutine) {
+        targetDateKey = dateKey;
+        break;
+      }
+    }
+
+    if (targetRoutine && targetDateKey) {
+      const targetDateObj = new Date(targetDateKey + 'T12:00:00'); 
+      setSelectedDate(targetDateObj); 
+      
+      setSelectedRoutine(targetRoutine);
+      setShowNoteList(true);
+      
+      setTimeout(() => {
+        setFlashMessage('Anotação aberta via notificação', 'success');
+      }, 0);
+      
+      setOpenNoteListFromNotification(false);
+    } else {
+      setFlashMessage('Rotina não encontrada', 'error');
+      setOpenNoteListFromNotification(false);
+    }
+  }
+}, [notes, openNoteListFromNotification, targetRoutineId]);
 
   const loadRoutines = useCallback(async () => {
     try {
@@ -209,12 +285,30 @@ const Calendar = () => {
     setCurrentDate(new Date());
   };
 
-  const formatDateKey = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+const formatDateKey = (dateInput) => {
+  let date;
+  
+  if (typeof dateInput === 'string') {
+    const [year, month, day] = dateInput.split('-').map(Number);
+    date = new Date(year, month - 1, day); 
+  } else if (dateInput instanceof Date) {
+    date = new Date(dateInput); 
+  } else {
+    console.error('Invalid date input for formatDateKey:', dateInput);
+    return new Date().toISOString().split('T')[0]; 
+  }
+  
+  if (isNaN(date.getTime())) {
+    console.error('Invalid Date object created:', dateInput);
+    return new Date().toISOString().split('T')[0]; 
+  }
+  
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+};
 
   const handleDateClick = (day) => {
     if (day) {
@@ -340,6 +434,8 @@ const Calendar = () => {
   const closeNoteList = () => {
     setShowNoteList(false);
     setSelectedRoutine(null);
+    setTargetRoutineId(null);
+    setTargetNoteId(null);
   };
 
   return (
@@ -508,6 +604,7 @@ const Calendar = () => {
         onEditNote={handleEditNote}
         onGenerateSummary={handleGenerateSummary}
         onViewSummary={handleViewSummary}
+        targetNoteId={targetNoteId} 
       />
 
       <CreateModalNote

@@ -10,11 +10,13 @@ import styles from './NotificationsDropdown.module.css';
 // 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
-import useFlashMessage from '../../hooks/userFlashMessage';
 
-
-// 📡 Serviço de notificações
+// 📡 Services
 import ServiceNotification from './services/ServiceNotification';
+import useFlashMessage from '../../hooks/userFlashMessage';
+import ServiceRoutines from '../../views/notes/Calendar/services/ServiceRoutines';
+import ServiceNotes from '../../views/notes/Calendar/services/ServiceNotes';
+
 
 
 const NotificationsDropdown = ({ onClose }) => {
@@ -78,6 +80,7 @@ const formatRelativeTime = (dateStr) => {
           time: formatRelativeTime(n.created_at),
           read: n.isRead,
           entity: n.entity, 
+          idEntity: n.idEntity, 
           link: n.path,
         }));
         setNotifications(mappedNotifications);
@@ -107,6 +110,57 @@ const formatRelativeTime = (dateStr) => {
       );
     } catch (error) {
       console.error('Erro ao marcar como lida:', error);
+    }
+  };
+
+  const handleNavigateToNote = async (notification) => {
+    if (notification.entity !== 'Anotação' || !notification.idEntity) {
+      history.push(notification.link);
+      return;
+    }
+
+    try {
+      const noteResponse = await ServiceNotes.getByIdNotes(notification.idEntity);
+      if (noteResponse.data.status !== 'OK') {
+        setFlashMessage('Erro ao carregar anotação', 'error');
+        history.push('/anotacoes');
+        return;
+      }
+
+      const noteData = noteResponse.data.data;
+      const routineId = noteData.routine_id;
+
+      if (!routineId) {
+        setFlashMessage('Anotação sem rotina associada', 'error');
+        history.push('/anotacoes');
+        return;
+      }
+
+      const routineResponse = await ServiceRoutines.getByIdRoutines(routineId);
+      if (routineResponse.data.status !== 'OK') {
+        setFlashMessage('Erro ao carregar rotina da anotação', 'error');
+        history.push('/anotacoes');
+        return;
+      }
+
+      const routineData = routineResponse.data.data;
+      console.log('routineData', routineData);
+      const routineDate = routineData.created_at.split('T')[0];
+            console.log('routineDate', routineDate);
+
+
+      const queryParams = new URLSearchParams({
+        date: routineDate,
+        routineId: routineId,
+        noteId: notification.idEntity, 
+        openNoteList: 'true'
+      }).toString();
+
+      history.push(`/anotacoes`,{ search:queryParams });
+    } catch (error) {
+      console.error('Erro ao processar navegação para anotação:', error);
+      setFlashMessage('Erro ao abrir anotação', 'error');
+      history.push('/anotacoes');
     }
   };
 
@@ -345,7 +399,7 @@ const formatRelativeTime = (dateStr) => {
                         if (!notification.read) {
                           await markAsRead(notification.id);
                         }
-                        history.push(notification.link);
+                        await handleNavigateToNote(notification); 
                         onClose();
                       }}
                     >
