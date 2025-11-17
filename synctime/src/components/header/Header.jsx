@@ -16,14 +16,19 @@ import {
   useMemorizeFilters,
   POSSIBLE_FILTERS_ENTITIES
 } from '../../hooks/useMemorizeInputsFilters';
+import { useSocket } from '../../hooks/useSocket'; 
 import ServiceUsers from '../../services/ServiceUsers';
+import ServiceNotification from '../notification/services/ServiceNotification';
 
 const Header = () => {
   const { emphasisColor } = useEmphasisColor();
   const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
     POSSIBLE_FILTERS_ENTITIES.USERS
   );
-  const [notificationCount, setNotificationCount] = useState(3);
+
+  const userId = getMemorizedFilters().id;
+  const { on: socketOn, off: socketOff } = useSocket(userId); 
+  const [notificationCount, setNotificationCount] = useState(0); 
   const [streakDays, setStreakDays] = useState(0);
   const [weekProgress, setWeekProgress] = useState([
     false,
@@ -43,6 +48,18 @@ const Header = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+
+  const fetchNotificationCount = async () => {
+    try {
+      const response = await ServiceNotification.getCountNotification();
+      if (response.data.status === 'OK') {
+        setNotificationCount(response.data.data || 0); 
+      }
+    } catch (error) {
+      console.error('Erro ao buscar count de notificações:', error);
+      setNotificationCount(0);
+    }
+  };
 
   const fetchUserData = async () => {
     const currentUser = getMemorizedFilters();
@@ -95,7 +112,10 @@ const Header = () => {
   useEffect(() => {
     fetchUserData();
     fetchStreakData();
-  }, []);
+    if (userId) {
+      fetchNotificationCount(); 
+    }
+  }, [userId]); 
 
   useEffect(() => {
     const handleProfileUpdate = () => {
@@ -109,6 +129,20 @@ const Header = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!userId) return;
+
+    const handleNewNotification = (data) => {
+      setNotificationCount(data.countNewNotification || notificationCount + 1); 
+    };
+
+    socketOn('newNotification', handleNewNotification);
+
+    return () => {
+      socketOff('newNotification', handleNewNotification);
+    };
+  }, [userId, socketOn, socketOff, notificationCount]); 
+
   const getFlameColor = () => {
     if (streakDays >= 30) return '#ff0000';
     if (streakDays >= 14) return '#ff6b00';
@@ -119,6 +153,15 @@ const Header = () => {
 
   const handleAvatarClick = () => {
     setShowProfileDropdown(!showProfileDropdown);
+  };
+
+  const handleNotificationChange = (delta) => {
+    setNotificationCount((prev) => Math.max(0, prev + delta)); 
+  };
+
+  const handleCloseNotifications = () => {
+    setShowNotifications(false);
+    fetchNotificationCount(); 
   };
 
   return (
@@ -228,7 +271,9 @@ const Header = () => {
                 {/* Notifications Dropdown */}
                 {showNotifications && (
                   <NotificationsDropdown
-                    onClose={() => setShowNotifications(false)}
+                    onClose={handleCloseNotifications} 
+                    initialUnreadCount={notificationCount} 
+                    onNotificationChange={handleNotificationChange} 
                   />
                 )}
               </div>

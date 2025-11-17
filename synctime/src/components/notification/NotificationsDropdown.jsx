@@ -3,21 +3,20 @@ import { useState, useEffect } from 'react';
 import { Filter, Trash2, ExternalLink, X, Check, Bell } from 'lucide-react';
 import { useHistory } from 'react-router-dom';
 
-
 // 💅 Estilos
 import styles from './NotificationsDropdown.module.css';
 
 // 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
+import { useSocket } from '../../hooks/useSocket'; 
 
 // 📡 Services
 import ServiceNotification from './services/ServiceNotification';
 import useFlashMessage from '../../hooks/userFlashMessage';
 import ServiceRoutines from '../../views/notes/Calendar/services/ServiceRoutines';
 import ServiceNotes from '../../views/notes/Calendar/services/ServiceNotes';
-
-
+import { POSSIBLE_FILTERS_ENTITIES, useMemorizeFilters } from '../../hooks/useMemorizeInputsFilters';
 
 const NotificationsDropdown = ({ onClose }) => {
   const { theme } = useTheme();
@@ -29,46 +28,78 @@ const NotificationsDropdown = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const history = useHistory();
   const { setFlashMessage } = useFlashMessage();
-    
+  const {
+      getMemorizedFilters: getMemorizedFiltersUsers,
+    } = useMemorizeFilters(POSSIBLE_FILTERS_ENTITIES.USERS);
 
+  const userId = getMemorizedFiltersUsers().id;
 
-const formatRelativeTime = (dateStr) => {
+  const { on: socketOn, off: socketOff } = useSocket(userId);
 
-  const utcDate = new Date(dateStr);
+  const formatRelativeTime = (dateStr) => {
+    console.log('dateStr', dateStr)
+    const utcDate = new Date(dateStr);
 
-  const brDate = new Date(utcDate.getTime() - 3 * 60 * 60 * 1000);
+    const brDate = new Date(utcDate.getTime() - 3 * 60 * 60 * 1000);
 
-  const nowUtc = new Date();
-  const nowBr = new Date(nowUtc.getTime());
+    const nowUtc = new Date();
+    const nowBr = new Date(nowUtc.getTime());
 
-  const diff = nowBr - brDate;
+    const diff = nowBr - brDate;
 
-  if (diff < 0) return "Agora";
+    if (diff < 0) return "Agora";
 
-  const minutes = Math.floor(diff / 60000);
+    const minutes = Math.floor(diff / 60000);
 
-  if (minutes < 1) return "Agora";
-  if (minutes < 60) return `${minutes} min atrás`;
+    if (minutes < 1) return "Agora";
+    if (minutes < 60) return `${minutes} min atrás`;
 
-  const hours = Math.floor(minutes / 60);
+    const hours = Math.floor(minutes / 60);
 
-  if (hours < 24) return `${hours} hora${hours > 1 ? "s" : ""} atrás`;
+    if (hours < 24) return `${hours} hora${hours > 1 ? "s" : ""} atrás`;
 
-  const days = Math.floor(hours / 24);
+    const days = Math.floor(hours / 24);
 
-  const result = `${days} dia${days > 1 ? "s" : ""} atrás`;
+    const result = `${days} dia${days > 1 ? "s" : ""} atrás`;
 
-  return result;
-};
+    return result;
+  };
 
+  const addNewNotification = (newNotifData) => {
+    const mappedNewNotif = {
+      id: newNotifData.id,
+      text: newNotifData.title,
+      time: formatRelativeTime(newNotifData.createdAt), 
+      read: false, 
+      entity: newNotifData.entity,
+      idEntity: newNotifData.idEntity,
+      link: newNotifData.path,
+      typeOfAction: newNotifData.typeOfAction,
+    };
+
+    setNotifications((prev) => [mappedNewNotif, ...prev]);
+
+    setFlashMessage('Nova notificação recebida!', 'info');
+  };
 
   const getTypeColor = (entity) => {
     const colors = {
-      'Registro Mensal': styles.typeRelatorio, 
+      'Registro Mensal': styles.typeRelatorio,
       'Anotação': styles.typeAnotacao,
       'Usuario': styles.typeUsuario,
+      'Transação': styles.typeTransacao
     };
-    return colors[entity] || styles.typeDefault; 
+    return colors[entity] || styles.typeDefault;
+  };
+
+  const getActionColor = (action) => {
+    const colors = {
+      'Criação': styles.actionCriacao,
+      'Atualização': styles.actionAtualizacao,
+      'Exclusão': styles.actionExclusao,
+      'Exportação': styles.actionExportacao
+    };
+    return colors[action] || styles.actionDefault;
   };
 
   const fetchNotifications = async () => {
@@ -78,12 +109,13 @@ const formatRelativeTime = (dateStr) => {
       if (response.data.status === 'OK') {
         const mappedNotifications = response.data.data.map((n) => ({
           id: n.id,
-          text: n.title, 
+          text: n.title,
           time: formatRelativeTime(n.created_at),
           read: n.isRead,
-          entity: n.entity, 
-          idEntity: n.idEntity, 
+          entity: n.entity,
+          idEntity: n.idEntity,
           link: n.path,
+          typeOfAction: n.typeOfAction,
         }));
         setNotifications(mappedNotifications);
       }
@@ -94,15 +126,42 @@ const formatRelativeTime = (dateStr) => {
     }
   };
 
+  const fetchUpdateNewNotifications = async () => {
+    try {
+      await ServiceNotification.updateAllNotificationNew();
+    } catch (error) {
+      console.error('Erro ao buscar notificações:', error);
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
   }, []);
+
+  useEffect(() => {
+    fetchUpdateNewNotifications();
+  }, [notifications]);
+
+  useEffect(() => {
+    if (!userId) return; 
+
+    const handleNewNotification = (data) => {
+      console.log('Nova notificação via Socket.IO:', data);
+      addNewNotification(data);
+    };
+
+    socketOn('newNotification', handleNewNotification);
+
+    return () => {
+      socketOff('newNotification', handleNewNotification);
+    };
+  }, [userId, socketOn, socketOff]); 
 
   const uniqueEntities = [...new Set(notifications.map(n => n.entity))];
   const typeOptions = [
     { value: 'todos', label: 'Todos os tipos' },
     ...uniqueEntities.map(entity => ({ value: entity, label: entity }))
-  ].sort((a, b) => a.label.localeCompare(b.label)); 
+  ].sort((a, b) => a.label.localeCompare(b.label));
 
   const baseNotifications = notifications.filter((n) =>
     typeFilter === 'todos' || n.entity === typeFilter
@@ -167,17 +226,16 @@ const formatRelativeTime = (dateStr) => {
       const routineData = routineResponse.data.data;
       console.log('routineData', routineData);
       const routineDate = routineData.created_at.split('T')[0];
-            console.log('routineDate', routineDate);
-
+      console.log('routineDate', routineDate);
 
       const queryParams = new URLSearchParams({
         date: routineDate,
         routineId: routineId,
-        noteId: notification.idEntity, 
+        noteId: notification.idEntity,
         openNoteList: 'true'
       }).toString();
 
-      history.push(`/anotacoes`,{ search:queryParams });
+      history.push(`/anotacoes`, { search: queryParams });
     } catch (error) {
       console.error('Erro ao processar navegação para anotação:', error);
       setFlashMessage('Erro ao abrir anotação', 'error');
@@ -234,18 +292,18 @@ const formatRelativeTime = (dateStr) => {
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className={styles.backdrop}
         onClick={() => {
           onClose();
           setShowFilterMenu(false);
         }}
       />
-      
+
       {/* Dropdown Panel */}
       <div className={`${styles.dropdown} ${styles[theme]}`}>
         {/* Header */}
-        <div 
+        <div
           className={styles.dropdownHeader}
           style={{ background: emphasisColor || 'rgb(20, 18, 129)' }}
         >
@@ -254,10 +312,7 @@ const formatRelativeTime = (dateStr) => {
               <Bell className={styles.dropdownBellIcon} />
               <h2 className={styles.dropdownTitle}>Notificações</h2>
             </div>
-            <button
-              onClick={onClose}
-              className={styles.closeButton}
-            >
+            <button onClick={onClose} className={styles.closeButton}>
               <X className={styles.closeIcon} />
             </button>
           </div>
@@ -274,8 +329,8 @@ const formatRelativeTime = (dateStr) => {
               <button
                 onClick={() => setFilter('todas')}
                 className={`${styles.filterButton} ${filter === 'todas' ? styles.filterButtonActive : ''}`}
-                style={filter === 'todas' ? { 
-                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)' 
+                style={filter === 'todas' ? {
+                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)'
                 } : {}}
               >
                 Todas
@@ -286,8 +341,8 @@ const formatRelativeTime = (dateStr) => {
               <button
                 onClick={() => setFilter('naoLidas')}
                 className={`${styles.filterButton} ${filter === 'naoLidas' ? styles.filterButtonActive : ''}`}
-                style={filter === 'naoLidas' ? { 
-                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)' 
+                style={filter === 'naoLidas' ? {
+                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)'
                 } : {}}
               >
                 Não Lidas
@@ -298,8 +353,8 @@ const formatRelativeTime = (dateStr) => {
               <button
                 onClick={() => setFilter('lidas')}
                 className={`${styles.filterButton} ${filter === 'lidas' ? styles.filterButtonActive : ''}`}
-                style={filter === 'lidas' ? { 
-                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)' 
+                style={filter === 'lidas' ? {
+                  backgroundColor: emphasisColor || 'rgb(20, 18, 129)'
                 } : {}}
               >
                 Lidas
@@ -381,7 +436,7 @@ const formatRelativeTime = (dateStr) => {
                   <div className={styles.notificationItemInner}>
                     {/* Unread Indicator */}
                     <div className={styles.indicatorWrapper}>
-                      <div 
+                      <div
                         className={`${styles.indicator} ${
                           !notification.read ? styles.indicatorUnread : styles.indicatorRead
                         }`}
@@ -392,7 +447,7 @@ const formatRelativeTime = (dateStr) => {
                     </div>
 
                     {/* Content */}
-                    <div 
+                    <div
                       className={styles.notificationContent}
                       onClick={() => !notification.read && markAsRead(notification.id)}
                     >
@@ -401,10 +456,13 @@ const formatRelativeTime = (dateStr) => {
                       }`}>
                         {notification.text}
                       </p>
-                      
+
                       <div className={styles.notificationMeta}>
                         <span className={`${styles.typeBadge} ${getTypeColor(notification.entity)}`}>
                           {notification.entity}
+                        </span>
+                        <span className={`${styles.actionBadge} ${getActionColor(notification.typeOfAction)}`}>
+                          {notification.typeOfAction}
                         </span>
                         <span className={styles.notificationTime}>{notification.time}</span>
                       </div>
@@ -412,20 +470,22 @@ const formatRelativeTime = (dateStr) => {
 
                     {/* Action Buttons */}
                     <div className={styles.actionButtons}>
-                      <button
-                        type="button"
-                        className={styles.actionButton}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          if (!notification.read) {
-                            await markAsRead(notification.id);
-                          }
-                          await handleNavigateToNote(notification); 
-                          onClose();
-                        }}
-                      >
-                        <ExternalLink className={styles.externalIcon} />
-                      </button>
+                      {notification.link && (
+                        <button
+                          type="button"
+                          className={styles.actionButton}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (!notification.read) {
+                              await markAsRead(notification.id);
+                            }
+                            await handleNavigateToNote(notification);
+                            onClose();
+                          }}
+                        >
+                          <ExternalLink className={styles.externalIcon} />
+                        </button>
+                      )}
                       <button
                         type="button"
                         className={styles.deleteButton}
@@ -453,7 +513,7 @@ const formatRelativeTime = (dateStr) => {
             </div>
             <div className={styles.footerStat}>
               <p className={styles.footerStatLabel}>Não Lidas</p>
-              <p 
+              <p
                 className={styles.footerStatValueUnread}
                 style={{ color: emphasisColor || '#6366f1' }}
               >

@@ -20,6 +20,12 @@ class ServiceNotification {
   deleteNotification(ids) {
     return api.post(`/notification/delete`,ids);
   }
+  getCountNotification() {
+    return api.get(`/notification/count/new-notification`);
+  }
+  updateAllNotificationNew() {
+    return api.put(`/notification/mark-read-new-notification-all`);
+  }
 }
 
 export default new ServiceNotification();
