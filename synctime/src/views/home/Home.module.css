@@ -373,6 +373,16 @@
   color: #15803d;
 }
 
+.routine {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+}
+
+.custom {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
 .time {
   font-size: 0.75rem;
   transition: color 0.3s ease;

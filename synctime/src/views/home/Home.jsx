@@ -1,24 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets, Calendar, Filter, BarChart3, CheckCircle2 } from 'lucide-react';
+import { useHistory } from 'react-router-dom';
 import styles from './Home.module.css';
 import { useTheme } from '../../hooks/useTheme'; 
 import ServiceUsers from '../../services/ServiceUsers';
+import ServiceRoutines from '../../views/notes/Calendar/services/ServiceRoutines';
 
 const Home = () => {
   const { theme } = useTheme();
+  const history = useHistory(); 
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [presenceLoading, setPresenceLoading] = useState(true);
   const [presenceError, setPresenceError] = useState(null);
   const [filter, setFilter] = useState('todos');
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'OUT000-Integração FlexiA Externa', category: 'Protocolos', time: '2h atrás', type: 'update' },
-    { id: 2, title: 'SET000-Problema ao realizar download', category: 'Protocolos', time: '3h atrás', type: 'issue' },
-    { id: 3, title: 'Nova anotação criada', category: 'Anotações', time: '5h atrás', type: 'note' },
-    { id: 4, title: 'AGO000-Organização do projeto', category: 'Protocolos', time: '1 dia atrás', type: 'update' },
-    { id: 5, title: 'Lembrete importante', category: 'Anotações', time: '2 dias atrás', type: 'note' }
-  ]);
-
+  const [uniqueCategories, setUniqueCategories] = useState([]);
+  const [notifications, setNotifications] = useState([]); 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); 
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString()); 
   const [presenceData, setPresenceData] = useState([]);
@@ -44,6 +41,96 @@ const Home = () => {
 
   const years = [2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035];
 
+  const timeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date(); 
+    const seconds = Math.floor((now - date) / 1000);
+
+    let interval = Math.floor(seconds / 31536000);
+    if (interval > 1) return `${interval} anos atrás`;
+
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) return `${interval} meses atrás`;
+
+    interval = Math.floor(seconds / 86400);
+    if (interval > 1) return `${interval} dias atrás`;
+    if (interval === 1) return `1 dia atrás`;
+
+    interval = Math.floor(seconds / 3600);
+    if (interval > 1) return `${interval} horas atrás`;
+    if (interval === 1) return `1 hora atrás`;
+
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) return `${interval} minutos atrás`;
+    if (interval === 1) return `1 minuto atrás`;
+
+    return 'agora';
+  };
+
+  const getBadgeClass = (category) => {
+    if (category === 'Anotação') return 'note';
+    if (category === 'Rotina') return 'routine';
+    if (category === 'Relatório') return 'update';
+    if (category === 'Categoria') return 'issue';
+    if (category === 'Custom') return 'custom';
+    return 'note'; 
+  };
+
+  const handleNavigate = async (notif) => {
+    if (notif.category !== 'Anotação' || !notif.entityRef?.routineId) {
+      history.push(notif.path);
+      return;
+    }
+
+    try {
+      const routineResponse = await ServiceRoutines.getByIdRoutines(notif.entityRef.routineId);
+      if (routineResponse.data.status !== 'OK') {
+        console.error('Erro ao carregar rotina da anotação');
+        history.push('/anotacoes');
+        return;
+      }
+
+      const routineData = routineResponse.data.data;
+      const routineDate = routineData.created_at.split('T')[0];
+
+      const queryParams = new URLSearchParams({
+        date: routineDate,
+        routineId: notif.entityRef.routineId,
+        noteId: notif.id,
+        openNoteList: 'true'
+      }).toString();
+      history.push(`/anotacoes`, { search: queryParams });
+    } catch (error) {
+      console.error('Erro ao processar navegação para anotação:', error);
+      history.push('/anotacoes');
+    }
+  };
+
+  const fetchInbox = async () => {
+    try {
+      const response = await ServiceUsers.getInbox();
+      if (response.status !== 200) {
+        throw new Error('Erro ao buscar inbox');
+      }
+      const mappedNotifications = response.data.data.map(item => ({
+        id: item.id,
+        title: item.title,
+        category: item.entityName, 
+        time: timeAgo(item.updated_at), 
+        type: item.type.toLowerCase(),
+        path: item.path,
+        entityRef: item.entityRef 
+      }));
+      setNotifications(mappedNotifications);
+      const categories = [...new Set(mappedNotifications.map(n => n.category))].sort();
+      setUniqueCategories(categories);
+    } catch (error) {
+      console.error('Erro ao buscar inbox:', error);
+      setNotifications([]); 
+      setUniqueCategories([]);
+    }
+  };
+
   const fetchPresenceData = async (month, year) => {
     const startTime = Date.now();
     const minLoadingTime = 500; 
@@ -64,20 +151,8 @@ const Home = () => {
     } catch (error) {
       console.error('Erro ao buscar presença:', error);
       setPresenceError(error.message);
-      const date = new Date(year, parseInt(month) - 1, 0);
-      const daysInMonth = date.getDate();
-      const mockData = [];
-      for (let day = 1; day <= daysInMonth; day++) {
-        const present = Math.random() > 0.2;
-        const sessions = present ? Math.floor(Math.random() * 7) + 1 : 0;
-        mockData.push({ day: day.toString().padStart(2, '0'), present, sessions });
-      }
-      setPresenceData(mockData);
-      setPresenceStats({
-        presentDays: mockData.filter(d => d.present).length,
-        totalSessions: mockData.reduce((acc, d) => acc + d.sessions, 0),
-        rate: Math.round((mockData.filter(d => d.present).length / mockData.length) * 100),
-      });
+      setPresenceData([]); 
+      setPresenceStats({ presentDays: 0, totalSessions: 0, rate: 0 });
     } finally {
       const elapsedTime = Date.now() - startTime;
       const remainingTime = minLoadingTime - elapsedTime;
@@ -104,6 +179,10 @@ const Home = () => {
   useEffect(() => {
     fetchPresenceData(selectedMonth, selectedYear);
   }, [selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    fetchInbox();
+  }, []);
 
   useEffect(() => {
     if (navigator?.geolocation) {
@@ -190,9 +269,7 @@ const Home = () => {
 
   const filteredNotifications = notifications.filter(notif => {
     if (filter === 'todos') return true;
-    if (filter === 'categorias') return notif.category === 'Protocolos';
-    if (filter === 'anotacoes') return notif.category === 'Anotações';
-    return true;
+    return notif.category === filter;
   });
 
   return (
@@ -258,35 +335,37 @@ const Home = () => {
                   className={styles.filterSelect}
                 >
                   <option value="todos">Todos</option>
-                  <option value="categorias">Categorias</option>
-                  <option value="anotacoes">Anotações</option>
+                  {uniqueCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                 </select>
               </div>
             </div>
             
             <div className={styles.notificationsList}>
-              {filteredNotifications.map(notif => (
-                <div key={notif.id} className={styles.notificationItem}>
-                  <div className={styles.notificationContent}>
-                    <div className={styles.notificationMain}>
-                      <h3 className={styles.notificationTitle}>{notif.title}</h3>
-                      <div className={styles.notificationMeta}>
-                        <span className={`${styles.badge} ${styles[notif.type]}`}>
-                          {notif.category}
-                        </span>
-                        <span className={styles.time}>{notif.time}</span>
+              {filteredNotifications.length === 0 ? (
+                <p className={styles.emptyMessage}>Nenhuma notificação disponível</p>
+              ) : (
+                filteredNotifications.map(notif => (
+                  <div 
+                    key={notif.id} 
+                    className={styles.notificationItem}
+                    onClick={async () => await handleNavigate(notif)} 
+                  >
+                    <div className={styles.notificationContent}>
+                      <div className={styles.notificationMain}>
+                        <h3 className={styles.notificationTitle}>{notif.title}</h3>
+                        <div className={styles.notificationMeta}>
+                          <span className={`${styles.badge} ${styles[getBadgeClass(notif.category)]}`}>
+                            {notif.category}
+                          </span>
+                          <span className={styles.time}>{notif.time}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className={styles.notificationDot}></div>
                   </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className={styles.cardFooter}>
-              <button className={styles.viewAllButton}>
-                Ver todas as atualizações →
-              </button>
+                ))
+              )}
             </div>
           </div>
 
@@ -329,7 +408,6 @@ const Home = () => {
               ) : presenceError ? (
                 <div className={styles.errorMessage}>
                   <p>Erro ao carregar dados: {presenceError}</p>
-                  <p>Dados mock serão exibidos.</p>
                 </div>
               ) : (
                 <div className={`${styles.dataContainer} ${dataVisible ? styles.visible : ''}`}>

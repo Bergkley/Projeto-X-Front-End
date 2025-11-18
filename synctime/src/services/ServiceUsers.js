@@ -30,6 +30,10 @@ class ServiceUSERS {
   deleteUser(id){
     return api.delete(`/user/delete/${id}`);
   }
+
+  getInbox(){
+    return api.get(`/user/inbox`);
+  }
   
 }
 
