@@ -3,9 +3,7 @@ import { Filter, X, Plus, ChevronDown, Check, RotateCcw, Download } from 'lucide
 import styles from './TableHeaderWithFilter.module.css';
 import { useTheme } from '../../../hooks/useTheme';
 import { useEmphasisColor } from '../../../hooks/useEmphasisColor';
-import xlsxImage from '../../../assets/xlsx.png';
 import pdfImage from '../../../assets/pdf.png';
-import csvImage from '../../../assets/csv.png';
 
 const TableHeaderWithFilterDashboard = ({ 
   title, 
@@ -51,8 +49,6 @@ const TableHeaderWithFilterDashboard = ({
   };
 
   const exportFormats = [
-    { value: 'csv', label: 'CSV', icon: <img src={csvImage} alt="CSV" style={{ width: '16px', height: '16px' }} /> },
-    { value: 'xlsx', label: 'XLSX', icon: <img src={xlsxImage} alt="XLSX" style={{ width: '16px', height: '16px' }} /> },
     { value: 'pdf', label: 'PDF', icon: <img src={pdfImage} alt="PDF" style={{ width: '16px', height: '16px' }} /> }
   ];
 
