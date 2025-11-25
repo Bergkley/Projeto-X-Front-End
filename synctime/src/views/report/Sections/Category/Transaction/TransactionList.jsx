@@ -1,6 +1,6 @@
 // ⚙️ Bibliotecas externas
 import { useEffect, useState } from 'react';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit,  Trash2 } from 'lucide-react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useFlashMessage from '../../../../../hooks/userFlashMessage';
 import { useTheme } from '../../../../../hooks/useTheme';
@@ -237,10 +237,10 @@ const TransactionList = () => {
           }}
           title="Editar registro"
           style={{
-            backgroundColor: emphasisColor || '#0ea5e9'
+            backgroundColor: '#3b82f6'
           }}
         >
-          <Edit2 size={16} />
+          <Edit size={16} />
         </button>
         <button
           className={styles.deleteButton}

@@ -22,20 +22,10 @@ import {
 import TransactionModal from '../modal/TransactionModal';
 
 const monthNames = [
-    'JAN',
-    'FEV',
-    'MAR',
-    'ABR',
-    'MAI',
-    'JUN',
-    'JUL',
-    'AGO',
-    'SET',
-    'OUT',
-    'NOV',
-    'DEZ'
-  ];
-  const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
+  'JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 
+  'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'
+];
+const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'];
 
 const TableWithDate = ({
   columns,
@@ -76,8 +66,6 @@ const TableWithDate = ({
   const [showGroupByDropdown, setShowGroupByDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -117,13 +105,13 @@ const TableWithDate = ({
     }
   }, [columns, getMemorizedConfig]);
 
- const getValue = useCallback((row, key) => {
-  if (key.startsWith('custom_')) {
-    const fieldName = key.slice(7);
-    return row.customFields?.[fieldName] || '';
-  }
-  return row[key];
-}, []);
+  const getValue = useCallback((row, key) => {
+    if (key.startsWith('custom_')) {
+      const fieldName = key.slice(7);
+      return row.customFields?.[fieldName] || '';
+    }
+    return row[key];
+  }, []);
 
   const openModal = useCallback((record = null, partialData = {}) => {
     setSelectedRecord(record ? record : { ...partialData, id: null });
@@ -143,20 +131,20 @@ const TableWithDate = ({
     }
   };
 
- const toggleDay = useCallback(
-  (groupKey) => {
-    setExpandedDays((prevExpanded) => {
-      const newExpanded = new Set(prevExpanded);
-      if (newExpanded.has(groupKey)) {
-        newExpanded.delete(groupKey);
-      } else {
-        newExpanded.add(groupKey);
-      }
-      return newExpanded;
-    });
-  },
-  [] 
-);
+  const toggleDay = useCallback(
+    (groupKey) => {
+      setExpandedDays((prevExpanded) => {
+        const newExpanded = new Set(prevExpanded);
+        if (newExpanded.has(groupKey)) {
+          newExpanded.delete(groupKey);
+        } else {
+          newExpanded.add(groupKey);
+        }
+        return newExpanded;
+      });
+    },
+    [] 
+  );
 
   // Lógica de ordenação
   const sortedData = React.useMemo(() => {
@@ -236,7 +224,7 @@ const TableWithDate = ({
     }
 
     return allGroups;
-  }, [groupedData, currentGroupBy, month, year,  isMobile]);
+  }, [groupedData, currentGroupBy, month, year, isMobile]);
 
   const expandAll = () => {
     const allGroups = getAllGroups();
@@ -259,22 +247,20 @@ const TableWithDate = ({
   };
 
   const handleSelectRow = useCallback(
-  (row) => {
-    setSelectedRows((prevSelected) => {
-      const newSelected = new Set(prevSelected);
-      if (newSelected.has(row)) {
-        newSelected.delete(row);
-      } else {
-        newSelected.add(row);
-      }
-
-      onSelectionChange?.(Array.from(newSelected));
-
-      return newSelected;
-    });
-  },
-  [onSelectionChange] 
-);
+    (row) => {
+      setSelectedRows((prevSelected) => {
+        const newSelected = new Set(prevSelected);
+        if (newSelected.has(row)) {
+          newSelected.delete(row);
+        } else {
+          newSelected.add(row);
+        }
+        onSelectionChange?.(Array.from(newSelected));
+        return newSelected;
+      });
+    },
+    [onSelectionChange] 
+  );
 
   const toggleColumnVisibility = (columnKey) => {
     if (columnKey === 'actions') return;
@@ -499,7 +485,7 @@ const TableWithDate = ({
           >
             <div className={styles.groupHeaderContent}>
               <ChevronRight
-                size={16}
+                size={25}
                 className={`${styles.expandIcon} ${
                   expandedDays.has(groupKey) ? styles.expanded : ''
                 }`}
