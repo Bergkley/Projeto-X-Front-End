@@ -3,11 +3,13 @@ import { Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets, Calendar, Filter, Bar
 import { useHistory } from 'react-router-dom';
 import styles from './Home.module.css';
 import { useTheme } from '../../hooks/useTheme'; 
+import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 import ServiceUsers from '../../services/ServiceUsers';
 import ServiceRoutines from '../../views/notes/Calendar/services/ServiceRoutines';
 
 const Home = () => {
   const { theme } = useTheme();
+  const { emphasisColor } = useEmphasisColor();
   const history = useHistory(); 
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -412,15 +414,21 @@ const Home = () => {
               ) : (
                 <div className={`${styles.dataContainer} ${dataVisible ? styles.visible : ''}`}>
                   <div className={styles.statsGrid}>
-                    <div className={styles.statBox}>
+                    <div 
+                      className={styles.statBox}
+                      style={{ backgroundColor: `${emphasisColor || '#16a34a'}20` }} 
+                    >
                       <p className={styles.statLabel}>Dias Presentes</p>
-                      <p className={styles.statValueGreen}>
+                      <p className={styles.statValueBlue} style={{ color: emphasisColor || '#16a34a' }}>
                         {presenceStats.presentDays}
                       </p>
                     </div>
-                    <div className={styles.statBoxBlue}>
+                    <div 
+                      className={styles.statBoxBlue}
+                      style={{ backgroundColor: `${emphasisColor || '#3b82f6'}20` }}
+                    >
                       <p className={styles.statLabel}>Total Sessões</p>
-                      <p className={styles.statValueBlue}>
+                      <p className={styles.statValueBlue} style={{ color: emphasisColor || '#3b82f6' }}>
                         {presenceStats.totalSessions}
                       </p>
                     </div>
@@ -440,14 +448,20 @@ const Home = () => {
                           {day.present && (
                             <div 
                               className={styles.progressFill}
-                              style={{ width: `${Math.min((day.sessions / 7) * 100, 100)}%` }}
+                              style={{ 
+                                background: `linear-gradient(to right, ${emphasisColor || '#4ade80'}, ${emphasisColor || '#22c55e'})`,
+                                width: `${Math.min((day.sessions / 7) * 100, 100)}%`
+                              }}
                             >
                               <span className={styles.sessionCount}>{day.sessions}</span>
                             </div>
                           )}
                         </div>
                         {day.present ? (
-                          <CheckCircle2 className={styles.checkIcon} />
+                          <CheckCircle2 
+                            className={styles.checkIcon} 
+                            style={{ color: emphasisColor || '#22c55e' }} 
+                          />
                         ) : (
                           <div className={styles.emptyCheck}></div>
                         )}
@@ -457,7 +471,9 @@ const Home = () => {
                   
                   <div className={styles.presenceFooter}>
                     <p className={styles.presenceRate}>
-                      Taxa de presença: <span className={styles.rateValue}>{presenceStats.rate}%</span>
+                      Taxa de presença: <span className={styles.rateValue} style={{ color: emphasisColor || '#16a34a' }}>
+                        {presenceStats.rate}%
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -465,7 +481,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
     </div>
   );
 };
