@@ -42,58 +42,119 @@
   color: var(--text-secondary, #94a3b8);
 }
 
-/* Status badges - adicionados estilos básicos para os status */
-.status-active {
-  background-color: var(--success-bg, #d1fae5);
-  color: var(--success-text, #065f46);
-  padding: 4px 8px;
-  border-radius: 4px;
+/* ========== NOVOS ESTILOS DE STATUS ========== */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
 }
 
-.status-completed {
-  background-color: var(--success-bg, #d1fae5);
-  color: var(--success-text, #065f46);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse-dot 2s ease-in-out infinite;
 }
 
-.status-cancelled {
-  background-color: var(--error-bg, #fee2e2);
-  color: var(--error-text, #991b1b);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
-.status-pending {
-  background-color: var(--warning-bg, #fef3c7);
-  color: var(--warning-text, #92400e);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+/* Status: Em Andamento */
+.status-em_andamento {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
 }
 
-.container.dark .status-active,
-.container.dark .status-completed {
-  background-color: var(--success-bg-dark, #064e3b);
-  color: var(--success-text-dark, #d1fae5);
+.status-em_andamento .statusDot {
+  background-color: #2563eb;
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.5);
 }
 
-.container.dark .status-cancelled {
-  background-color: var(--error-bg-dark, #7f1d1d);
-  color: var(--error-text-dark, #fee2e2);
+/* Status: Concluído */
+.status-concluido {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #059669;
 }
 
-.container.dark .status-pending {
-  background-color: var(--warning-bg-dark, #78350f);
-  color: var(--warning-text-dark, #fef3c7);
+.status-concluido .statusDot {
+  background-color: #059669;
+  box-shadow: 0 0 6px rgba(5, 150, 105, 0.5);
 }
+
+/* Status: Cancelado */
+.status-cancelado {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.status-cancelado .statusDot {
+  background-color: #dc2626;
+  box-shadow: 0 0 6px rgba(220, 38, 38, 0.5);
+}
+
+/* Status: Pendente */
+.status-pendente {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+.status-pendente .statusDot {
+  background-color: #d97706;
+  box-shadow: 0 0 6px rgba(217, 119, 6, 0.5);
+}
+
+/* Status: Pausado */
+.status-pausado {
+  background-color: rgba(107, 114, 128, 0.15);
+  color: #6b7280;
+}
+
+.status-pausado .statusDot {
+  background-color: #6b7280;
+  box-shadow: 0 0 6px rgba(107, 114, 128, 0.5);
+}
+
+/* TEMA ESCURO - Status Badges */
+.container.dark .status-em_andamento {
+  background-color: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+}
+
+.container.dark .status-concluido {
+  background-color: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+}
+
+.container.dark .status-cancelado {
+  background-color: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
+.container.dark .status-pendente {
+  background-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+.container.dark .status-pausado {
+  background-color: rgba(107, 114, 128, 0.25);
+  color: #9ca3af;
+}
+
+/* ========== FIM DOS NOVOS ESTILOS DE STATUS ========== */
 
 .avatar {
   width: 40px;
@@ -284,7 +345,6 @@ input:checked + .slider:before {
   align-items: center;
   justify-content: center;
   animation: pulse 2s ease-in-out infinite;
-  /* background e box-shadow removidos - serão aplicados via inline style */
 }
 
 @keyframes pulse {
@@ -330,7 +390,6 @@ input:checked + .slider:before {
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
-  /* background e box-shadow removidos - serão aplicados via inline style */
 }
 
 .emptyStateButton:hover {

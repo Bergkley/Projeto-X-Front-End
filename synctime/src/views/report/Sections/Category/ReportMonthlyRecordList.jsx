@@ -1,6 +1,6 @@
 // ⚙️ Bibliotecas externas
 import { useEffect, useState } from 'react';
-import { Edit2, ExternalLink, FileText,  Plus, Trash2 } from 'lucide-react';
+import { Edit, ExternalLink, FileText, Plus, Trash2 } from 'lucide-react';
 import { useHistory } from 'react-router-dom';
 
 // 💅 Estilos
@@ -178,7 +178,8 @@ const ReportMonthlyRecordList = () => {
       key: 'status',
       label: 'Status',
       render: (row) => (
-        <span className={styles[`status-${row.status}`]}>
+        <span className={`${styles.statusBadge} ${styles[`status-${row.status}`]}`}>
+          <span className={styles.statusDot}></span>
           {formatStatus(row.status)}
         </span>
       )
@@ -203,9 +204,8 @@ const ReportMonthlyRecordList = () => {
             className={styles.editButton}
             onClick={() => onEdit(row.id)}
             title="Editar registro"
-            
           >
-            <Edit2 size={16} />
+            <Edit size={16} />
           </button>
           <button
             className={styles.deleteButton}
@@ -233,12 +233,13 @@ const ReportMonthlyRecordList = () => {
     });
   };
 
-  const handleReport = (recordId ,month, year) => {
-    history.push(`/relatorios/categoria/transações`,{
+  const handleReport = (recordId, month, year) => {
+    history.push(`/relatorios/categoria/transações`, {
       monthlyRecordId: recordId,
       month,
       year,
-      idCategory});
+      idCategory
+    });
   };
 
   const handleDeleteRecord = async () => {
