@@ -5,6 +5,7 @@ import styles from './TransactionModal.module.css';
 import { Button } from 'reactstrap';
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
+import { useButtonColors } from '../../hooks/useButtonColors'; 
 import ServiceCustomFields from '../../views/sectionConfigSystem/Sections/General/CustomFields/services/ServiceCustomFields';
 import errorFormMessage from '../../utils/errorFormMessage';
 import CustomFieldsRenderModal from '../customFields/CustomFieldsRenderModal';
@@ -19,6 +20,7 @@ const TransactionModal = ({
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
+  const { primaryButtonColor, secondaryButtonColor } = useButtonColors(); 
   const isEditMode = !!record?.id;
   const [customFields, setCustomFields] = useState([]);
   const [isLoadingCustomFields, setIsLoadingCustomFields] = useState(false);
@@ -325,15 +327,18 @@ const TransactionModal = ({
           </div>
 
           <div className={`${styles.modalFooter} ${styles[theme]}`}>
-            <Button type="button" className={`${styles.btnCancel} ${styles[theme]}`} onClick={handleClose}>
+            <Button 
+              type="button" 
+              className={`${styles.btnCancel} ${styles[theme]}`} 
+              onClick={handleClose}
+              style={{ backgroundColor: secondaryButtonColor }}
+            >
               Cancelar
             </Button>
             <Button 
               type="submit" 
               className={`${styles.btnSave} ${styles[theme]}`}
-              style={{
-                background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`
-              }}
+              style={{ backgroundColor: primaryButtonColor }}
             >
               {isEditMode ? 'Atualizar' : 'Criar'}
             </Button>

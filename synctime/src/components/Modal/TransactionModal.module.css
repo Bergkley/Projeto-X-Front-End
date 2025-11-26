@@ -272,29 +272,15 @@
   gap: 8px;
 }
 
-.btnCancel.light {
-  background-color: var(--secondary-color, #6c757d);
-  color: white;
-}
-
-.btnCancel.light:hover {
-  background-color: var(--secondary-hover, #5a6268);
-}
-
-.btnCancel.dark {
-  background-color: var(--secondary-color, #4a5568);
-  color: white;
-}
-
-.btnCancel.dark:hover {
-  background-color: var(--secondary-hover, #2d3748);
-}
-
+.btnCancel.light,
+.btnCancel.dark,
 .btnSave.light,
 .btnSave.dark {
   color: white;
 }
 
+.btnCancel.light:hover,
+.btnCancel.dark:hover,
 .btnSave.light:hover,
 .btnSave.dark:hover {
   opacity: 0.9;
