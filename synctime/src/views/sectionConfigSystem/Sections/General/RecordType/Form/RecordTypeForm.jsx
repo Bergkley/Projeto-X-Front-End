@@ -14,6 +14,7 @@ import ActionHeader from '../../../../../../components/header/ActionHeader/Actio
 // 🔧 Utils e Hooks
 import errorFormMessage from '../../../../../../utils/errorFormMessage';
 import { useTheme } from '../../../../../../hooks/useTheme';
+import { useButtonColors } from '../../../../../../hooks/useButtonColors';
 import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 
 // 📡 Services
@@ -25,6 +26,7 @@ const RecordTypeForm = () => {
   const { id } = useParams();
   const history = useHistory();
   const { theme } = useTheme();
+  const { primaryButtonColor, secondaryButtonColor } = useButtonColors(); 
   const { setFlashMessage } = useFlashMessage();
 
   const [loading, setLoading] = useState(false);
@@ -265,6 +267,7 @@ const RecordTypeForm = () => {
               type="submit"
               className={styles.buttonCreate}
               disabled={loading}
+              style={{ backgroundColor: primaryButtonColor }}
             >
               {loading ? 'Salvando...' : id ? 'Atualizar' : 'Criar'}
             </button>
@@ -273,6 +276,7 @@ const RecordTypeForm = () => {
               onClick={handleCancel}
               className={styles.buttonCancel}
               disabled={loading}
+              style={{ backgroundColor: secondaryButtonColor }}
             >
               Cancelar
             </button>
