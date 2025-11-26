@@ -16,6 +16,7 @@ import ActionHeader from '../../../../../../components/header/ActionHeader/Actio
 // 🔧 Utils e Hooks
 import errorFormMessage from '../../../../../../utils/errorFormMessage';
 import { useTheme } from '../../../../../../hooks/useTheme';
+import { useButtonColors } from '../../../../../../hooks/useButtonColors'; 
 import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 import ServiceCategory from '../../../Report/Category/services/ServiceCategory';
 import ServiceRecordType from '../../RecordType/services/ServiceRecordType';
@@ -28,6 +29,7 @@ const CustomFieldForm = () => {
   const { id } = useParams();
   const history = useHistory();
   const { theme } = useTheme();
+  const { primaryButtonColor, secondaryButtonColor } = useButtonColors(); 
   const { setFlashMessage } = useFlashMessage();
 
   const [loading, setLoading] = useState(false);
@@ -339,13 +341,14 @@ const CustomFieldForm = () => {
             </div>
 
             <div className={styles.modalButtonContainer}>
-              <button type="submit" className={styles.buttonSave}>
+              <button type="submit" className={styles.buttonSave} style={{ backgroundColor: primaryButtonColor }}>
                 Salvar
               </button>
               <button
                 type="button"
                 onClick={handleCloseModal}
                 className={styles.buttonCancel}
+                style={{ backgroundColor: secondaryButtonColor }}
               >
                 Cancelar
               </button>
@@ -616,6 +619,7 @@ const CustomFieldForm = () => {
                       onClick={() => handleOpenModal()}
                       className={styles.buttonAddOption}
                       disabled={loading}
+                      style={{ backgroundColor: primaryButtonColor }}
                     >
                       <Plus size={18} />
                       Adicionar Opção
@@ -680,6 +684,7 @@ const CustomFieldForm = () => {
               type="submit"
               className={styles.buttonCreate}
               disabled={loading}
+              style={{ backgroundColor: primaryButtonColor }}
             >
               {loading ? 'Salvando...' : id ? 'Atualizar' : 'Criar'}
             </button>
@@ -688,6 +693,7 @@ const CustomFieldForm = () => {
               onClick={handleCancel}
               className={styles.buttonCancel}
               disabled={loading}
+              style={{ backgroundColor: secondaryButtonColor }}
             >
               Cancelar
             </button>

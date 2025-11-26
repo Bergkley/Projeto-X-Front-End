@@ -184,11 +184,10 @@
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.3s ease;
-  background-color: #20c997;
 }
 
 .buttonAddOption:hover {
-  background-color: #18a373;
+  filter: brightness(0.9);
 }
 
 /* Tabela de Opções */
@@ -310,7 +309,7 @@
 }
 
 .buttonEdit:hover {
-  background-color: #4f46e5;
+  filter: brightness(0.9);
 }
 
 .buttonDelete {
@@ -327,7 +326,7 @@
 }
 
 .buttonDelete:hover {
-  background-color: #c82333;
+  filter: brightness(0.9);
 }
 
 .emptyState {
@@ -395,11 +394,10 @@
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background-color: #20c997;
 }
 
 .buttonSave:hover {
-  background-color: #18a373;
+  filter: brightness(0.9);
 }
 
 .buttonCancel {
@@ -411,11 +409,10 @@
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background-color: #6c757d;
 }
 
 .buttonCancel:hover {
-  background-color: #5a6268;
+  filter: brightness(0.9);
 }
 
 .buttonCreate {
@@ -427,17 +424,16 @@
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background-color: #20c997;
 }
 
 .buttonCreate:hover {
-  background-color: #18a373;
+  filter: brightness(0.9);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .buttonCreate:active {
-  background-color: #117a56;
+  filter: brightness(0.8);
   transform: translateY(0);
 }
 
