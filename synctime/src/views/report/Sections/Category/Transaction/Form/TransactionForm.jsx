@@ -19,6 +19,7 @@ import ActionHeader from '../../../../../../components/header/ActionHeader/Actio
 import CustomFieldsRenderer from '../../../../../../components/customFields/CustomFieldsRenderer';
 import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 import { useTheme } from '../../../../../../hooks/useTheme';
+import { useButtonColors } from '../../../../../../hooks/useButtonColors';
 import errorFormMessage from '../../../../../../utils/errorFormMessage';
 
 const TransactionForm = () => {
@@ -27,6 +28,7 @@ const TransactionForm = () => {
   const { dados } = location.state || {};
   const history = useHistory();
   const { theme } = useTheme();
+  const { primaryButtonColor, secondaryButtonColor } = useButtonColors();
   const { setFlashMessage } = useFlashMessage();
 
   const [loading, setLoading] = useState(false);
@@ -393,6 +395,7 @@ const TransactionForm = () => {
               type="submit"
               className={styles.buttonCreate}
               disabled={loading}
+              style={{ backgroundColor: primaryButtonColor }}
             >
               {loading ? 'Salvando...' : id ? 'Atualizar' : 'Criar'}
             </button>
@@ -401,6 +404,7 @@ const TransactionForm = () => {
               onClick={handleCancel}
               className={styles.buttonCancel}
               disabled={loading}
+              style={{ backgroundColor: secondaryButtonColor }}
             >
               Cancelar
             </button>
