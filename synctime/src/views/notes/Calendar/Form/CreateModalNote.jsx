@@ -6,6 +6,7 @@ import CreatableSelect from 'react-select/creatable';
 import styles from './CreateModalNote.module.css';
 import { useTheme } from './../../../../hooks/useTheme';
 import { useEmphasisColor } from './../../../../hooks/useEmphasisColor';
+import { useButtonColors } from './../../../../hooks/useButtonColors'; 
 import useFlashMessage from '../../../../hooks/userFlashMessage';
 import ServiceCategory from '../../../sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
 import ServiceNotes from '../services/ServiceNotes';
@@ -22,6 +23,7 @@ const CreateModalNote = ({
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
+  const { primaryButtonColor, secondaryButtonColor } = useButtonColors(); // Uso do hook para obter as cores personalizadas
   const { setFlashMessage } = useFlashMessage();
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
@@ -755,6 +757,7 @@ const CreateModalNote = ({
                 className={`${styles.btnSecondary} ${styles[theme]}`}
                 onClick={closeModal}
                 disabled={loading}
+                style={{ backgroundColor: secondaryButtonColor }}
               >
                 Cancelar
               </button>
@@ -762,10 +765,7 @@ const CreateModalNote = ({
                 type="submit"
                 className={`${styles.btnPrimary} ${styles[theme]}`}
                 disabled={loading}
-                style={{
-                  background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`,
-                  '--hover-shadow-color': emphasisColor || '#667eea'
-                }}
+                style={{ backgroundColor: primaryButtonColor }}
               >
                 {loading ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Salvar Anotação')}
               </button>

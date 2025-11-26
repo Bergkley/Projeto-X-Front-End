@@ -411,20 +411,12 @@
     transition: background-color 0.2s ease;
 }
 
-.btnSecondary.light {
-    background: #6c757d;
-}
-
 .btnSecondary.light:hover {
-    background: #5a6268;
-}
-
-.btnSecondary.dark {
-    background: #4a5568;
+    filter: brightness(0.9);
 }
 
 .btnSecondary.dark:hover {
-    background: #2d3748;
+    filter: brightness(0.9);
 }
 
 .btnPrimary {
@@ -439,12 +431,14 @@
 }
 
 .btnPrimary.light:hover {
+    filter: brightness(0.9);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 
 .btnPrimary.dark:hover {
+    filter: brightness(0.9);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
 }
