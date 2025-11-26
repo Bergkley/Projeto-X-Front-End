@@ -133,17 +133,16 @@
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background-color: #20c997;
 }
 
 .buttonCreate:hover {
-  background-color: #18a373;
+  filter: brightness(0.9);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .buttonCreate:active {
-  background-color: #117a56;
+  filter: brightness(0.8);
   transform: translateY(0);
 }
 
@@ -162,17 +161,16 @@
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background-color: #6366f1;
 }
 
 .buttonCancel:hover {
-  background-color: #4f46e5;
+  filter: brightness(0.9);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .buttonCancel:active {
-  background-color: #4338ca;
+  filter: brightness(0.8);
   transform: translateY(0);
 }
 

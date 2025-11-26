@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { useParams, useHistory,useLocation } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
 import { ErrorMessage } from '@hookform/error-message';
 
@@ -16,6 +16,7 @@ import SingleSelect from '../../../../../components/select/SingleSelect';
 // 🔧 Utils e Hooks
 import useFlashMessage from '../../../../../hooks/userFlashMessage';
 import { useTheme } from '../../../../../hooks/useTheme';
+import { useButtonColors } from '../../../../../hooks/useButtonColors'; // Adicionado o hook para cores dos botões
 import errorFormMessage from '../../../../../utils/errorFormMessage'
 ;
 
@@ -28,6 +29,10 @@ const ReportMonthlyRecordForm = () => {
   const { dados } = location.state || {};
   const history = useHistory();
   const { theme } = useTheme();
+  const { 
+    primaryButtonColor,
+    secondaryButtonColor 
+  } = useButtonColors(); 
   const { setFlashMessage } = useFlashMessage();
 
   const [loading, setLoading] = useState(false);
@@ -405,6 +410,7 @@ const ReportMonthlyRecordForm = () => {
               type="submit"
               className={styles.buttonCreate}
               disabled={loading}
+              style={{ backgroundColor: primaryButtonColor }} 
             >
               {loading ? 'Salvando...' : id ? 'Atualizar' : 'Criar'}
             </button>
@@ -413,6 +419,7 @@ const ReportMonthlyRecordForm = () => {
               onClick={handleCancel}
               className={styles.buttonCancel}
               disabled={loading}
+              style={{ backgroundColor: secondaryButtonColor }} 
             >
               Cancelar
             </button>
