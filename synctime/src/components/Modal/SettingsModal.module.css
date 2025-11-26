@@ -935,3 +935,43 @@
   font-size: 12px;
   margin-top: 6px;
 }
+
+
+/* Preview Container */
+.previewContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.previewContainer.dark {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.previewContainer.light {
+  background: #f8f8f8;
+  color: #000;
+}
+
+.previewContainer button:hover {
+  opacity: 0.9;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .buttonGroup {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .buttonGroup button {
+    width: 100%;
+    margin-right: 0 !important;
+  }
+}
