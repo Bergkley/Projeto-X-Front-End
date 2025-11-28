@@ -5,6 +5,7 @@ import { ErrorMessage } from '@hookform/error-message';
 
 // 🧠 Hooks customizados
 import { useTheme } from '../../hooks/useTheme';
+import { useButtonColors } from '../../hooks/useButtonColors'; 
 import useFlashMessage from '../../hooks/userFlashMessage';
 import { useMemorizeFilters, POSSIBLE_FILTERS_ENTITIES } from '../../hooks/useMemorizeInputsFilters';
 
@@ -19,6 +20,7 @@ import errorFormMessage from '../../utils/errorFormMessage';
 
 const NewPassword = ({ isOpen, onClose }) => {
   const { theme } = useTheme();
+  const { primaryButtonColor, secondaryButtonColor } = useButtonColors(); 
   const { setFlashMessage } = useFlashMessage();
   const [isLoading, setIsLoading] = useState(false);
   const {getMemorizedFilters} = useMemorizeFilters(POSSIBLE_FILTERS_ENTITIES.USERS)
@@ -165,6 +167,7 @@ const NewPassword = ({ isOpen, onClose }) => {
               onClick={handleClose}
               className={styles.cancelButton}
               disabled={isLoading}
+              style={{ backgroundColor: secondaryButtonColor }}
             >
               Cancelar
             </button>
@@ -172,6 +175,7 @@ const NewPassword = ({ isOpen, onClose }) => {
               type="submit"
               className={styles.submitButton}
               disabled={isLoading}
+              style={{ backgroundColor: primaryButtonColor }}
             >
               {isLoading ? 'Alterando...' : 'Alterar Senha'}
             </button>
