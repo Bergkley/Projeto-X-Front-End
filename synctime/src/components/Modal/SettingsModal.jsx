@@ -1,5 +1,5 @@
 // ⚙️ React e bibliotecas externas
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, User, Shield, Palette, Lock } from 'lucide-react';
 
 // 💅 Estilos
@@ -15,9 +15,15 @@ import PrivacySection from '../settings/SectionConfig/PrivacySection';
 import { useTheme } from '../../hooks/useTheme';
 
 
-const SettingsModal = ({ isOpen, onClose }) => {
-  const [activeSection, setActiveSection] = useState('profile');
+const SettingsModal = ({ isOpen, onClose, initialSection = 'profile' }) => {
+  const [activeSection, setActiveSection] = useState(initialSection);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveSection(initialSection);
+    }
+  }, [isOpen, initialSection]);
 
   if (!isOpen) return null;
 
