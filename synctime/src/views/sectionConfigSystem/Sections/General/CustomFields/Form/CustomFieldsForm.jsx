@@ -3,7 +3,7 @@ import { useForm, Controller, useWatch } from 'react-hook-form';
 import { useParams, useHistory } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, Row, Col } from 'reactstrap';
 import { ErrorMessage } from '@hookform/error-message';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit, Trash2, Plus } from 'lucide-react';
 
 // 💅 Estilos
 import styles from './CustomFieldForm.module.css';
@@ -654,7 +654,7 @@ const CustomFieldForm = () => {
                               title="Editar"
                               disabled={loading}
                             >
-                              <Edit2 size={16} />
+                              <Edit size={16} />
                             </button>
                             <button
                               type="button"

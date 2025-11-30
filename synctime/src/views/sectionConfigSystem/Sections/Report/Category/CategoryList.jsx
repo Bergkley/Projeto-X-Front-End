@@ -1,6 +1,6 @@
 // ⚙️ Bibliotecas externas
 import { useEffect, useState } from "react";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { useHistory } from 'react-router-dom';
 
 // 💅 Estilos
@@ -93,7 +93,7 @@ const CategoryList = () => {
       render: (row, idx, { onEdit, onDelete }) => (
         <div className={styles.actionsCell}>
           <button className={styles.editButton} onClick={() => onEdit(row.id)}>
-            <Edit2 size={16} />
+            <Edit size={16} />
           </button>
           <button 
             className={styles.deleteButton} 
