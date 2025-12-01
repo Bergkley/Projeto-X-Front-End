@@ -49,6 +49,31 @@ const TransactionForm = () => {
     }
   });
 
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    
+    const numericValue = value.replace(/\D/g, '');
+    
+    const numberValue = parseFloat(numericValue) / 100;
+    
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(numberValue);
+  };
+
+  const parseCurrency = (value) => {
+    if (!value) return '';
+    
+    const numericValue = value
+      .replace('R$', '')
+      .replace(/\s/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    
+    return numericValue;
+  };
+
   useEffect(() => {
     const fetchCustomFields = async () => {
       if (!dados?.categoryId || !dados?.recordTypeId) return;
@@ -89,7 +114,9 @@ const TransactionForm = () => {
           const formData = {
             title: transactionData.title || '',
             description: transactionData.description || '',
-            amount: transactionData.amount?.toString() || '',
+            amount: transactionData.amount 
+              ? formatCurrency((transactionData.amount * 100).toString())
+              : '',
             transactionDate: transactionData.transaction_date || ''
           };
 
@@ -129,7 +156,7 @@ const TransactionForm = () => {
       const payload = {
         title: data.title,
         description: data.description || undefined,
-        amount: data.amount ? parseFloat(data.amount) : undefined,
+        amount: data.amount ? parseFloat(parseCurrency(data.amount)) : undefined,
         transactionDate: data.transactionDate,
         recordTypeId: dados.recordTypeId,
         monthlyRecordId: dados.monthlyRecordId,
@@ -321,24 +348,29 @@ const TransactionForm = () => {
                   control={control}
                   rules={{
                     required: 'Valor é obrigatório',
-                    min: {
-                      value: 0.01,
-                      message: 'O valor deve ser maior que zero'
+                    validate: (value) => {
+                      const numericValue = parseFloat(parseCurrency(value));
+                      if (isNaN(numericValue) || numericValue <= 0) {
+                        return 'O valor deve ser maior que zero';
+                      }
+                      return true;
                     }
                   }}
                   render={({ field }) => (
                     <>
-                      <label className={styles.label}>Valor (R$) *</label>
+                      <label className={styles.label}>Valor *</label>
                       <input
                         {...field}
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0.00"
+                        type="text"
+                        placeholder="R$ 0,00"
                         className={`${styles.input} ${
                           errors.amount ? styles.error : ''
                         }`}
                         disabled={loading}
+                        onChange={(e) => {
+                          const formatted = formatCurrency(e.target.value);
+                          field.onChange(formatted);
+                        }}
                       />
                       <ErrorMessage
                         errors={errors}

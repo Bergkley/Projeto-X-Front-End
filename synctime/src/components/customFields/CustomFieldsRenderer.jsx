@@ -18,6 +18,31 @@ const CustomFieldsRenderer = ({
   loading 
 }) => {
   
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    
+    const numericValue = value.replace(/\D/g, '');
+    
+    const numberValue = parseFloat(numericValue) / 100;
+    
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(numberValue);
+  };
+
+  const parseCurrency = (value) => {
+    if (!value) return '';
+    
+    const numericValue = value
+      .replace('R$', '')
+      .replace(/\s/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    
+    return numericValue;
+  };
+
   const renderField = (field) => {
     const fieldName = `customField_${field.id}`;
 
@@ -97,9 +122,12 @@ const CustomFieldsRenderer = ({
             control={control}
             rules={{
               required: field.required ? `${field.label} é obrigatório` : false,
-              min: field.required ? {
-                value: 0.01,
-                message: 'O valor deve ser maior que zero'
+              validate: field.required ? (value) => {
+                const numericValue = parseFloat(parseCurrency(value));
+                if (isNaN(numericValue) || numericValue <= 0) {
+                  return 'O valor deve ser maior que zero';
+                }
+                return true;
               } : undefined
             }}
             render={({ field: formField }) => (
@@ -109,14 +137,16 @@ const CustomFieldsRenderer = ({
                 </label>                
                 <input
                   {...formField}
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
+                  type="text"
+                  placeholder="R$ 0,00"
                   className={`${styles.input} ${
                     errors[fieldName] ? styles.error : ''
                   }`}
                   disabled={loading}
+                  onChange={(e) => {
+                    const formatted = formatCurrency(e.target.value);
+                    formField.onChange(formatted);
+                  }}
                 />
                 <ErrorMessage
                   errors={errors}

@@ -39,6 +39,31 @@ const TransactionModal = ({
     }
   });
 
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    
+    const numericValue = value.replace(/\D/g, '');
+    
+    const numberValue = parseFloat(numericValue) / 100;
+    
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(numberValue);
+  };
+
+  const parseCurrency = (value) => {
+    if (!value) return '';
+    
+    const numericValue = value
+      .replace('R$', '')
+      .replace(/\s/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    
+    return numericValue;
+  };
+
   useEffect(() => {
     const fetchCustomFields = async () => {
       if (!dados?.categoryId || !dados?.recordTypeId || !isOpen) return;
@@ -76,7 +101,9 @@ const TransactionModal = ({
     if (isEditMode && record) {
       formData.title = record.title || '';
       formData.description = record.description || '';
-      formData.amount = record.amount?.toString() || '';
+      formData.amount = record.amount 
+        ? formatCurrency((record.amount * 100).toString())
+        : '';
       formData.transactionDate = record.transaction_date || '';
 
       const customFieldsData = record.customFieldsResult || [];
@@ -107,7 +134,7 @@ const TransactionModal = ({
     const payload = {
       title: data.title,
       description: data.description || undefined,
-      amount: data.amount ? parseFloat(data.amount) : undefined,
+      amount: data.amount ? parseFloat(parseCurrency(data.amount)) : undefined,
       transactionDate: data.transactionDate,
       recordTypeId: dados.recordTypeId,
       monthlyRecordId: dados.monthlyRecordId,
@@ -227,30 +254,35 @@ const TransactionModal = ({
 
             {/* Valor - Coluna 2 */}
             <div className={styles.formGroup}>
-              <label htmlFor="amount" className={`${styles.formLabel} ${styles[theme]}`}>Valor (R$) *</label>
+              <label htmlFor="amount" className={`${styles.formLabel} ${styles[theme]}`}>Valor *</label>
               <Controller
                 name="amount"
                 control={control}
                 rules={{
                   required: 'Valor é obrigatório',
-                  min: {
-                    value: 0.01,
-                    message: 'O valor deve ser maior que zero'
+                  validate: (value) => {
+                    const numericValue = parseFloat(parseCurrency(value));
+                    if (isNaN(numericValue) || numericValue <= 0) {
+                      return 'O valor deve ser maior que zero';
+                    }
+                    return true;
                   }
                 }}
                 render={({ field }) => (
                   <>
                     <input
                       {...field}
-                      type="number"
+                      type="text"
                       id="amount"
                       className={`${styles.formInput} ${styles[theme]} ${errors.amount ? styles.error : ''}`}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
+                      placeholder="R$ 0,00"
                       style={{
                         '--focus-border-color': emphasisColor || 'rgb(20, 18, 129)',
                         '--focus-shadow-color': emphasisColor ? `${emphasisColor}26` : 'rgba(102, 126, 234, 0.15)'
+                      }}
+                      onChange={(e) => {
+                        const formatted = formatCurrency(e.target.value);
+                        field.onChange(formatted);
                       }}
                     />
                     <div className={styles.errorMessage}>
