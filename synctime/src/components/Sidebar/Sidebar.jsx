@@ -25,6 +25,9 @@ import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 import ServiceCategory from '../../views/sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
 import useAuth from '../../hooks/userAuth';
 
+// 🔗 Ícones Lucide
+import { iconMap } from '../../utils/iconsConfig';
+
 function Sidebar({ onToggle }) {
   const location = useLocation();
   const { theme } = useTheme();
@@ -300,40 +303,44 @@ function Sidebar({ onToggle }) {
                     ) : relatoriosSubMenu.length === 0 ? (
                       <li className={styles.emptyItem}>Nenhuma categoria encontrada</li>
                     ) : (
-                      relatoriosSubMenu.map(recordType => (
-                        <li key={recordType.id}>
-                          <button
-                            className={`${styles.submenuItem} ${styles.submenuItemDropdown}`}
-                            onClick={(e) => toggleCategory(recordType.id, e)}
-                          >
-                            <span>{recordType.name}</span>
-                            <span className={styles.submenuArrow}>
-                              {openCategories[recordType.id] ? <FaChevronDown /> : <FaChevronRight />}
-                            </span>
-                          </button>
+                      relatoriosSubMenu.map(recordType => {
+                        const Icon = iconMap[recordType.icon];
+                        return (
+                          <li key={recordType.id}>
+                            <button
+                              className={`${styles.submenuItem} ${styles.submenuItemDropdown}`}
+                              onClick={(e) => toggleCategory(recordType.id, e)}
+                            >
+                              {Icon && <Icon className={styles.icon} />}
+                              <span>{recordType.name}</span>
+                              <span className={styles.submenuArrow}>
+                                {openCategories[recordType.id] ? <FaChevronDown /> : <FaChevronRight />}
+                              </span>
+                            </button>
 
-                          {openCategories[recordType.id] && recordType.categorias && (
-                            <ul className={styles.subSubmenu}>
-                              {recordType.categorias.map(categoria => (
-                                <li key={categoria.id}>
-                                  <Link
-                                    to={categoria.path}
-                                    className={`${styles.subSubmenuItem} ${isActive(categoria.path)}`}
-                                    onClick={closeMobileMenu}
-                                    style={
-                                      location.pathname === categoria.path
-                                        ? { borderLeftColor: emphasisColor || '#3b82f6', color: emphasisColor || '#3b82f6' }
-                                        : {}
-                                    }
-                                  >
-                                    {categoria.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))
+                            {openCategories[recordType.id] && recordType.categorias && (
+                              <ul className={styles.subSubmenu}>
+                                {recordType.categorias.map(categoria => (
+                                  <li key={categoria.id}>
+                                    <Link
+                                      to={categoria.path}
+                                      className={`${styles.subSubmenuItem} ${isActive(categoria.path)}`}
+                                      onClick={closeMobileMenu}
+                                      style={
+                                        location.pathname === categoria.path
+                                          ? { borderLeftColor: emphasisColor || '#3b82f6', color: emphasisColor || '#3b82f6' }
+                                          : {}
+                                      }
+                                    >
+                                      {categoria.name}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })
                     )}
                   </ul>
                 )}

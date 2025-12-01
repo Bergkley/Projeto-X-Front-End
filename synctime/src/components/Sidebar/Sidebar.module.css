@@ -415,10 +415,15 @@
 }
 
 .icon {
-  font-size: 18px;
+  width: 16px;
+  height: 16px;
   margin-right: 12px;
   min-width: 18px;
   flex-shrink: 0;
+}
+
+.submenuItemDropdown .icon {
+  margin-right: 0;
 }
 
 .menuItem span:not(.dropdownIcon) {
