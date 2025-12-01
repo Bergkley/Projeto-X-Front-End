@@ -30,25 +30,36 @@ const Calendar = () => {
   const [noteToEdit, setNoteToEdit] = useState(null);
   const [noteType, setNoteType] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('');
-  const [holidays, setHolidays] = useState({}); 
-  const [openNoteListFromNotification, setOpenNoteListFromNotification] = useState(false); // Flag para controle de abertura via notificação
-  const [targetRoutineId, setTargetRoutineId] = useState(null); // Para definir a rotina específica
-  const [targetNoteId, setTargetNoteId] = useState(null); // Para destacar nota específica, se necessário
+  const [holidays, setHolidays] = useState({});
+  const [openNoteListFromNotification, setOpenNoteListFromNotification] =
+    useState(false); 
+  const [targetRoutineId, setTargetRoutineId] = useState(null); 
+  const [targetNoteId, setTargetNoteId] = useState(null); 
 
-  const API_KEY = import.meta.env.VITE_KEY_API_HOLIDAY || ''; 
+  const API_KEY = import.meta.env.VITE_KEY_API_HOLIDAY || '';
 
   const months = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro'
   ];
 
   const weekDays = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
   const sortNotes = (notesArray) => {
     const order = {
-      'Manhã': 0,
-      'Tarde': 1,
-      'Noite': 2,
+      Manhã: 0,
+      Tarde: 1,
+      Noite: 2,
       'Resumo do Dia': 3
     };
     return [...notesArray].sort((a, b) => {
@@ -79,11 +90,11 @@ const Calendar = () => {
 
   useEffect(() => {
     const year = currentDate.getFullYear();
-    if (holidays[year]) return; 
+    if (holidays[year]) return;
 
     const fetchHolidays = async () => {
       if (!API_KEY) {
-        setHolidays(prev => ({ ...prev, [year]: getFallbackHolidays(year) }));
+        setHolidays((prev) => ({ ...prev, [year]: getFallbackHolidays(year) }));
         return;
       }
 
@@ -95,18 +106,21 @@ const Calendar = () => {
         const data = await res.json();
 
         const yearHolidays = {};
-        data.forEach(holiday => {
+        data.forEach((holiday) => {
           if (holiday.type === 'National Holiday') {
             const [month, day, yr] = holiday.date.split('/');
-            const dateKey = `${yr}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            const dateKey = `${yr}-${month.padStart(2, '0')}-${day.padStart(
+              2,
+              '0'
+            )}`;
             yearHolidays[dateKey] = holiday.name;
           }
         });
 
-        setHolidays(prev => ({ ...prev, [year]: yearHolidays }));
+        setHolidays((prev) => ({ ...prev, [year]: yearHolidays }));
       } catch (error) {
         console.error('Erro ao buscar feriados:', error);
-        setHolidays(prev => ({ ...prev, [year]: getFallbackHolidays(year) }));
+        setHolidays((prev) => ({ ...prev, [year]: getFallbackHolidays(year) }));
       }
     };
 
@@ -148,40 +162,44 @@ const Calendar = () => {
         }
       }
     }
-  }, [location.search, location.state]); 
+  }, [location.search, location.state]);
 
-useEffect(() => {
-  if (openNoteListFromNotification && notes && Object.keys(notes).length > 0) {
-    let targetRoutine = null;
-    let targetDateKey = null;
+  useEffect(() => {
+    if (
+      openNoteListFromNotification &&
+      notes &&
+      Object.keys(notes).length > 0
+    ) {
+      let targetRoutine = null;
+      let targetDateKey = null;
 
-    for (const dateKey in notes) {
-      const dateRoutines = notes[dateKey] || [];
-      targetRoutine = dateRoutines.find(r => r.id === targetRoutineId);
-      if (targetRoutine) {
-        targetDateKey = dateKey;
-        break;
+      for (const dateKey in notes) {
+        const dateRoutines = notes[dateKey] || [];
+        targetRoutine = dateRoutines.find((r) => r.id === targetRoutineId);
+        if (targetRoutine) {
+          targetDateKey = dateKey;
+          break;
+        }
+      }
+
+      if (targetRoutine && targetDateKey) {
+        const targetDateObj = new Date(targetDateKey + 'T12:00:00');
+        setSelectedDate(targetDateObj);
+
+        setSelectedRoutine(targetRoutine);
+        setShowNoteList(true);
+
+        setTimeout(() => {
+          setFlashMessage('Anotação aberta via notificação', 'success');
+        }, 0);
+
+        setOpenNoteListFromNotification(false);
+      } else {
+        setFlashMessage('Rotina não encontrada', 'error');
+        setOpenNoteListFromNotification(false);
       }
     }
-
-    if (targetRoutine && targetDateKey) {
-      const targetDateObj = new Date(targetDateKey + 'T12:00:00'); 
-      setSelectedDate(targetDateObj); 
-      
-      setSelectedRoutine(targetRoutine);
-      setShowNoteList(true);
-      
-      setTimeout(() => {
-        setFlashMessage('Anotação aberta via notificação', 'success');
-      }, 0);
-      
-      setOpenNoteListFromNotification(false);
-    } else {
-      setFlashMessage('Rotina não encontrada', 'error');
-      setOpenNoteListFromNotification(false);
-    }
-  }
-}, [notes, openNoteListFromNotification, targetRoutineId]);
+  }, [notes, openNoteListFromNotification, targetRoutineId]);
 
   const loadRoutines = useCallback(async () => {
     try {
@@ -191,14 +209,24 @@ useEffect(() => {
       if (response.data.status === 'OK') {
         const routinesData = response.data.data || [];
         const grouped = {};
-        routinesData.forEach(routine => {
-          const routineDate = new Date(routine.created_at).toISOString().split('T')[0];
-          const title = routine.type === 'periodo' ? routine.period : routine.type === 'resumo' ? 'Resumo do Dia' : routine.type;
+        routinesData.forEach((routine) => {
+          const routineDate = new Date(routine.created_at)
+            .toISOString()
+            .split('T')[0];
+          const title =
+            routine.type === 'periodo'
+              ? routine.period
+              : routine.type === 'resumo'
+              ? 'Resumo do Dia'
+              : routine.type;
           const processedRoutine = {
             id: routine.id,
             title,
             content: '',
-            time: new Date(routine.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            time: new Date(routine.created_at).toLocaleTimeString('pt-BR', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
             notes: routine.notes || []
           };
           if (!grouped[routineDate]) {
@@ -206,7 +234,7 @@ useEffect(() => {
           }
           grouped[routineDate].push(processedRoutine);
         });
-        Object.keys(grouped).forEach(dateKey => {
+        Object.keys(grouped).forEach((dateKey) => {
           grouped[dateKey] = sortNotes(grouped[dateKey]);
         });
         setNotes(grouped);
@@ -221,7 +249,7 @@ useEffect(() => {
     loadRoutines();
   }, [loadRoutines]);
 
-  const handleGenerateSummary = useCallback(async (routineId,date) => {
+  const handleGenerateSummary = useCallback(async (routineId, date) => {
     try {
       const data = { routine_id: routineId, date: formatDateKey(date) };
       const response = await ServiceNotes.generateSummary(data);
@@ -234,7 +262,8 @@ useEffect(() => {
       }
     } catch (error) {
       console.error('Erro ao gerar resumo:', error);
-      const errorMsg = error.response?.data?.errors?.[0] || 'Erro ao gerar resumo';
+      const errorMsg =
+        error.response?.data?.errors?.[0] || 'Erro ao gerar resumo';
       setFlashMessage(errorMsg, 'error');
     }
   }, []);
@@ -253,11 +282,11 @@ useEffect(() => {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push({ day: null, isCurrentMonth: false });
     }
-    
+
     for (let i = 1; i <= daysInMonth; i++) {
       days.push({ day: i, isCurrentMonth: true });
     }
@@ -266,53 +295,65 @@ useEffect(() => {
   };
 
   const previousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
+    );
   };
 
   const nextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
+    );
   };
 
   const previousYear = () => {
-    setCurrentDate(new Date(currentDate.getFullYear() - 1, currentDate.getMonth()));
+    setCurrentDate(
+      new Date(currentDate.getFullYear() - 1, currentDate.getMonth())
+    );
   };
 
   const nextYear = () => {
-    setCurrentDate(new Date(currentDate.getFullYear() + 1, currentDate.getMonth()));
+    setCurrentDate(
+      new Date(currentDate.getFullYear() + 1, currentDate.getMonth())
+    );
   };
 
   const goToToday = () => {
     setCurrentDate(new Date());
   };
 
-const formatDateKey = (dateInput) => {
-  let date;
-  
-  if (typeof dateInput === 'string') {
-    const [year, month, day] = dateInput.split('-').map(Number);
-    date = new Date(year, month - 1, day); 
-  } else if (dateInput instanceof Date) {
-    date = new Date(dateInput); 
-  } else {
-    console.error('Invalid date input for formatDateKey:', dateInput);
-    return new Date().toISOString().split('T')[0]; 
-  }
-  
-  if (isNaN(date.getTime())) {
-    console.error('Invalid Date object created:', dateInput);
-    return new Date().toISOString().split('T')[0]; 
-  }
-  
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  
-  return `${year}-${month}-${day}`;
-};
+  const formatDateKey = (dateInput) => {
+    let date;
+
+    if (typeof dateInput === 'string') {
+      const [year, month, day] = dateInput.split('-').map(Number);
+      date = new Date(year, month - 1, day);
+    } else if (dateInput instanceof Date) {
+      date = new Date(dateInput);
+    } else {
+      console.error('Invalid date input for formatDateKey:', dateInput);
+      return new Date().toISOString().split('T')[0];
+    }
+
+    if (isNaN(date.getTime())) {
+      console.error('Invalid Date object created:', dateInput);
+      return new Date().toISOString().split('T')[0];
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
 
   const handleDateClick = (day) => {
     if (day) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+      const date = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        day
+      );
       setSelectedDate(date);
       setNoteType('');
       setSelectedPeriod('');
@@ -322,34 +363,44 @@ const formatDateKey = (dateInput) => {
 
   const handleOpenNoteList = (day, routine = null) => {
     if (day) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+      const date = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        day
+      );
       setSelectedDate(date);
       setSelectedRoutine(routine);
       setShowNoteList(true);
     }
   };
 
-  const handleOpenRoutineInModal = useCallback((routine) => {
-    if (selectedDate && routine) {
+  const handleOpenRoutineInModal = useCallback(
+    (routine) => {
+      if (selectedDate && routine) {
+        setSelectedRoutine(routine);
+        setShowNoteList(true);
+        setShowModal(false);
+      }
+    },
+    [selectedDate]
+  );
+
+  const handleOpenCreateNote = useCallback(
+    (routine = selectedRoutine) => {
       setSelectedRoutine(routine);
-      setShowNoteList(true);
-      setShowModal(false);
-    }
-  }, [selectedDate]);
+      setNoteToEdit(null);
+      setShowCreateNoteModal(true);
+    },
+    [selectedRoutine]
+  );
 
-  const handleOpenCreateNote = useCallback((routine = selectedRoutine) => {
-    setSelectedRoutine(routine);
-    setNoteToEdit(null);
-    setShowCreateNoteModal(true);
-  }, [selectedRoutine]);
-
-  const handleEditNote = useCallback( async(note) => {
-    if(note){
-     const response = await ServiceNotes.getByIdNotes(note.id);
-     if(response.data.status === 'OK'){
-      const noteData = response.data.data;
-      setNoteToEdit(noteData);
-     }
+  const handleEditNote = useCallback(async (note) => {
+    if (note) {
+      const response = await ServiceNotes.getByIdNotes(note.id);
+      if (response.data.status === 'OK') {
+        const noteData = response.data.data;
+        setNoteToEdit(noteData);
+      }
     }
     setShowCreateNoteModal(true);
   }, []);
@@ -361,27 +412,38 @@ const formatDateKey = (dateInput) => {
       loadRoutines();
     } catch (error) {
       console.error('Erro ao deletar rotina:', error);
-      const errorMsg = error.response?.data?.errors?.[0] || 'Erro ao deletar rotina';
+      const errorMsg =
+        error.response?.data?.errors?.[0] || 'Erro ao deletar rotina';
       setFlashMessage(errorMsg, 'error');
     }
   };
 
   const isToday = (day) => {
     const today = new Date();
-    return day === today.getDate() && 
-           currentDate.getMonth() === today.getMonth() && 
-           currentDate.getFullYear() === today.getFullYear();
+    return (
+      day === today.getDate() &&
+      currentDate.getMonth() === today.getMonth() &&
+      currentDate.getFullYear() === today.getFullYear()
+    );
   };
 
   const getNotesForDay = (day) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
     const dateKey = formatDateKey(date);
     return sortNotes(notes[dateKey] || []);
   };
 
   const getHolidayForDay = (day) => {
     if (!day) return null;
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
     const dateKey = formatDateKey(date);
     const year = currentDate.getFullYear();
     const yearHolidays = holidays[year] || {};
@@ -389,30 +451,36 @@ const formatDateKey = (dateInput) => {
   };
 
   const days = getDaysInMonth(currentDate);
-  const selectedDateRoutines = selectedDate ? notes[formatDateKey(selectedDate)] || [] : [];
+  const selectedDateRoutines = selectedDate
+    ? notes[formatDateKey(selectedDate)] || []
+    : [];
   const selectedDateNotesForCreate = selectedDateRoutines;
-  const selectedDateNotesForList = selectedDate ? selectedDateRoutines.flatMap(routine =>
-    routine.notes.map(note => ({
-      id: note.id,
-      title: note.activity || 'Atividade sem título',
-      content: note.description || '',
-      time: note.startTime ? note.startTime.slice(0, 5) : '',
-      status: note.status || 'Pendente',
-      routineTitle: routine.title,
-      priority: note.priority,
-      startTime: note.startTime,
-      endTime: note.endTime,
-      collaborators: note.collaborators,
-      comments: note.comments,
-      summaryDay: note.summaryDay,
-      ...note
-    }))
-  ) : [];
-  const currentSelectedRoutine = selectedDate && selectedRoutine 
-    ? selectedDateRoutines.find(r => r.id === selectedRoutine.id) || selectedRoutine 
-    : selectedRoutine;
-  const listNotes = currentSelectedRoutine 
-    ? currentSelectedRoutine.notes.map(note => ({
+  const selectedDateNotesForList = selectedDate
+    ? selectedDateRoutines.flatMap((routine) =>
+        routine.notes.map((note) => ({
+          id: note.id,
+          title: note.activity || 'Atividade sem título',
+          content: note.description || '',
+          time: note.startTime ? note.startTime.slice(0, 5) : '',
+          status: note.status || 'Pendente',
+          routineTitle: routine.title,
+          priority: note.priority,
+          startTime: note.startTime,
+          endTime: note.endTime,
+          collaborators: note.collaborators,
+          comments: note.comments,
+          summaryDay: note.summaryDay,
+          ...note
+        }))
+      )
+    : [];
+  const currentSelectedRoutine =
+    selectedDate && selectedRoutine
+      ? selectedDateRoutines.find((r) => r.id === selectedRoutine.id) ||
+        selectedRoutine
+      : selectedRoutine;
+  const listNotes = currentSelectedRoutine
+    ? currentSelectedRoutine.notes.map((note) => ({
         id: note.id,
         title: note.activity || 'Atividade sem título',
         content: note.description || '',
@@ -441,14 +509,19 @@ const formatDateKey = (dateInput) => {
   return (
     <div className={`${styles.container} ${styles[theme]}`}>
       <div className={`${styles.calendarWrapper} ${styles[theme]}`}>
-        <div 
+        <div
           className={`${styles.header} ${styles[theme]}`}
           style={{
-            background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`
+            background: `linear-gradient(135deg, ${
+              emphasisColor || '#667eea'
+            } 0%, ${emphasisColor || '#764ba2'} 100%)`
           }}
         >
           <div className={styles.headerContent}>
-            <button onClick={previousMonth} className={`${styles.navButton} ${styles[theme]}`}>
+            <button
+              onClick={previousMonth}
+              className={`${styles.navButton} ${styles[theme]}`}
+            >
               <ChevronLeft size={24} />
             </button>
 
@@ -460,27 +533,38 @@ const formatDateKey = (dateInput) => {
                 <span>📅 Suas anotações diárias</span>
               </div>
               <div className={styles.yearNav}>
-                <button onClick={previousYear} className={`${styles.yearNavButton} ${styles[theme]}`}>
+                <button
+                  onClick={previousYear}
+                  className={`${styles.yearNavButton} ${styles[theme]}`}
+                >
                   <ChevronLeft size={16} />
                 </button>
-                <span className={styles.yearLabel}>{currentDate.getFullYear()}</span>
-                <button onClick={nextYear} className={`${styles.yearNavButton} ${styles[theme]}`}>
+                <span className={styles.yearLabel}>
+                  {currentDate.getFullYear()}
+                </span>
+                <button
+                  onClick={nextYear}
+                  className={`${styles.yearNavButton} ${styles[theme]}`}
+                >
                   <ChevronRight size={16} />
                 </button>
               </div>
             </div>
 
-            <button onClick={nextMonth} className={`${styles.navButton} ${styles[theme]}`}>
+            <button
+              onClick={nextMonth}
+              className={`${styles.navButton} ${styles[theme]}`}
+            >
               <ChevronRight size={24} />
             </button>
           </div>
-          
+
           <div className={styles.todayButtonWrapper}>
-            <button 
-              onClick={goToToday} 
+            <button
+              onClick={goToToday}
               className={`${styles.todayButton} ${styles[theme]}`}
               style={{
-                color: emphasisColor || '#667eea'
+                color: '#fff'
               }}
             >
               Hoje
@@ -489,7 +573,7 @@ const formatDateKey = (dateInput) => {
         </div>
 
         <div className={`${styles.weekDays} ${styles[theme]}`}>
-          {weekDays.map(day => (
+          {weekDays.map((day) => (
             <div key={day} className={styles.weekDay}>
               {day}
             </div>
@@ -498,13 +582,20 @@ const formatDateKey = (dateInput) => {
 
         <div className={styles.daysGrid}>
           {days.map((item, index) => {
-            const dayRoutines = item.isCurrentMonth ? getNotesForDay(item.day) : [];
-            const totalNotesCount = dayRoutines.reduce((acc, rut) => acc + (rut.notes?.length || 0), 0);
+            const dayRoutines = item.isCurrentMonth
+              ? getNotesForDay(item.day)
+              : [];
+            const totalNotesCount = dayRoutines.reduce(
+              (acc, rut) => acc + (rut.notes?.length || 0),
+              0
+            );
             const hasRoutines = dayRoutines.length > 0;
-            const holidayName = item.isCurrentMonth ? getHolidayForDay(item.day) : null;
+            const holidayName = item.isCurrentMonth
+              ? getHolidayForDay(item.day)
+              : null;
             const isHoliday = !!holidayName;
             const isTodayDay = isToday(item.day);
-            
+
             return (
               <div
                 key={index}
@@ -514,33 +605,45 @@ const formatDateKey = (dateInput) => {
                 } ${isTodayDay ? styles.dayCellToday : ''} ${
                   isHoliday ? styles.dayCellHoliday : ''
                 } ${isTodayDay && isHoliday ? styles.dayCellTodayHoliday : ''}`}
-                style={isTodayDay && !isHoliday ? {
-                  background: `linear-gradient(135deg, ${emphasisColor || '#667eea'} 0%, ${emphasisColor || '#764ba2'} 100%)`,
-                  borderColor: emphasisColor || '#667eea'
-                } : {}}
+                style={
+                  isTodayDay && !isHoliday
+                    ? {
+                        background: `linear-gradient(135deg, ${
+                          emphasisColor || '#667eea'
+                        } 0%, ${emphasisColor || '#764ba2'} 100%)`,
+                        borderColor: emphasisColor || '#667eea'
+                      }
+                    : {}
+                }
               >
                 <div className={styles.dayNumber}>{item.day}</div>
-                
+
                 {holidayName && item.isCurrentMonth && (
-                  <div className={`${styles.holidayName} ${styles[theme]}`} title={holidayName}>
-                    {holidayName.length > 15 ? `${holidayName.substring(0, 12)}...` : holidayName}
+                  <div
+                    className={`${styles.holidayName} ${styles[theme]}`}
+                    title={holidayName}
+                  >
+                    {holidayName.length > 15
+                      ? `${holidayName.substring(0, 12)}...`
+                      : holidayName}
                   </div>
                 )}
-                 {item.isCurrentMonth && hasRoutines && (
+                {item.isCurrentMonth && hasRoutines && (
                   <>
-                    <div 
-                      className={styles.notesPreview}
-                      title="Ver rotinas"
-                    >
+                    <div className={styles.notesPreview} title="Ver rotinas">
                       {dayRoutines.slice(0, 4).map((routine) => (
-                        <div 
-                          key={routine.id} 
+                        <div
+                          key={routine.id}
                           className={styles.notePreviewItem}
-                          style={!isTodayDay && !isHoliday ? {
-                            background: `${emphasisColor || '#667eea'}26`,
-                            color: emphasisColor || '#4f46e5',
-                            borderLeftColor: emphasisColor || '#667eea'
-                          } : {}}
+                          style={
+                            !isTodayDay && !isHoliday
+                              ? {
+                                  background: `${emphasisColor || '#667eea'}26`,
+                                  color: emphasisColor || '#4f46e5',
+                                  borderLeftColor: emphasisColor || '#667eea'
+                                }
+                              : {}
+                          }
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenNoteList(item.day, routine);
@@ -550,7 +653,7 @@ const formatDateKey = (dateInput) => {
                         </div>
                       ))}
                       {dayRoutines.length > 4 && (
-                        <div 
+                        <div
                           className={`${styles.notePreviewMore} ${styles[theme]}`}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -562,14 +665,22 @@ const formatDateKey = (dateInput) => {
                         </div>
                       )}
                     </div>
-                    
-                    <div 
-                      className={`${styles.notesIndicator} ${styles[theme]}`} 
-                      title={totalNotesCount > 0 ? `${totalNotesCount} anotação(ões)` : 'Rotinas sem anotações'}
+
+                    <div
+                      className={`${styles.notesIndicator} ${styles[theme]}`}
+                      title={
+                        totalNotesCount > 0
+                          ? `${totalNotesCount} anotação(ões)`
+                          : 'Rotinas sem anotações'
+                      }
                       onClick={() => handleOpenNoteList(item.day)}
-                      style={isTodayDay && !isHoliday ? {
-                        borderColor: emphasisColor || '#667eea'
-                      } : {}}
+                      style={
+                        isTodayDay && !isHoliday
+                          ? {
+                              borderColor: emphasisColor || '#667eea'
+                            }
+                          : {}
+                      }
                     ></div>
                   </>
                 )}
@@ -604,7 +715,7 @@ const formatDateKey = (dateInput) => {
         onEditNote={handleEditNote}
         onGenerateSummary={handleGenerateSummary}
         onViewSummary={handleViewSummary}
-        targetNoteId={targetNoteId} 
+        targetNoteId={targetNoteId}
       />
 
       <CreateModalNote
