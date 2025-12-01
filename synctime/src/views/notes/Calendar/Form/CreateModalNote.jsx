@@ -11,7 +11,31 @@ import useFlashMessage from '../../../../hooks/userFlashMessage';
 import ServiceCategory from '../../../sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
 import ServiceNotes from '../services/ServiceNotes';
 import { createNotesValidationSchema } from '../validation/createNotesValidationSchema';
+import StatusBadge from '../../../../components/statusBadge/StatusBadge';
 
+const STATUS_CONFIG = {
+  'Não Realizado': { 
+    label: 'Não Realizado', 
+    color: '#ef4444', 
+    bgColor: '#fef2f2', 
+    shadowColor: 'rgba(239, 68, 68, 0.25)',
+    icon: '✕' 
+  },
+  'Em Andamento': { 
+    label: 'Andamento', 
+    color: '#3b82f6', 
+    bgColor: '#eff6ff', 
+    shadowColor: 'rgba(59, 130, 246, 0.25)',
+    icon: '▶' 
+  },
+  'Concluído': { 
+    label: 'Concluído', 
+    color: '#10b981', 
+    bgColor: '#ecfdf5', 
+    shadowColor: 'rgba(16, 185, 129, 0.25)',
+    icon: '✓' 
+  }
+};
 
 
 const CreateModalNote = ({
@@ -23,7 +47,7 @@ const CreateModalNote = ({
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
-  const { primaryButtonColor, secondaryButtonColor } = useButtonColors(); // Uso do hook para obter as cores personalizadas
+  const { primaryButtonColor, secondaryButtonColor } = useButtonColors(); 
   const { setFlashMessage } = useFlashMessage();
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
@@ -369,12 +393,6 @@ const CreateModalNote = ({
   const isEditMode = !!noteToEdit;
   const modalTitle = isEditMode ? 'Editar Anotação' : 'Nova Anotação';
 
-  const statusOptions = [
-    { value: 'Não Realizado', label: 'Não Realizado' },
-    { value: 'Em Andamento', label: 'Em Andamento' },
-    { value: 'Concluído', label: 'Concluído' },
-  ];
-
   const priorityOptions = [
     { value: 'Baixa', label: 'Baixa' },
     { value: 'Média', label: 'Média' },
@@ -435,32 +453,32 @@ const CreateModalNote = ({
                 </h3>
                 <div className={styles.formGrid}>
                   <div className={styles.formGroup}>
-                    <label className={`${styles.formLabel} ${styles[theme]}`} htmlFor="status">
+                    <label className={`${styles.formLabel} ${styles[theme]}`}>
                       Status *
                     </label>
                     <Controller
                       name="status"
                       control={control}
                       render={({ field }) => (
-                        <select
-                          {...field}
-                          id="status"
-                          className={`${styles.formSelect} ${styles[theme]} ${errors.status ? styles.error : ''}`}
-                          style={{ '--focus-color': emphasisColor || '#667eea' }}
-                        >
-                          <option value="">Selecione...</option>
-                          {statusOptions.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
+                        <>
+                          <div className={styles.statusContainer}>
+                            {Object.keys(STATUS_CONFIG).map((status) => (
+                              <StatusBadge
+                                key={status}
+                                status={status}
+                                isSelected={field.value === status}
+                                onClick={() => field.onChange(status)}
+                                disabled={loading}
+                              />
+                            ))}
+                          </div>
+                          <ErrorMessage
+                            errors={errors}
+                            name="status"
+                            render={({ message }) => <div className={styles.errorMessage}>{message}</div>}
+                          />
+                        </>
                       )}
-                    />
-                    <ErrorMessage
-                      errors={errors}
-                      name="status"
-                      render={({ message }) => <div className={styles.errorMessage}>{message}</div>}
                     />
                   </div>
                   <div className={styles.formGroup}>

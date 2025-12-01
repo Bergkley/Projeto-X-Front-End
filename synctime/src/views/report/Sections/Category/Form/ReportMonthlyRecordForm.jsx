@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
 import { ErrorMessage } from '@hookform/error-message';
 
-
-// 💅 Estilos
+// 💅 Estilos (Contém os novos estilos que você atualizou)
 import styles from './ReportMonthlyRecordForm.module.css';
 
 // 🧩 Componentes
@@ -16,12 +15,50 @@ import SingleSelect from '../../../../../components/select/SingleSelect';
 // 🔧 Utils e Hooks
 import useFlashMessage from '../../../../../hooks/userFlashMessage';
 import { useTheme } from '../../../../../hooks/useTheme';
-import { useButtonColors } from '../../../../../hooks/useButtonColors'; // Adicionado o hook para cores dos botões
-import errorFormMessage from '../../../../../utils/errorFormMessage'
-;
+import { useButtonColors } from '../../../../../hooks/useButtonColors';
+import errorFormMessage from '../../../../../utils/errorFormMessage';
 
 // 📡 Services
 import ServiceMonthlyRecord from '../services/ServiceMonthlyRecord';
+import StatusBadge from '../../../../../components/statusBadge/StatusBadge';
+
+const STATUS_CONFIG = {
+  concluido: { 
+    label: 'Concluído', 
+    color: '#10b981', 
+    bgColor: '#ecfdf5', 
+    shadowColor: 'rgba(16, 185, 129, 0.25)',
+    icon: '✓' 
+  },
+  pendente: { 
+    label: 'Pendente', 
+    color: '#f59e0b', 
+    bgColor: '#fffbeb', 
+    shadowColor: 'rgba(245, 158, 11, 0.25)',
+    icon: '⏳' 
+  },
+  em_andamento: { 
+    label: 'Em Andamento', 
+    color: '#3b82f6', 
+    bgColor: '#eff6ff', 
+    shadowColor: 'rgba(59, 130, 246, 0.25)',
+    icon: '▶' 
+  },
+  pausado: { 
+    label: 'Pausado', 
+    color: '#8b5cf6', 
+    bgColor: '#f5f3ff', 
+    shadowColor: 'rgba(139, 92, 246, 0.25)',
+    icon: '⏸' 
+  },
+  cancelado: { 
+    label: 'Cancelado', 
+    color: '#ef4444', 
+    bgColor: '#fef2f2', 
+    shadowColor: 'rgba(239, 68, 68, 0.25)',
+    icon: '✕' 
+  }
+};
 
 const ReportMonthlyRecordForm = () => {
   const { id } = useParams();
@@ -30,7 +67,7 @@ const ReportMonthlyRecordForm = () => {
   const history = useHistory();
   const { theme } = useTheme();
   const { 
-    primaryButtonColor,
+    primaryButtonColor, 
     secondaryButtonColor 
   } = useButtonColors(); 
   const { setFlashMessage } = useFlashMessage();
@@ -56,13 +93,7 @@ const ReportMonthlyRecordForm = () => {
   });
 
   // Opções de status
-  const statusOptions = [
-    { value: 'concluido', label: 'Concluído' },
-    { value: 'pendente', label: 'Pendente' },
-    { value: 'em_andamento', label: 'Em Andamento' },
-    { value: 'pausado', label: 'Pausado' },
-    { value: 'cancelado', label: 'Cancelado' }
-  ];
+  const statusOptions = ['concluido', 'pendente', 'em_andamento', 'pausado', 'cancelado'];
 
   // Opções de meses
   const monthOptions = [
@@ -80,12 +111,30 @@ const ReportMonthlyRecordForm = () => {
     { value: 12, label: 'Dezembro' }
   ];
 
-  // Opções de anos (últimos 5 anos e próximos 2)
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 8 }, (_, i) => {
     const year = currentYear - 5 + i;
     return { value: year, label: year.toString() };
   });
+
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    const numericValue = value.replace(/\D/g, '');
+    const numberValue = parseFloat(numericValue) / 100;
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(numberValue);
+  };
+
+  const parseCurrency = (value) => {
+    if (!value) return '';
+    return value
+      .replace('R$', '')
+      .replace(/\s/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+  };
 
   useEffect(() => {
     const fetchMonthlyRecordData = async () => {
@@ -97,36 +146,24 @@ const ReportMonthlyRecordForm = () => {
 
         if (response.data.status === 'OK') {
           const recordData = response.data.data;
-          if (!recordData) {
-            throw new Error('Registro mensal não encontrado');
-          }
+          if (!recordData) throw new Error('Registro mensal não encontrado');
 
           reset({
             title: recordData.title || '',
             description: recordData.description || '',
             goal: recordData.goal || '',
-            status: recordData.status
-              ? {
-                  value: recordData.status,
-                  label:
-                    statusOptions.find((s) => s.value === recordData.status)
-                      ?.label || recordData.status
-                }
-              : null,
-            initial_balance: recordData.initial_balance?.toString() || '',
+            status: recordData.status || null,
+            initial_balance: recordData.initial_balance 
+              ? formatCurrency((recordData.initial_balance * 100).toString())
+              : '',
             month: recordData.month
               ? {
                   value: recordData.month,
-                  label:
-                    monthOptions.find((m) => m.value === recordData.month)
-                      ?.label || recordData.month.toString()
+                  label: monthOptions.find((m) => m.value === recordData.month)?.label || recordData.month.toString()
                 }
               : null,
             year: recordData.year
-              ? {
-                  value: recordData.year,
-                  label: recordData.year.toString()
-                }
+              ? { value: recordData.year, label: recordData.year.toString() }
               : null
           });
         }
@@ -142,6 +179,7 @@ const ReportMonthlyRecordForm = () => {
     fetchMonthlyRecordData();
   }, [id]);
 
+  // Submit
   const onSubmit = async (data) => {
     try {
       setLoading(true);
@@ -150,13 +188,13 @@ const ReportMonthlyRecordForm = () => {
         title: data.title,
         description: data.description || undefined,
         goal: data.goal,
-        status: data.status?.value || data.status,
+        status: data.status,
         initial_balance: data.initial_balance
-          ? parseFloat(data.initial_balance)
+          ? parseFloat(parseCurrency(data.initial_balance))
           : undefined,
         month: data.month?.value || data.month,
         year: data.year?.value || data.year,
-        categoryId: dados.categoryId
+        categoryId: dados?.categoryId
       };
 
       if (id) {
@@ -167,27 +205,26 @@ const ReportMonthlyRecordForm = () => {
         setFlashMessage('Registro mensal criado com sucesso', 'success');
       }
 
-      history.push(`/relatorios/categoria/relatorio-mesal/${dados.categoryId}`);
+      history.push(`/relatorios/categoria/relatorio-mesal/${dados?.categoryId}`);
     } catch (error) {
       console.error('Erro ao salvar registro mensal:', error);
-      const errorMessage = id
-        ? 'Erro ao atualizar registro mensal'
-        : 'Erro ao criar registro mensal';
+      const errorMessage = id ? 'Erro ao atualizar registro mensal' : 'Erro ao criar registro mensal';
       setFlashMessage(errorMessage, 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  // Navegação
   const handleCancel = () => {
-    if(dados.categoryId) {
+    if(dados?.categoryId) {
       return history.push(`/relatorios/categoria/relatorio-mesal/${dados.categoryId}`)
     };
     history.push('/inicio');
   };
 
   const handleBack = () => {
-    if(dados.categoryId) {
+    if(dados?.categoryId) {
       return history.push(`/relatorios/categoria/relatorio-mesal/${dados.categoryId}`)
     };
     history.push('/inicio');
@@ -204,15 +241,16 @@ const ReportMonthlyRecordForm = () => {
         backButtonLabel="Voltar"
         isOnlyBack={true}
       />
+      {/* Aplica o tema Dark/Light ao container principal */}
       <div className={`${styles.container} ${styles[theme]}`}>
         <h5 className={styles.title}>
           {id ? 'Editar Registro Mensal' : 'Novo Registro Mensal'}
         </h5>
 
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-          {/* Primeira Linha */}
+          {/* Primeira Linha - Título e Status */}
           <Row className="mb-4">
-            <Col md={8}>
+            <Col md={7}>
               <div className={styles.fieldGroup}>
                 <Controller
                   name="title"
@@ -225,15 +263,14 @@ const ReportMonthlyRecordForm = () => {
                         {...field}
                         type="text"
                         placeholder="Digite o título do registro"
-                        className={`${styles.input} ${
-                          errors.title ? styles.error : ''
-                        }`}
+                        // Usa estilos temáticos
+                        className={`${styles.input} ${errors.title ? styles.error : ''}`}
                         disabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
                         name="title"
-                        render={({ message }) => errorFormMessage(message)}
+                        render={({ message }) => errorFormMessage(message, styles.errorMessage)}
                       />
                     </>
                   )}
@@ -241,7 +278,7 @@ const ReportMonthlyRecordForm = () => {
               </div>
             </Col>
 
-            <Col md={4}>
+            <Col md={5}>
               <div className={styles.fieldGroup}>
                 <Controller
                   name="status"
@@ -250,17 +287,25 @@ const ReportMonthlyRecordForm = () => {
                   render={({ field }) => (
                     <>
                       <label className={styles.label}>Status *</label>
-                      <SingleSelect
-                        options={statusOptions}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Selecione..."
-                        isDisabled={loading}
-                      />
+                      
+                      {/* Container Moderno dos Badges */}
+                      <div className={styles.statusContainer}>
+                        {statusOptions.map((status) => (
+                          <StatusBadge
+                            key={status}
+                            status={status}
+                            config={STATUS_CONFIG}
+                            isSelected={field.value === status}
+                            onClick={() => field.onChange(status)}
+                            disabled={loading}
+                          />
+                        ))}
+                      </div>
+
                       <ErrorMessage
                         errors={errors}
                         name="status"
-                        render={({ message }) => errorFormMessage(message)}
+                        render={({ message }) => errorFormMessage(message, styles.errorMessage)}
                       />
                     </>
                   )}
@@ -269,7 +314,7 @@ const ReportMonthlyRecordForm = () => {
             </Col>
           </Row>
 
-          {/* Segunda Linha */}
+          {/* Segunda Linha - Descrição */}
           <Row className="mb-4">
             <Col md={12}>
               <div className={styles.fieldGroup}>
@@ -293,7 +338,7 @@ const ReportMonthlyRecordForm = () => {
             </Col>
           </Row>
 
-          {/* Terceira Linha */}
+          {/* Terceira Linha - Meta e Saldo Inicial */}
           <Row className="mb-4">
             <Col md={6}>
               <div className={styles.fieldGroup}>
@@ -308,15 +353,13 @@ const ReportMonthlyRecordForm = () => {
                         {...field}
                         type="text"
                         placeholder="Digite a meta do registro"
-                        className={`${styles.input} ${
-                          errors.goal ? styles.error : ''
-                        }`}
+                        className={`${styles.input} ${errors.goal ? styles.error : ''}`}
                         disabled={loading}
                       />
                       <ErrorMessage
                         errors={errors}
                         name="goal"
-                        render={({ message }) => errorFormMessage(message)}
+                        render={({ message }) => errorFormMessage(message, styles.errorMessage)}
                       />
                     </>
                   )}
@@ -334,11 +377,14 @@ const ReportMonthlyRecordForm = () => {
                       <label className={styles.label}>Saldo Inicial</label>
                       <input
                         {...field}
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
+                        type="text"
+                        placeholder="R$ 0,00"
                         className={styles.input}
                         disabled={loading}
+                        onChange={(e) => {
+                          const formatted = formatCurrency(e.target.value);
+                          field.onChange(formatted);
+                        }}
                       />
                     </>
                   )}
@@ -347,7 +393,7 @@ const ReportMonthlyRecordForm = () => {
             </Col>
           </Row>
 
-          {/* Quarta Linha */}
+          {/* Quarta Linha - Mês e Ano */}
           <Row className="mb-4">
             <Col md={6}>
               <div className={styles.fieldGroup}>
@@ -368,7 +414,7 @@ const ReportMonthlyRecordForm = () => {
                       <ErrorMessage
                         errors={errors}
                         name="month"
-                        render={({ message }) => errorFormMessage(message)}
+                        render={({ message }) => errorFormMessage(message, styles.errorMessage)}
                       />
                     </>
                   )}
@@ -395,7 +441,7 @@ const ReportMonthlyRecordForm = () => {
                       <ErrorMessage
                         errors={errors}
                         name="year"
-                        render={({ message }) => errorFormMessage(message)}
+                        render={({ message }) => errorFormMessage(message, styles.errorMessage)}
                       />
                     </>
                   )}
