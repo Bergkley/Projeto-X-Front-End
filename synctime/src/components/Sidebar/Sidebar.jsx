@@ -7,7 +7,6 @@ import {
   FaFileAlt,
   FaStickyNote,
   FaCog,
-  FaUser,
   FaSignOutAlt,
   FaBars,
   FaTimes,
@@ -357,12 +356,6 @@ function Sidebar({ onToggle }) {
               <Link to="/configuracoes" className={`${styles.menuItem} ${isActive('/configuracoes')}`} onClick={closeMobileMenu}>
                 <FaCog className={styles.icon} />
                 {showExpanded && <span>Configuração do Sistema</span>}
-              </Link>
-            </li>
-            <li>
-              <Link to="/conta" className={`${styles.menuItem} ${isActive('/conta')}`} onClick={closeMobileMenu}>
-                <FaUser className={styles.icon} />
-                {showExpanded && <span>Conta</span>}
               </Link>
             </li>
             <li>
