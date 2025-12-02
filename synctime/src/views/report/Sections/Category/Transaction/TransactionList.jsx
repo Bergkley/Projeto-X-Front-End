@@ -18,6 +18,7 @@ import {
   useMemorizeTableColumns,
   TABLE_CONFIG_KEYS
 } from '../../../../../hooks/useMemorizeTableColumns';
+import TableFooter from '../../../../../components/footer/TableFooter';
 
 // 💅 Estilos
 
@@ -47,6 +48,7 @@ const TransactionList = () => {
   const [sortBy, setSortBy] = useState('');
   const [order, setOrder] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
 
   const effectiveTableKey = `${TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS}_${
     idCategory || categoryId || 'general'
@@ -282,8 +284,9 @@ const TransactionList = () => {
 
         if (response.data.status === 'OK') {
           setStatus(response.data.status);
+          setTotalAmount(response.data.data.totalAmount);
           setTransactionRecords(
-            response.data.data.map((item) => ({
+            response.data.data.transactions.map((item) => ({
               ...item.transaction,
               customFields: item.customFields
             }))
@@ -364,7 +367,7 @@ const TransactionList = () => {
 
       if (response.data.status === 'OK') {
         setTransactionRecords(
-          response.data.data.map((item) => ({
+          response.data.data.transactions.map((item) => ({
             ...item.transaction,
             customFields: item.customFields
           }))
@@ -528,6 +531,7 @@ const TransactionList = () => {
             onUpdateRecord={editTransactionRecord}
             tableKey={TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS}
           />
+          <TableFooter numRecords={transactionRecords.length} totalAmount={totalAmount} />
         </>
       )}
 

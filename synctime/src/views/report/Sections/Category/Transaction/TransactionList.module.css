@@ -7,7 +7,7 @@
 }
 
 .container.light {
-  background-color: var(--bg-primary, #ffffff);
+  background-color: transparent;
   color: var(--text-primary, #1f2937);
 }
 
