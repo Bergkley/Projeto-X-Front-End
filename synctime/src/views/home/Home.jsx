@@ -6,6 +6,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
 import ServiceUsers from '../../services/ServiceUsers';
 import ServiceRoutines from '../../views/notes/Calendar/services/ServiceRoutines';
+import { POSSIBLE_FILTERS_ENTITIES, useMemorizeFilters } from '../../hooks/useMemorizeInputsFilters';
 
 const Home = () => {
   const { theme } = useTheme();
@@ -25,6 +26,11 @@ const Home = () => {
   const [location, setLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [dataVisible, setDataVisible] = useState(false); 
+  const { getMemorizedFilters, memorizeFilters } = useMemorizeFilters(
+      POSSIBLE_FILTERS_ENTITIES.USERS
+    );
+  
+    const userName = getMemorizedFilters()?.name;
 
   const months = [
     { value: '1', label: 'Janeiro' },
@@ -274,10 +280,19 @@ const Home = () => {
     return notif.category === filter;
   });
 
+  const getGreeting = () => {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) return 'Bom dia';
+  if (hour >= 12 && hour < 18) return 'Boa tarde';
+  return 'Boa noite';
+};
+
+
   return (
     <div className={`${styles.container} ${styles[theme]}`}>
       <div className={styles.wrapper}>
-        <h1 className={styles.title}>Bom dia, Bergkley</h1>
+        <h1 className={styles.title}> {getGreeting()}, {userName}</h1>
         
         <div className={styles.grid}>
           {/* Clima e Tempo */}
