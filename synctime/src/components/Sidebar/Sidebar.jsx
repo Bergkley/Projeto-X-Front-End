@@ -27,6 +27,8 @@ import useAuth from '../../hooks/userAuth';
 
 // 🔗 Ícones Lucide
 import { iconMap } from '../../utils/iconsConfig';
+import Mascote from '../../assets/mascote-synctime.png'
+
 
 function Sidebar({ onToggle }) {
   const location = useLocation();
@@ -200,7 +202,7 @@ function Sidebar({ onToggle }) {
         <div className={styles.sidebarHeader} style={{ backgroundColor: emphasisColor || 'rgb(20, 18, 129)' }}>
           {showExpanded && (
             <div className={styles.logoContainer}>
-              <img src="/logo.png" alt="Logo" className={styles.logo} />
+              <img src={Mascote} alt="Logo" className={styles.logo}  />
             </div>
           )}
 
