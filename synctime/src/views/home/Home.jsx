@@ -350,6 +350,7 @@ const Home = () => {
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
                   className={styles.filterSelect}
+                  style={{ '--focus-color': emphasisColor || '#9333ea' }}
                 >
                   <option value="todos">Todos</option>
                   {uniqueCategories.map(cat => (
@@ -399,6 +400,7 @@ const Home = () => {
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
                   className={styles.filterSelect}
+                  style={{ '--focus-color': emphasisColor || '#9333ea' }}
                 >
                   {months.map(m => (
                     <option key={m.value} value={m.value}>{m.label}</option>
@@ -408,6 +410,7 @@ const Home = () => {
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
                   className={styles.filterSelect}
+                  style={{ '--focus-color': emphasisColor || '#9333ea' }}
                 >
                   {years.map(y => (
                     <option key={y} value={y}>{y}</option>

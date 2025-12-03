@@ -250,7 +250,7 @@
 }
 
 .filterSelect:focus {
-  outline: 2px solid #9333ea;
+  outline: 2px solid var(--focus-color, #9333ea);
   outline-offset: 2px;
 }
 
