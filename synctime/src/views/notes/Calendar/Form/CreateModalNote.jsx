@@ -469,6 +469,7 @@ const CreateModalNote = ({
                                 isSelected={field.value === status}
                                 onClick={() => field.onChange(status)}
                                 disabled={loading}
+                                config={STATUS_CONFIG}
                               />
                             ))}
                           </div>
