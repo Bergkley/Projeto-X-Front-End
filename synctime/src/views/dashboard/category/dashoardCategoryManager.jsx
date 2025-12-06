@@ -34,12 +34,14 @@ const DashboardCategoryManager = () => {
   const loadDashboard = async (appliedFilters = {}) => {
     setLoading(true);
     setChartsReady(false); 
+    chartRefs.current = []; 
+    
     try {
       const params = {
-        startDate: filters.startDate || '',
-        endDate: filters.endDate || '',
-        groupBy: filters.groupBy || 'month',
-        categoryId: filters.categoryId || ''
+        startDate: appliedFilters.startDate || '',
+        endDate: appliedFilters.endDate || '',
+        groupBy: appliedFilters.groupBy || 'month',
+        categoryId: appliedFilters.categoryId || ''
       };
       Object.assign(params, appliedFilters);
 
@@ -62,13 +64,16 @@ const DashboardCategoryManager = () => {
     loadDashboard();
   }, []);
 
-  const handleFiltersChange = (appliedFilters) => {
-    const newFilters = { ...filters };
+  const handleFiltersChange = async (appliedFilters) => {
+    
+    const newFilters = {};  
+    
     appliedFilters.forEach(f => {
-      if (f.column in newFilters) newFilters[f.column] = f.value || '';
+      newFilters[f.column] = f.value || '';
     });
-    setFilters(newFilters);
-    loadDashboard(newFilters);
+    
+    setFilters(newFilters || {});
+    await loadDashboard(newFilters || {});
   };
 
   const handleExport = async () => {
@@ -91,7 +96,7 @@ const DashboardCategoryManager = () => {
     });
     overlay.innerHTML = `
       <div style="animation: pulse 1.5s infinite;">Gerando PDF...</div>
-      <div style="font-size:1.2rem; opacity:0.9;">Isso pode levar até 25 segundos</div>
+      <div style="font-size:1.2rem; opacity:0.9;">Isso pode levar alguns segundos</div>
     `;
     document.body.appendChild(overlay);
 

@@ -35,46 +35,66 @@ const DashboardCategory = forwardRef(
   ({ data, loading, filters, chartRefs, onChartsRendered }, ref) => {
     const { theme } = useTheme();
 
+    const registeredCharts = useRef(0);
+    const totalExpectedCharts = useRef(0);
+    const hasCalledReady = useRef(false);
+
     useEffect(() => {
       chartRefs.current = [];
       registeredCharts.current = 0;
       totalExpectedCharts.current = 0;
+      hasCalledReady.current = false;
     }, [data, chartRefs]);
-
-    const registeredCharts = useRef(0);
-    const totalExpectedCharts = useRef(0);
 
     useEffect(() => {
       if (data) {
         let count = 0;
-        count += 3;
-        count += data.customFieldValueCounts?.length || 0;
-        count += 4;
-        count += 2;
-        count += 1;
+        count += 3; 
+        count += (data.customFieldValueCounts?.length || 0); 
+        count += 4; 
+        count += 2; 
+        count += 1; 
 
         totalExpectedCharts.current = count;
-        console.log(
-          `Total de gráficos esperados: ${totalExpectedCharts.current}`
-        );
+        
+        
+        const fallbackTimer = setTimeout(() => {
+          if (!hasCalledReady.current && onChartsRendered) {
+            console.warn('⚠️ FALLBACK: Forçando onChartsRendered após timeout');
+            hasCalledReady.current = true;
+            onChartsRendered();
+          }
+        }, 5000);
+        
+        return () => clearTimeout(fallbackTimer);
       }
-    }, [data]);
+    }, [data, onChartsRendered]);
 
     const addChartRef = (el) => {
-      if (el && !chartRefs.current.includes(el)) {
-        chartRefs.current.push(el);
-        registeredCharts.current += 1;
-
-        if (
-          totalExpectedCharts.current > 0 &&
-          registeredCharts.current >= totalExpectedCharts.current &&
-          onChartsRendered
-        ) {
-          setTimeout(() => {
-            onChartsRendered();
-            console.log('Sinal: onChartsRendered chamado com sucesso.');
-          }, 1500);
+      if (!el || chartRefs.current.includes(el)) {
+        if (el) {
+          console.log('⚠️ Elemento já registrado, ignorando duplicata');
         }
+        return;
+      }
+
+      chartRefs.current.push(el);
+      registeredCharts.current += 1;
+
+      console.log(
+        `📈 Gráfico ${registeredCharts.current}/${totalExpectedCharts.current} registrado`
+      );
+
+      if (
+        totalExpectedCharts.current > 0 &&
+        registeredCharts.current >= totalExpectedCharts.current &&
+        !hasCalledReady.current &&
+        onChartsRendered
+      ) {
+        hasCalledReady.current = true;
+        setTimeout(() => {
+          onChartsRendered();
+        }, 1500);
       }
     };
 
@@ -288,40 +308,42 @@ const DashboardCategory = forwardRef(
         </div>
 
         {/* === 2. Campos Customizados (N gráficos) === */}
-        <div className={`${styles.section} ${styles[theme]}`}>
-          <h2>Insights de Campos Customizados</h2>
-          <div className={styles.chartsGrid}>
-            {customFieldValueCounts.map((field, idx) => (
-              <div
-                key={idx}
-                className={`${styles.chartCard} ${styles[theme]}`}
-                ref={addChartRef}
-              >
-                <h3>Contagem: {field.label}</h3>
-                <ResponsiveContainer width="100%" height={360}>
-                  <BarChart data={field.data.filter((d) => d.count > 0)}>
-                    <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
-                    <XAxis
-                      dataKey="name"
-                      angle={-15}
-                      textAnchor="end"
-                      height={90}
-                    />
-                    <YAxis tickFormatter={formatNumber} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend />
-                    <Bar
-                      dataKey="count"
-                      fill="#8b5cf6"
-                      name="Contagem"
-                      radius={[8, 8, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ))}
+        {customFieldValueCounts && customFieldValueCounts.length > 0 && (
+          <div className={`${styles.section} ${styles[theme]}`}>
+            <h2>Insights de Campos Customizados</h2>
+            <div className={styles.chartsGrid}>
+              {customFieldValueCounts.map((field, idx) => (
+                <div
+                  key={idx}
+                  className={`${styles.chartCard} ${styles[theme]}`}
+                  ref={addChartRef}
+                >
+                  <h3>Contagem: {field.label}</h3>
+                  <ResponsiveContainer width="100%" height={360}>
+                    <BarChart data={field.data.filter((d) => d.count > 0)}>
+                      <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
+                      <XAxis
+                        dataKey="name"
+                        angle={-15}
+                        textAnchor="end"
+                        height={90}
+                      />
+                      <YAxis tickFormatter={formatNumber} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend />
+                      <Bar
+                        dataKey="count"
+                        fill="#8b5cf6"
+                        name="Contagem"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className={`${styles.section} ${styles[theme]}`}>
           <h2>Insights de Transações</h2>
@@ -410,7 +432,6 @@ const DashboardCategory = forwardRef(
               </ResponsiveContainer>
             </div>
 
-            {/* GRÁFICO 4/4 */}
             <div
               className={`${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
@@ -575,19 +596,6 @@ const DashboardCategory = forwardRef(
             </div>
           </div>
         </div>
-
-        <div
-          style={{ position: 'absolute', left: '-9999px', top: 0 }}
-          ref={() => {
-            if (
-              totalExpectedCharts.current > 0 &&
-              registeredCharts.current >= totalExpectedCharts.current &&
-              onChartsRendered
-            ) {
-              setTimeout(onChartsRendered, 800);
-            }
-          }}
-        />
       </div>
     );
   }
