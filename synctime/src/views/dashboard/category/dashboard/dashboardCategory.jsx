@@ -81,9 +81,7 @@ const DashboardCategory = forwardRef(
       chartRefs.current.push(el);
       registeredCharts.current += 1;
 
-      console.log(
-        `📈 Gráfico ${registeredCharts.current}/${totalExpectedCharts.current} registrado`
-      );
+      
 
       if (
         totalExpectedCharts.current > 0 &&
