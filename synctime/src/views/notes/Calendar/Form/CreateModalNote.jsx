@@ -43,7 +43,8 @@ const CreateModalNote = ({
   onClose,
   selectedRoutine,
   noteToEdit,
-  onRefresh
+  onRefresh,
+  dateOfNote
 }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
@@ -302,7 +303,8 @@ const CreateModalNote = ({
         endTime: data.endTime,
         comments: comments.length > 0 ? comments : null,
         routine_id: data.routine_id,
-        userId: data.userId
+        userId: data.userId,
+        dateOfNote: dateOfNote
       };
 
       if (noteToEdit) {

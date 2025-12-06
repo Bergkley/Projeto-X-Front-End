@@ -724,6 +724,7 @@ const Calendar = () => {
         selectedRoutine={currentSelectedRoutine}
         noteToEdit={noteToEdit}
         onRefresh={loadRoutines}
+        dateOfNote={selectedDate}
       />
 
       <SummaryModal
