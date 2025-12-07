@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './Calendar.module.css';
@@ -35,6 +35,8 @@ const Calendar = () => {
     useState(false); 
   const [targetRoutineId, setTargetRoutineId] = useState(null); 
   const [targetNoteId, setTargetNoteId] = useState(null); 
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const monthPickerRef = useRef(null);
 
   const API_KEY = import.meta.env.VITE_KEY_API_HOLIDAY || '';
 
@@ -248,6 +250,19 @@ const Calendar = () => {
   useEffect(() => {
     loadRoutines();
   }, [loadRoutines]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (monthPickerRef.current && !monthPickerRef.current.contains(event.target)) {
+        setShowMonthPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleGenerateSummary = useCallback(async (routineId, date) => {
     try {
@@ -526,9 +541,33 @@ const Calendar = () => {
             </button>
 
             <div className={styles.headerTitle}>
-              <h1 className={styles.monthYear}>
-                {months[currentDate.getMonth()]} {currentDate.getFullYear()}
-              </h1>
+              <div className={styles.monthYearWrapper}>
+                <h1 className={styles.monthYear}>
+                  <span
+                    className={styles.monthClickable}
+                    onClick={() => setShowMonthPicker(!showMonthPicker)}
+                  >
+                    {months[currentDate.getMonth()]}
+                  </span>{' '}
+                  {currentDate.getFullYear()}
+                </h1>
+                {showMonthPicker && (
+                  <div ref={monthPickerRef} className={`${styles.monthPicker} ${styles[theme]}`}>
+                    {months.map((month, index) => (
+                      <div
+                        key={month}
+                        className={`${styles.monthOption} ${index === currentDate.getMonth() ? styles.monthSelected : ''}`}
+                        onClick={() => {
+                          setCurrentDate(new Date(currentDate.getFullYear(), index, currentDate.getDate()));
+                          setShowMonthPicker(false);
+                        }}
+                      >
+                        {month}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className={styles.subtitle}>
                 <span>📅 Suas anotações diárias</span>
               </div>
