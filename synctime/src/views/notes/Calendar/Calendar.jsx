@@ -37,6 +37,8 @@ const Calendar = () => {
   const [targetNoteId, setTargetNoteId] = useState(null); 
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const monthPickerRef = useRef(null);
+  const [showYearPicker, setShowYearPicker] = useState(false);
+  const yearPickerRef = useRef(null);
 
   const API_KEY = import.meta.env.VITE_KEY_API_HOLIDAY || '';
 
@@ -56,6 +58,9 @@ const Calendar = () => {
   ];
 
   const weekDays = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+
+  const currentYear = currentDate.getFullYear();
+  const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
 
   const sortNotes = (notesArray) => {
     const order = {
@@ -255,6 +260,9 @@ const Calendar = () => {
     const handleClickOutside = (event) => {
       if (monthPickerRef.current && !monthPickerRef.current.contains(event.target)) {
         setShowMonthPicker(false);
+      }
+      if (yearPickerRef.current && !yearPickerRef.current.contains(event.target)) {
+        setShowYearPicker(false);
       }
     };
 
@@ -549,7 +557,12 @@ const Calendar = () => {
                   >
                     {months[currentDate.getMonth()]}
                   </span>{' '}
-                  {currentDate.getFullYear()}
+                  <span
+                    className={styles.yearClickable}
+                    onClick={() => setShowYearPicker(!showYearPicker)}
+                  >
+                    {currentDate.getFullYear()}
+                  </span>
                 </h1>
                 {showMonthPicker && (
                   <div ref={monthPickerRef} className={`${styles.monthPicker} ${styles[theme]}`}>
@@ -558,11 +571,27 @@ const Calendar = () => {
                         key={month}
                         className={`${styles.monthOption} ${index === currentDate.getMonth() ? styles.monthSelected : ''}`}
                         onClick={() => {
-                          setCurrentDate(new Date(currentDate.getFullYear(), index, currentDate.getDate()));
+                          setCurrentDate(new Date(currentDate.getFullYear(), index, 1));
                           setShowMonthPicker(false);
                         }}
                       >
                         {month}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {showYearPicker && (
+                  <div ref={yearPickerRef} className={`${styles.yearPicker} ${styles[theme]}`}>
+                    {years.map((year) => (
+                      <div
+                        key={year}
+                        className={`${styles.yearOption} ${year === currentDate.getFullYear() ? styles.yearSelected : ''}`}
+                        onClick={() => {
+                          setCurrentDate(new Date(year, currentDate.getMonth(), 1));
+                          setShowYearPicker(false);
+                        }}
+                      >
+                        {year}
                       </div>
                     ))}
                   </div>

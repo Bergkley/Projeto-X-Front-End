@@ -81,18 +81,21 @@
   letter-spacing: -0.5px;
 }
 
-.monthClickable {
+.monthClickable,
+.yearClickable {
   cursor: pointer;
   text-decoration-color: rgba(255, 255, 255, 0.5);
   transition: all 0.2s ease;
 }
 
-.monthClickable:hover {
+.monthClickable:hover,
+.yearClickable:hover {
   text-decoration-color: rgba(255, 255, 255, 1);
   opacity: 0.9;
 }
 
-.monthPicker {
+.monthPicker,
+.yearPicker {
   position: absolute;
   top: 100%;
   left: 50%;
@@ -111,17 +114,20 @@
   backdrop-filter: blur(10px);
 }
 
-.monthPicker.light {
+.monthPicker.light,
+.yearPicker.light {
   background: rgba(255, 255, 255, 0.95);
   color: #1f2937;
 }
 
-.monthPicker.dark {
+.monthPicker.dark,
+.yearPicker.dark {
   background: rgba(15, 23, 42, 0.95);
   color: #f1f5f9;
 }
 
-.monthOption {
+.monthOption,
+.yearOption {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
@@ -131,19 +137,23 @@
   transition: all 0.2s ease;
 }
 
-.monthOption:hover {
+.monthOption:hover,
+.yearOption:hover {
   background: rgba(102, 126, 234, 0.2);
 }
 
-.monthOption.light:hover {
+.monthOption.light:hover,
+.yearOption.light:hover {
   background: #f3f4f6;
 }
 
-.monthOption.dark:hover {
+.monthOption.dark:hover,
+.yearOption.dark:hover {
   background: #475569;
 }
 
-.monthSelected {
+.monthSelected,
+.yearSelected {
   background: linear-gradient(135deg, var(--emphasis-color, #667eea) 0%, var(--emphasis-gradient-end, #764ba2) 100%);
   color: white !important;
 }
@@ -636,13 +646,15 @@
     min-width: 50px;
   }
 
-  .monthPicker {
+  .monthPicker,
+  .yearPicker {
     width: 240px;
     padding: 12px;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
-  .monthOption {
+  .monthOption,
+  .yearOption {
     font-size: 13px;
     padding: 6px 8px;
   }
@@ -739,13 +751,15 @@
     min-width: 45px;
   }
 
-  .monthPicker {
+  .monthPicker,
+  .yearPicker {
     width: 200px;
     padding: 10px;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
-  .monthOption {
+  .monthOption,
+  .yearOption {
     font-size: 12px;
     padding: 5px 6px;
   }
@@ -800,7 +814,8 @@
     height: 5px;
   }
 
-  .monthPicker {
+  .monthPicker,
+  .yearPicker {
     width: 260px;
     grid-template-columns: repeat(3, 1fr);
   }
