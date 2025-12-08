@@ -12,14 +12,22 @@ import {
   CartesianGrid,
   LineChart,
   Line,
+  AreaChart,
   Area,
   ScatterChart,
   Scatter,
-  ZAxis
+  ZAxis,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar
 } from 'recharts';
 import styles from './dashboardCategory.module.css';
 import { useTheme } from './../../../../hooks/useTheme';
-import { forwardRef, useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
+import { X } from 'lucide-react';
+import CustomChartModal from './modal/customChartModal';
 
 const COLORS = [
   '#3b82f6',
@@ -32,12 +40,16 @@ const COLORS = [
 ];
 
 const DashboardCategory = forwardRef(
-  ({ data, loading, filters, chartRefs, onChartsRendered }, ref) => {
+  ({ data, loading, filters, chartRefs, onChartsRendered, setChartsReady }, ref) => {
     const { theme } = useTheme();
 
     const registeredCharts = useRef(0);
     const totalExpectedCharts = useRef(0);
     const hasCalledReady = useRef(false);
+
+    const [showModal, setShowModal] = useState(false);
+    const [currentSection, setCurrentSection] = useState('');
+    const [customCharts, setCustomCharts] = useState({});
 
     useEffect(() => {
       chartRefs.current = [];
@@ -48,12 +60,16 @@ const DashboardCategory = forwardRef(
 
     useEffect(() => {
       if (data) {
-        let count = 0;
-        count += 3; 
-        count += (data.customFieldValueCounts?.length || 0); 
-        count += 4; 
-        count += 2; 
-        count += 1; 
+        let count = 3; // categorias
+        count += (customCharts['categorias']?.length || 0);
+        count += (data.customFieldValueCounts?.length || 0);
+        count += (customCharts['camposCustomizados']?.length || 0);
+        count += 4; // transacoes
+        count += (customCharts['transacoes']?.length || 0);
+        count += 2; // evolucao
+        count += (customCharts['evolucao']?.length || 0);
+        count += 1; // progresso
+        count += (customCharts['progresso']?.length || 0);
 
         totalExpectedCharts.current = count;
         
@@ -68,7 +84,7 @@ const DashboardCategory = forwardRef(
         
         return () => clearTimeout(fallbackTimer);
       }
-    }, [data, onChartsRendered]);
+    }, [data, customCharts, onChartsRendered]);
 
     const addChartRef = (el) => {
       if (!el || chartRefs.current.includes(el)) {
@@ -94,6 +110,434 @@ const DashboardCategory = forwardRef(
           onChartsRendered();
         }, 1500);
       }
+    };
+
+    const handleOpenModal = (section) => {
+      setCurrentSection(section);
+      setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+      setShowModal(false);
+    };
+
+    const handleSubmit = (config) => {
+      if (!config.dataSource || !config.xAxis || !config.yAxis || !config.title) {
+        alert('Preencha todos os campos obrigatórios.');
+        return;
+      }
+      setChartsReady(false);
+      setCustomCharts((prev) => ({
+        ...prev,
+        [currentSection]: [
+          ...(prev[currentSection] || []),
+          { ...config, id: Date.now() },
+        ],
+      }));
+      setShowModal(false);
+      setTimeout(() => {
+        setChartsReady(true);
+      }, 1500);
+    };
+
+    const handleRemoveChart = (id, section) => {
+      setChartsReady(false);
+      setCustomCharts((prev) => ({
+        ...prev,
+        [section]: prev[section].filter((c) => c.id !== id),
+      }));
+      // Após a atualização de estado, limpar refs obsoletas
+      setTimeout(() => {
+        chartRefs.current = chartRefs.current.filter(node => node && document.body.contains(node));
+        setChartsReady(true);
+      }, 500);
+    };
+
+    const getDataOptions = (section) => {
+      switch (section) {
+        case 'categorias':
+          return [
+            { value: 'distributionRecordType', label: 'Distribuição de Categorias por Record Type', fields: ['name', 'value'] },
+            { value: 'transactionCount', label: 'Distribuição de Contagem de Transações por Categoria', fields: ['name', 'count'] },
+            { value: 'categoryType', label: 'Contagem por Tipo de Categoria', fields: ['type', 'transactionCount', 'categoryCount'] },
+          ];
+        case 'camposCustomizados':
+          return data.customFieldValueCounts?.map((field) => ({
+            value: field.label,
+            label: `Contagem: ${field.label}`,
+            fields: ['name', 'count'],
+          })) || [];
+        case 'transacoes':
+          return [
+            { value: 'transactionsByCategory', label: 'Transações por Categoria', fields: ['category', 'transactions'] },
+            { value: 'statusDistribution', label: 'Distribuição de Status', fields: ['name', 'count', 'percentage'] },
+            { value: 'dateHistogram', label: 'Histograma de Datas', fields: ['periodLabel', 'totalTransactions'] },
+            { value: 'valueHistogram', label: 'Histograma de Valores', fields: ['bin', 'count', 'totalAmount'] },
+          ];
+        case 'evolucao':
+          return [
+            { value: 'timeEvolution', label: 'Evolução Temporal', fields: ['periodLabel', 'totalAmount', 'totalTransactions'] },
+            { value: 'recordsVsAverage', label: 'Relação: Nº de Registros × Valor Médio', fields: ['recordsCount', 'averageAmount', 'totalAmount'] },
+          ];
+        case 'progresso':
+          return [
+            { value: 'progressByRecord', label: 'Progresso por Registro', fields: ['title', 'initialBalance', 'currentTotal'] },
+          ];
+        default:
+          return [];
+      }
+    };
+
+    const renderCustomChart = (section, chart) => {
+      let chartData = [];
+      let chartProps = {};
+
+      if (section === 'categorias') {
+        const { summary, transactionCountPieChart, categoryTypeBarChart } = data;
+
+        if (chart.dataSource === 'distributionRecordType') {
+          chartData = Object.entries(
+            (summary?.categoryBreakdown || []).reduce((acc, cat) => {
+              if (!cat) return acc;
+              if (!acc[cat.recordTypeName])
+                acc[cat.recordTypeName] = {
+                  name: cat.recordTypeName,
+                  value: 0,
+                  categories: []
+                };
+              acc[cat.recordTypeName].value += 1;
+              acc[cat.recordTypeName].categories.push(cat.categoryName);
+              return acc;
+            }, {})
+          ).map(([name, d]) => ({
+            name,
+            value: d.value,
+            categories: d.categories
+          }));
+          chartProps = {
+            dataKey: 'value',
+            nameKey: 'name',
+            innerRadius: 85,
+            outerRadius: 130,
+            paddingAngle: 3,
+            cornerRadius: 12,
+          };
+        } else if (chart.dataSource === 'transactionCount') {
+          chartData = (transactionCountPieChart || []).filter((d) => d.count > 0);
+          chartProps = {
+            dataKey: 'count',
+            nameKey: 'name',
+            innerRadius: 85,
+            outerRadius: 130,
+            paddingAngle: 3,
+            cornerRadius: 12,
+          };
+        } else if (chart.dataSource === 'categoryType') {
+          chartData = categoryTypeBarChart || [];
+          chartProps = {
+            xDataKey: 'type',
+            bars: [
+              { dataKey: 'transactionCount', fill: '#10b981', name: 'Transações' },
+              { dataKey: 'categoryCount', fill: '#3b82f6', name: 'Categorias' },
+            ],
+          };
+        }
+      } else if (section === 'camposCustomizados') {
+        const field = (data?.customFieldValueCounts || []).find((f) => f.label === chart.dataSource);
+        if (field) {
+          chartData = (field.data || []).filter((d) => d.count > 0);
+          chartProps = {
+            xDataKey: 'name',
+            bars: [
+              { dataKey: 'count', fill: '#8b5cf6', name: 'Contagem' },
+            ],
+          };
+        }
+      } else if (section === 'transacoes') {
+        if (chart.dataSource === 'transactionsByCategory') {
+          chartData = (data?.barChartData || []).filter((d) => d.amount > 0 || d.transactions > 0);
+          chartProps = {
+            xDataKey: 'category',
+            bars: [
+              { dataKey: 'transactions', fill: '#10b981', name: 'Nº de Transações' },
+            ],
+          };
+        } else if (chart.dataSource === 'statusDistribution') {
+          chartData = (data?.statusDistribution || []).filter((d) => d.count > 0);
+          chartProps = {
+            dataKey: 'count',
+            nameKey: 'name',
+            innerRadius: 85,
+            outerRadius: 130,
+            paddingAngle: 3,
+            cornerRadius: 12,
+          };
+        } else if (chart.dataSource === 'dateHistogram') {
+          chartData = data?.transactionDateHistogram || [];
+          chartProps = {
+            xDataKey: 'periodLabel',
+            bars: [
+              { dataKey: 'totalTransactions', fill: '#ec4899', name: 'Transações' },
+            ],
+          };
+        } else if (chart.dataSource === 'valueHistogram') {
+          chartData = (data?.transactionHistogram || []).filter((d) => d.count > 0);
+          chartProps = {
+            xDataKey: 'bin',
+            bars: [
+              { dataKey: 'count', fill: '#f59e0b', name: 'Contagem' },
+              { dataKey: 'totalAmount', fill: '#ef4444', name: 'Valor Total' },
+            ],
+          };
+        }
+      } else if (section === 'evolucao') {
+        if (chart.dataSource === 'timeEvolution') {
+          chartData = data?.timeSeriesData || [];
+          chartProps = {
+            xDataKey: 'periodLabel',
+            lines: [
+              { dataKey: 'totalAmount', stroke: '#3b82f6', name: 'Valor Total', area: true },
+              { dataKey: 'totalTransactions', stroke: '#10b981', name: 'Transações' },
+            ],
+          };
+        } else if (chart.dataSource === 'recordsVsAverage') {
+          chartData = (data?.scatterData || []).filter((d) => d.totalAmount > 0);
+          chartProps = {
+            xDataKey: 'recordsCount',
+            yDataKey: 'averageAmount',
+            zDataKey: 'totalAmount',
+            scatterName: 'Categorias',
+            fill: '#8b5cf6',
+          };
+        }
+      } else if (section === 'progresso') {
+        if (chart.dataSource === 'progressByRecord') {
+          chartData = data?.goalProgressData || [];
+          chartProps = {
+            layout: 'vertical',
+            xType: 'number',
+            yDataKey: 'title',
+            bars: [
+              { dataKey: 'initialBalance', fill: '#06b6d4', name: 'Saldo Inicial', stackId: 'a' },
+              { dataKey: 'currentTotal', fill: '#10b981', name: 'Total Atual', stackId: 'a' },
+            ],
+          };
+        }
+      }
+
+      const formatCurrency = (value) =>
+        `R$ ${Number(value).toFixed(2).replace('.', ',')}`;
+      const formatNumber = (value) => Number(value).toLocaleString('pt-BR');
+
+      const getYAxisFormatter = (dataKey) => {
+        return dataKey.includes('amount') ? formatCurrency : formatNumber;
+      };
+
+      // Renderizar baseado no tipo
+      if (chart.chartType === 'PieChart') {
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey={chart.yAxis}
+                nameKey={chart.xAxis}
+                cx="50%"
+                cy="50%"
+                innerRadius={chartProps.innerRadius}
+                outerRadius={chartProps.outerRadius}
+                paddingAngle={chartProps.paddingAngle}
+                cornerRadius={chartProps.cornerRadius}
+              >
+                {chartData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend verticalAlign="bottom" />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+      } else if (chart.chartType === 'BarChart') {
+        return (
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={chartData} layout={chartProps.layout || 'horizontal'}>
+              <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
+              <XAxis
+                type={chartProps.xType || 'category'}
+                dataKey={chart.xAxis}
+                angle={-15}
+                textAnchor="end"
+                height={90}
+                tickFormatter={chartProps.xFormatter || formatNumber}
+              />
+              <YAxis
+                type={chartProps.yType || 'number'}
+                dataKey={chartProps.yDataKey}
+                width={150}
+                tickFormatter={getYAxisFormatter(chart.yAxis)}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Bar
+                dataKey={chart.yAxis}
+                fill={COLORS[0]}
+                name={chart.yAxis}
+                radius={[8, 8, 0, 0]}
+                stackId={chartProps.bars?.[0]?.stackId}
+              />
+              {chart.additionalMetrics.map((metric, i) => (
+                <Bar
+                  key={i}
+                  dataKey={metric}
+                  fill={COLORS[(i + 1) % COLORS.length]}
+                  name={metric}
+                  radius={[8, 8, 0, 0]}
+                  stackId={chartProps.bars?.[i + 1]?.stackId}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      } else if (chart.chartType === 'LineChart') {
+        return (
+          <ResponsiveContainer width="100%" height={360}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="5 5" strokeOpacity={0.3} />
+              <XAxis dataKey={chart.xAxis} />
+              <YAxis tickFormatter={getYAxisFormatter(chart.yAxis)} />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                dataKey={chart.yAxis}
+                stroke={COLORS[0]}
+                strokeWidth={3}
+                dot={{ fill: COLORS[0], r: 6 }}
+                name={chart.yAxis}
+              />
+              {chart.additionalMetrics.map((metric, i) => (
+                <Line
+                  key={i}
+                  type="monotone"
+                  dataKey={metric}
+                  stroke={COLORS[(i + 1) % COLORS.length]}
+                  strokeWidth={3}
+                  dot={{ fill: COLORS[(i + 1) % COLORS.length], r: 6 }}
+                  name={metric}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        );
+      } else if (chart.chartType === 'AreaChart') {
+        return (
+          <ResponsiveContainer width="100%" height={360}>
+            <AreaChart data={chartData}>
+              <CartesianGrid strokeDasharray="5 5" strokeOpacity={0.3} />
+              <XAxis dataKey={chart.xAxis} />
+              <YAxis tickFormatter={getYAxisFormatter(chart.yAxis)} />
+              <Tooltip content={<CustomTooltip />} />
+              <defs>
+                <linearGradient id="gradientPrimary" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={COLORS[0]} stopOpacity={0.9} />
+                  <stop offset="100%" stopColor={COLORS[0]} stopOpacity={0.05} />
+                </linearGradient>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey={chart.yAxis}
+                stroke={COLORS[0]}
+                fill="url(#gradientPrimary)"
+                strokeWidth={3}
+                name={chart.yAxis}
+              />
+              {chart.additionalMetrics.map((metric, i) => (
+                <>
+                  <defs>
+                    <linearGradient id={`gradient${i}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={COLORS[(i + 1) % COLORS.length]} stopOpacity={0.9} />
+                      <stop offset="100%" stopColor={COLORS[(i + 1) % COLORS.length]} stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <Area
+                    key={i}
+                    type="monotone"
+                    dataKey={metric}
+                    stroke={COLORS[(i + 1) % COLORS.length]}
+                    fill={`url(#gradient${i})`}
+                    strokeWidth={3}
+                    name={metric}
+                  />
+                </>
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+      } else if (chart.chartType === 'ScatterChart') {
+        return (
+          <ResponsiveContainer width="100%" height={360}>
+            <ScatterChart>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                type="number"
+                dataKey={chart.xAxis}
+                name={chart.xAxis}
+              />
+              <YAxis
+                type="number"
+                dataKey={chart.yAxis}
+                name={chart.yAxis}
+                tickFormatter={getYAxisFormatter(chart.yAxis)}
+              />
+              <ZAxis
+                type="number"
+                dataKey={chart.additionalMetrics[0] || chartProps.zDataKey}
+                range={[300, 1600]}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Scatter
+                name={chartProps.scatterName || 'Dados'}
+                data={chartData}
+                fill={COLORS[0]}
+              >
+                {chartData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Scatter>
+            </ScatterChart>
+          </ResponsiveContainer>
+        );
+      } else if (chart.chartType === 'RadarChart') {
+        return (
+          <ResponsiveContainer width="100%" height={360}>
+            <RadarChart data={chartData}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey={chart.xAxis} />
+              <PolarRadiusAxis tickFormatter={getYAxisFormatter(chart.yAxis)} />
+              <Radar
+                dataKey={chart.yAxis}
+                stroke={COLORS[0]}
+                fill={COLORS[0]}
+                fillOpacity={0.6}
+                name={chart.yAxis}
+              />
+              {chart.additionalMetrics.map((metric, i) => (
+                <Radar
+                  key={i}
+                  dataKey={metric}
+                  stroke={COLORS[(i + 1) % COLORS.length]}
+                  fill={COLORS[(i + 1) % COLORS.length]}
+                  fillOpacity={0.6}
+                  name={metric}
+                />
+              ))}
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+            </RadarChart>
+          </ResponsiveContainer>
+        );
+      }
+      return <div>Gráfico não suportado ainda.</div>;
     };
 
     if (loading) {
@@ -125,7 +569,7 @@ const DashboardCategory = forwardRef(
       goalProgressData
     } = data;
 
-    const barDataFiltered = barChartData.filter(
+    const barDataFiltered = (barChartData || []).filter(
       (d) => d.amount > 0 || d.transactions > 0
     );
 
@@ -187,10 +631,18 @@ const DashboardCategory = forwardRef(
 
         {/* === 1. Insights de Categorias === */}
         <div className={`${styles.section} ${styles[theme]}`}>
-          <h2>Insights de Categorias</h2>
+          <h2>
+            Insights de Categorias
+            <button
+              onClick={() => handleOpenModal('categorias')}
+              className={styles.customButton}
+            >
+              Customizar Gráfico
+            </button>
+          </h2>
           <div className={styles.chartsGrid}>
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Distribuição de Categorias por Record Type</h3>
@@ -198,7 +650,8 @@ const DashboardCategory = forwardRef(
                 <PieChart>
                   <Pie
                     data={Object.entries(
-                      summary.categoryBreakdown.reduce((acc, cat) => {
+                      (summary?.categoryBreakdown || []).reduce((acc, cat) => {
+                        if (!cat) return acc;
                         if (!acc[cat.recordTypeName])
                           acc[cat.recordTypeName] = {
                             name: cat.recordTypeName,
@@ -226,7 +679,8 @@ const DashboardCategory = forwardRef(
                     cornerRadius={12}
                   >
                     {Object.keys(
-                      summary.categoryBreakdown.reduce((a, c) => {
+                      (summary?.categoryBreakdown || []).reduce((a, c) => {
+                        if (!c) return a;
                         a[c.recordTypeName] = true;
                         return a;
                       }, {})
@@ -234,21 +688,21 @@ const DashboardCategory = forwardRef(
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   <Legend verticalAlign="bottom" />
                 </PieChart>
               </ResponsiveContainer>
             </div>
 
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Distribuição de Contagem de Transações por Categoria</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie
-                    data={transactionCountPieChart.filter((d) => d.count > 0)}
+                    data={(transactionCountPieChart || []).filter((d) => d.count > 0)}
                     dataKey="count"
                     nameKey="name"
                     cx="50%"
@@ -258,25 +712,25 @@ const DashboardCategory = forwardRef(
                     paddingAngle={3}
                     cornerRadius={12}
                   >
-                    {transactionCountPieChart
+                    {(transactionCountPieChart || [])
                       .filter((d) => d.count > 0)
                       .map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   <Legend verticalAlign="bottom" />
                 </PieChart>
               </ResponsiveContainer>
             </div>
 
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Contagem por Tipo de Categoria</h3>
               <ResponsiveContainer width="100%" height={360}>
-                <BarChart data={categoryTypeBarChart}>
+                <BarChart data={categoryTypeBarChart || []}>
                   <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
                   <XAxis
                     dataKey="type"
@@ -302,23 +756,49 @@ const DashboardCategory = forwardRef(
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            {customCharts['categorias']?.map((chart) => (
+              <div
+                key={chart.id}
+                className={`chart-card ${styles.chartCard} ${styles[theme]}`}
+                ref={addChartRef}
+              >
+                <div className={styles.customChartHeader}>
+                  <h3>{chart.title}</h3>
+                  <button
+                    onClick={() => handleRemoveChart(chart.id, 'categorias')}
+                    className={styles.removeButton}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                {renderCustomChart('categorias', chart)}
+              </div>
+            ))}
           </div>
         </div>
 
         {/* === 2. Campos Customizados (N gráficos) === */}
         {customFieldValueCounts && customFieldValueCounts.length > 0 && (
           <div className={`${styles.section} ${styles[theme]}`}>
-            <h2>Insights de Campos Customizados</h2>
+            <h2>
+              Insights de Campos Customizados
+              <button
+                onClick={() => handleOpenModal('camposCustomizados')}
+                className={styles.customButton}
+              >
+                Customizar Gráfico
+              </button>
+            </h2>
             <div className={styles.chartsGrid}>
-              {customFieldValueCounts.map((field, idx) => (
+              {(customFieldValueCounts || []).map((field, idx) => (
                 <div
                   key={idx}
-                  className={`${styles.chartCard} ${styles[theme]}`}
+                  className={`chart-card ${styles.chartCard} ${styles[theme]}`}
                   ref={addChartRef}
                 >
                   <h3>Contagem: {field.label}</h3>
                   <ResponsiveContainer width="100%" height={360}>
-                    <BarChart data={field.data.filter((d) => d.count > 0)}>
+                    <BarChart data={(field.data || []).filter((d) => d.count > 0)}>
                       <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
                       <XAxis
                         dataKey="name"
@@ -339,15 +819,42 @@ const DashboardCategory = forwardRef(
                   </ResponsiveContainer>
                 </div>
               ))}
+              {customCharts['camposCustomizados']?.map((chart) => (
+                <div
+                  key={chart.id}
+                  className={`chart-card ${styles.chartCard} ${styles[theme]}`}
+                  ref={addChartRef}
+                >
+                  <div className={styles.customChartHeader}>
+                    <h3>{chart.title}</h3>
+                    <button
+                      onClick={() => handleRemoveChart(chart.id, 'camposCustomizados')}
+                      className={styles.removeButton}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  {renderCustomChart('camposCustomizados', chart)}
+                </div>
+              ))}
             </div>
           </div>
         )}
 
+        {/* === 3. Insights de Transações === */}
         <div className={`${styles.section} ${styles[theme]}`}>
-          <h2>Insights de Transações</h2>
+          <h2>
+            Insights de Transações
+            <button
+              onClick={() => handleOpenModal('transacoes')}
+              className={styles.customButton}
+            >
+              Customizar Gráfico
+            </button>
+          </h2>
           <div className={styles.chartsGrid}>
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Transações por Categoria</h3>
@@ -374,14 +881,14 @@ const DashboardCategory = forwardRef(
             </div>
 
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Distribuição de Status</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie
-                    data={statusDistribution.filter((d) => d.count > 0)}
+                    data={(statusDistribution || []).filter((d) => d.count > 0)}
                     dataKey="count"
                     nameKey="name"
                     cx="50%"
@@ -391,25 +898,25 @@ const DashboardCategory = forwardRef(
                     paddingAngle={3}
                     cornerRadius={12}
                   >
-                    {statusDistribution
+                    {(statusDistribution || [])
                       .filter((d) => d.count > 0)
                       .map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   <Legend verticalAlign="bottom" />
                 </PieChart>
               </ResponsiveContainer>
             </div>
 
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Histograma de Datas</h3>
               <ResponsiveContainer width="100%" height={360}>
-                <BarChart data={transactionDateHistogram}>
+                <BarChart data={transactionDateHistogram || []}>
                   <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
                   <XAxis
                     dataKey="periodLabel"
@@ -431,13 +938,13 @@ const DashboardCategory = forwardRef(
             </div>
 
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Histograma de Valores</h3>
               <ResponsiveContainer width="100%" height={360}>
                 <BarChart
-                  data={transactionHistogram.filter((d) => d.count > 0)}
+                  data={(transactionHistogram || []).filter((d) => d.count > 0)}
                 >
                   <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
                   <XAxis
@@ -464,20 +971,46 @@ const DashboardCategory = forwardRef(
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            {customCharts['transacoes']?.map((chart) => (
+              <div
+                key={chart.id}
+                className={`chart-card ${styles.chartCard} ${styles[theme]}`}
+                ref={addChartRef}
+              >
+                <div className={styles.customChartHeader}>
+                  <h3>{chart.title}</h3>
+                  <button
+                    onClick={() => handleRemoveChart(chart.id, 'transacoes')}
+                    className={styles.removeButton}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                {renderCustomChart('transacoes', chart)}
+              </div>
+            ))}
           </div>
         </div>
 
         {/* === 4. Evolução e Relações (2 gráficos) === */}
         <div className={`${styles.section} ${styles[theme]}`}>
-          <h2>Evolução e Relações</h2>
+          <h2>
+            Evolução e Relações
+            <button
+              onClick={() => handleOpenModal('evolucao')}
+              className={styles.customButton}
+            >
+              Customizar Gráfico
+            </button>
+          </h2>
           <div className={styles.chartsGrid}>
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Evolução Temporal ({filters.groupBy || 'mês'})</h3>
               <ResponsiveContainer width="100%" height={360}>
-                <LineChart data={timeSeriesData}>
+                <LineChart data={timeSeriesData || []}>
                   <CartesianGrid strokeDasharray="5 5" strokeOpacity={0.3} />
                   <XAxis dataKey="periodLabel" />
                   <YAxis tickFormatter={formatCurrency} />
@@ -519,7 +1052,7 @@ const DashboardCategory = forwardRef(
             </div>
 
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Relação: Nº de Registros × Valor Médio</h3>
@@ -545,10 +1078,10 @@ const DashboardCategory = forwardRef(
                   <Tooltip content={<CustomTooltip />} />
                   <Scatter
                     name="Categorias"
-                    data={scatterData.filter((d) => d.totalAmount > 0)}
+                    data={(scatterData || []).filter((d) => d.totalAmount > 0)}
                     fill="#8b5cf6"
                   >
-                    {scatterData
+                    {(scatterData || [])
                       .filter((d) => d.totalAmount > 0)
                       .map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -557,19 +1090,46 @@ const DashboardCategory = forwardRef(
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
+            {customCharts['evolucao']?.map((chart) => (
+              <div
+                key={chart.id}
+                className={`chart-card ${styles.chartCard} ${styles[theme]}`}
+                ref={addChartRef}
+              >
+                <div className={styles.customChartHeader}>
+                  <h3>{chart.title}</h3>
+                  <button
+                    onClick={() => handleRemoveChart(chart.id, 'evolucao')}
+                    className={styles.removeButton}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                {renderCustomChart('evolucao', chart)}
+              </div>
+            ))}
           </div>
         </div>
 
+        {/* === 5. Progresso de Metas === */}
         <div className={`${styles.section} ${styles[theme]}`}>
-          <h2>Progresso de Metas</h2>
+          <h2>
+            Progresso de Metas
+            <button
+              onClick={() => handleOpenModal('progresso')}
+              className={styles.customButton}
+            >
+              Customizar Gráfico
+            </button>
+          </h2>
           <div className={styles.chartsGrid}>
             <div
-              className={`${styles.chartCard} ${styles[theme]}`}
+              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
               ref={addChartRef}
             >
               <h3>Progresso por Registro</h3>
               <ResponsiveContainer width="100%" height={360}>
-                <BarChart data={goalProgressData} layout="vertical">
+                <BarChart data={goalProgressData || []} layout="vertical">
                   <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
                   <XAxis type="number" tickFormatter={formatCurrency} />
                   <YAxis dataKey="title" type="category" width={150} />
@@ -592,8 +1152,34 @@ const DashboardCategory = forwardRef(
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            {customCharts['progresso']?.map((chart) => (
+              <div
+                key={chart.id}
+                className={`chart-card ${styles.chartCard} ${styles[theme]}`}
+                ref={addChartRef}
+              >
+                <div className={styles.customChartHeader}>
+                  <h3>{chart.title}</h3>
+                  <button
+                    onClick={() => handleRemoveChart(chart.id, 'progresso')}
+                    className={styles.removeButton}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                {renderCustomChart('progresso', chart)}
+              </div>
+            ))}
           </div>
         </div>
+
+        <CustomChartModal
+          show={showModal}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmit}
+          currentSection={currentSection}
+          getDataOptions={getDataOptions}
+        />
       </div>
     );
   }

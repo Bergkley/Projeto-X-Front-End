@@ -14,6 +14,7 @@ const DashboardCategoryManager = () => {
   const [chartsReady, setChartsReady] = useState(false);
 
   const chartRefs = useRef([]);
+  const dashboardRef = useRef(null);
   
   const handleChartsRendered = () => {
     setChartsReady(true);
@@ -82,7 +83,14 @@ const DashboardCategoryManager = () => {
       return;
     }
 
-    if (chartRefs.current.length === 0 || chartRefs.current.every(r => !r)) {
+    if (!dashboardRef.current) {
+      alert('Erro de referência. Tente novamente ou recarregue o dashboard.');
+      return;
+    }
+
+    const chartNodes = dashboardRef.current.querySelectorAll('.chart-card');
+
+    if (chartNodes.length === 0) {
       alert('Erro de referência. Tente novamente ou recarregue o dashboard.');
       return;
     }
@@ -108,9 +116,9 @@ const DashboardCategoryManager = () => {
       window.dispatchEvent(new Event('resize'));
       await new Promise(r => setTimeout(r, 800)); 
 
-      for (let i = 0; i < chartRefs.current.length; i++) {
-        const node = chartRefs.current[i];
-        if (!node) continue;
+      for (let i = 0; i < chartNodes.length; i++) {
+        const node = chartNodes[i];
+        if (!node || !document.body.contains(node)) continue;
 
         node.style.background = '#ffffff';
         node.style.padding = '20px';
@@ -199,11 +207,13 @@ const DashboardCategoryManager = () => {
       />
 
       <DashboardCategory
+        ref={dashboardRef}
         data={dashboardData}
         loading={loading}
         filters={filters}
         chartRefs={chartRefs}
-        onChartsRendered={handleChartsRendered} 
+        onChartsRendered={handleChartsRendered}
+        setChartsReady={setChartsReady} 
       />
     </div>
   );
