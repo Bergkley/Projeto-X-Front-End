@@ -26,8 +26,9 @@ import {
 import styles from './dashboardCategory.module.css';
 import { useTheme } from './../../../../hooks/useTheme';
 import { forwardRef, useEffect, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import CustomChartModal from './modal/customChartModal';
+import CustomSummaryModal from './modal/customSummaryModal';
 
 const COLORS = [
   '#3b82f6',
@@ -48,8 +49,10 @@ const DashboardCategory = forwardRef(
     const hasCalledReady = useRef(false);
 
     const [showModal, setShowModal] = useState(false);
+    const [showSummaryModal, setShowSummaryModal] = useState(false);
     const [currentSection, setCurrentSection] = useState('');
     const [customCharts, setCustomCharts] = useState({});
+    const [selectedCustomSummaries, setSelectedCustomSummaries] = useState([]);
 
     useEffect(() => {
       chartRefs.current = [];
@@ -60,16 +63,16 @@ const DashboardCategory = forwardRef(
 
     useEffect(() => {
       if (data) {
-        let count = 3; // categorias
-        count += (customCharts['categorias']?.length || 0);
+        let count = 3; 
+        count += (customCharts['categories']?.length || 0);
         count += (data.customFieldValueCounts?.length || 0);
-        count += (customCharts['camposCustomizados']?.length || 0);
-        count += 4; // transacoes
-        count += (customCharts['transacoes']?.length || 0);
-        count += 2; // evolucao
-        count += (customCharts['evolucao']?.length || 0);
-        count += 1; // progresso
-        count += (customCharts['progresso']?.length || 0);
+        count += (customCharts['customFields']?.length || 0);
+        count += 4; 
+        count += (customCharts['transactions']?.length || 0);
+        count += 2; 
+        count += (customCharts['evolution']?.length || 0);
+        count += 1; 
+        count += (customCharts['progress']?.length || 0);
 
         totalExpectedCharts.current = count;
         
@@ -146,40 +149,56 @@ const DashboardCategory = forwardRef(
         ...prev,
         [section]: prev[section].filter((c) => c.id !== id),
       }));
-      // Após a atualização de estado, limpar refs obsoletas
       setTimeout(() => {
         chartRefs.current = chartRefs.current.filter(node => node && document.body.contains(node));
         setChartsReady(true);
       }, 500);
     };
 
+    const handleOpenSummaryModal = () => {
+      setShowSummaryModal(true);
+    };
+
+    const handleCloseSummaryModal = () => {
+      setShowSummaryModal(false);
+    };
+
+    const handleSummarySubmit = (selected) => {
+      setSelectedCustomSummaries(selected);
+      setShowSummaryModal(false);
+    };
+
     const getDataOptions = (section) => {
       switch (section) {
-        case 'categorias':
+        case 'categories':
           return [
             { value: 'distributionRecordType', label: 'Distribuição de Categorias por Record Type', fields: ['name', 'value'] },
             { value: 'transactionCount', label: 'Distribuição de Contagem de Transações por Categoria', fields: ['name', 'count'] },
             { value: 'categoryType', label: 'Contagem por Tipo de Categoria', fields: ['type', 'transactionCount', 'categoryCount'] },
           ];
-        case 'camposCustomizados':
-          return data.customFieldValueCounts?.map((field) => ({
-            value: field.label,
-            label: `Contagem: ${field.label}`,
-            fields: ['name', 'count'],
-          })) || [];
-        case 'transacoes':
+        case 'customFields':
+          return data.customChartsData?.customFields?.flatMap((field) => {
+            const options = [
+              { value: field.label, label: `Contagem: ${field.label}`, fields: ['name', 'count'] }
+            ];
+            if (field.sums?.length > 0) { 
+              options.push({ value: `${field.label}_sum`, label: `Soma: ${field.label}`, fields: ['name', 'total'] });
+            }
+            return options;
+          }) || [];
+        case 'transactions':
           return [
             { value: 'transactionsByCategory', label: 'Transações por Categoria', fields: ['category', 'transactions'] },
             { value: 'statusDistribution', label: 'Distribuição de Status', fields: ['name', 'count', 'percentage'] },
             { value: 'dateHistogram', label: 'Histograma de Datas', fields: ['periodLabel', 'totalTransactions'] },
             { value: 'valueHistogram', label: 'Histograma de Valores', fields: ['bin', 'count', 'totalAmount'] },
           ];
-        case 'evolucao':
+        case 'evolution':
           return [
             { value: 'timeEvolution', label: 'Evolução Temporal', fields: ['periodLabel', 'totalAmount', 'totalTransactions'] },
             { value: 'recordsVsAverage', label: 'Relação: Nº de Registros × Valor Médio', fields: ['recordsCount', 'averageAmount', 'totalAmount'] },
           ];
-        case 'progresso':
+        case 'progress':
           return [
             { value: 'progressByRecord', label: 'Progresso por Registro', fields: ['title', 'initialBalance', 'currentTotal'] },
           ];
@@ -192,28 +211,11 @@ const DashboardCategory = forwardRef(
       let chartData = [];
       let chartProps = {};
 
-      if (section === 'categorias') {
-        const { summary, transactionCountPieChart, categoryTypeBarChart } = data;
+      const customData = data.customChartsData || {};
 
+      if (section === 'categories') {
         if (chart.dataSource === 'distributionRecordType') {
-          chartData = Object.entries(
-            (summary?.categoryBreakdown || []).reduce((acc, cat) => {
-              if (!cat) return acc;
-              if (!acc[cat.recordTypeName])
-                acc[cat.recordTypeName] = {
-                  name: cat.recordTypeName,
-                  value: 0,
-                  categories: []
-                };
-              acc[cat.recordTypeName].value += 1;
-              acc[cat.recordTypeName].categories.push(cat.categoryName);
-              return acc;
-            }, {})
-          ).map(([name, d]) => ({
-            name,
-            value: d.value,
-            categories: d.categories
-          }));
+          chartData = customData.categories.distributionRecordType || [];
           chartProps = {
             dataKey: 'value',
             nameKey: 'name',
@@ -223,7 +225,7 @@ const DashboardCategory = forwardRef(
             cornerRadius: 12,
           };
         } else if (chart.dataSource === 'transactionCount') {
-          chartData = (transactionCountPieChart || []).filter((d) => d.count > 0);
+          chartData = customData.categories.transactionCount || [];
           chartProps = {
             dataKey: 'count',
             nameKey: 'name',
@@ -233,7 +235,7 @@ const DashboardCategory = forwardRef(
             cornerRadius: 12,
           };
         } else if (chart.dataSource === 'categoryType') {
-          chartData = categoryTypeBarChart || [];
+          chartData = customData.categories.categoryType || [];
           chartProps = {
             xDataKey: 'type',
             bars: [
@@ -242,20 +244,22 @@ const DashboardCategory = forwardRef(
             ],
           };
         }
-      } else if (section === 'camposCustomizados') {
-        const field = (data?.customFieldValueCounts || []).find((f) => f.label === chart.dataSource);
+      } else if (section === 'customFields') {
+        const isSum = chart.dataSource.endsWith('_sum');
+        const label = isSum ? chart.dataSource.replace(/_sum$/, '') : chart.dataSource;
+        const field = customData.customFields?.find((f) => f.label === label);
         if (field) {
-          chartData = (field.data || []).filter((d) => d.count > 0);
+          chartData = isSum ? (field.sums || []).filter((d) => d.total > 0) : (field.data || []).filter((d) => d.count > 0);
           chartProps = {
             xDataKey: 'name',
             bars: [
-              { dataKey: 'count', fill: '#8b5cf6', name: 'Contagem' },
+              { dataKey: isSum ? 'total' : 'count', fill: '#8b5cf6', name: isSum ? 'Soma' : 'Contagem' },
             ],
           };
         }
-      } else if (section === 'transacoes') {
+      } else if (section === 'transactions') {
         if (chart.dataSource === 'transactionsByCategory') {
-          chartData = (data?.barChartData || []).filter((d) => d.amount > 0 || d.transactions > 0);
+          chartData = customData.transactions.transactionsByCategory || [];
           chartProps = {
             xDataKey: 'category',
             bars: [
@@ -263,7 +267,7 @@ const DashboardCategory = forwardRef(
             ],
           };
         } else if (chart.dataSource === 'statusDistribution') {
-          chartData = (data?.statusDistribution || []).filter((d) => d.count > 0);
+          chartData = customData.transactions.statusDistribution || [];
           chartProps = {
             dataKey: 'count',
             nameKey: 'name',
@@ -273,7 +277,7 @@ const DashboardCategory = forwardRef(
             cornerRadius: 12,
           };
         } else if (chart.dataSource === 'dateHistogram') {
-          chartData = data?.transactionDateHistogram || [];
+          chartData = customData.transactions.dateHistogram || [];
           chartProps = {
             xDataKey: 'periodLabel',
             bars: [
@@ -281,7 +285,7 @@ const DashboardCategory = forwardRef(
             ],
           };
         } else if (chart.dataSource === 'valueHistogram') {
-          chartData = (data?.transactionHistogram || []).filter((d) => d.count > 0);
+          chartData = customData.transactions.valueHistogram || [];
           chartProps = {
             xDataKey: 'bin',
             bars: [
@@ -290,9 +294,9 @@ const DashboardCategory = forwardRef(
             ],
           };
         }
-      } else if (section === 'evolucao') {
+      } else if (section === 'evolution') {
         if (chart.dataSource === 'timeEvolution') {
-          chartData = data?.timeSeriesData || [];
+          chartData = customData.evolution.timeEvolution || [];
           chartProps = {
             xDataKey: 'periodLabel',
             lines: [
@@ -301,7 +305,7 @@ const DashboardCategory = forwardRef(
             ],
           };
         } else if (chart.dataSource === 'recordsVsAverage') {
-          chartData = (data?.scatterData || []).filter((d) => d.totalAmount > 0);
+          chartData = customData.evolution.recordsVsAverage || [];
           chartProps = {
             xDataKey: 'recordsCount',
             yDataKey: 'averageAmount',
@@ -310,9 +314,9 @@ const DashboardCategory = forwardRef(
             fill: '#8b5cf6',
           };
         }
-      } else if (section === 'progresso') {
+      } else if (section === 'progress') {
         if (chart.dataSource === 'progressByRecord') {
-          chartData = data?.goalProgressData || [];
+          chartData = customData.progress.progressByRecord || [];
           chartProps = {
             layout: 'vertical',
             xType: 'number',
@@ -627,14 +631,29 @@ const DashboardCategory = forwardRef(
             <h3>Categorias Ativas</h3>
             <p>{summary.totalCategories}</p>
           </div>
+          {(data.customChartsData?.customFields || []).map((field, idx) => (
+            selectedCustomSummaries.includes(field.label) && field.totalSum > 0 && (
+              <div key={idx} className={`${styles.summaryCard} ${styles[theme]}`}>
+                <h3>Total de {field.label}</h3>
+                <p>{formatNumber(field.totalSum)}</p>
+              </div>
+            )
+          ))}
         </div>
+        <button
+          onClick={handleOpenSummaryModal}
+          className={styles.customButton}
+        >
+          Adicionar Totais Custom
+          <Plus size={16} style={{ marginLeft: '8px' }} />
+        </button>
 
         {/* === 1. Insights de Categorias === */}
         <div className={`${styles.section} ${styles[theme]}`}>
           <h2>
             Insights de Categorias
             <button
-              onClick={() => handleOpenModal('categorias')}
+              onClick={() => handleOpenModal('categories')}
               className={styles.customButton}
             >
               Customizar Gráfico
@@ -756,7 +775,7 @@ const DashboardCategory = forwardRef(
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            {customCharts['categorias']?.map((chart) => (
+            {customCharts['categories']?.map((chart) => (
               <div
                 key={chart.id}
                 className={`chart-card ${styles.chartCard} ${styles[theme]}`}
@@ -765,13 +784,13 @@ const DashboardCategory = forwardRef(
                 <div className={styles.customChartHeader}>
                   <h3>{chart.title}</h3>
                   <button
-                    onClick={() => handleRemoveChart(chart.id, 'categorias')}
+                    onClick={() => handleRemoveChart(chart.id, 'categories')}
                     className={styles.removeButton}
                   >
                     <X size={16} />
                   </button>
                 </div>
-                {renderCustomChart('categorias', chart)}
+                {renderCustomChart('categories', chart)}
               </div>
             ))}
           </div>
@@ -783,7 +802,7 @@ const DashboardCategory = forwardRef(
             <h2>
               Insights de Campos Customizados
               <button
-                onClick={() => handleOpenModal('camposCustomizados')}
+                onClick={() => handleOpenModal('customFields')}
                 className={styles.customButton}
               >
                 Customizar Gráfico
@@ -819,7 +838,7 @@ const DashboardCategory = forwardRef(
                   </ResponsiveContainer>
                 </div>
               ))}
-              {customCharts['camposCustomizados']?.map((chart) => (
+              {customCharts['customFields']?.map((chart) => (
                 <div
                   key={chart.id}
                   className={`chart-card ${styles.chartCard} ${styles[theme]}`}
@@ -828,13 +847,13 @@ const DashboardCategory = forwardRef(
                   <div className={styles.customChartHeader}>
                     <h3>{chart.title}</h3>
                     <button
-                      onClick={() => handleRemoveChart(chart.id, 'camposCustomizados')}
+                      onClick={() => handleRemoveChart(chart.id, 'customFields')}
                       className={styles.removeButton}
                     >
                       <X size={16} />
                     </button>
                   </div>
-                  {renderCustomChart('camposCustomizados', chart)}
+                  {renderCustomChart('customFields', chart)}
                 </div>
               ))}
             </div>
@@ -846,7 +865,7 @@ const DashboardCategory = forwardRef(
           <h2>
             Insights de Transações
             <button
-              onClick={() => handleOpenModal('transacoes')}
+              onClick={() => handleOpenModal('transactions')}
               className={styles.customButton}
             >
               Customizar Gráfico
@@ -971,7 +990,7 @@ const DashboardCategory = forwardRef(
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            {customCharts['transacoes']?.map((chart) => (
+            {customCharts['transactions']?.map((chart) => (
               <div
                 key={chart.id}
                 className={`chart-card ${styles.chartCard} ${styles[theme]}`}
@@ -980,13 +999,13 @@ const DashboardCategory = forwardRef(
                 <div className={styles.customChartHeader}>
                   <h3>{chart.title}</h3>
                   <button
-                    onClick={() => handleRemoveChart(chart.id, 'transacoes')}
+                    onClick={() => handleRemoveChart(chart.id, 'transactions')}
                     className={styles.removeButton}
                   >
                     <X size={16} />
                   </button>
                 </div>
-                {renderCustomChart('transacoes', chart)}
+                {renderCustomChart('transactions', chart)}
               </div>
             ))}
           </div>
@@ -997,7 +1016,7 @@ const DashboardCategory = forwardRef(
           <h2>
             Evolução e Relações
             <button
-              onClick={() => handleOpenModal('evolucao')}
+              onClick={() => handleOpenModal('evolution')}
               className={styles.customButton}
             >
               Customizar Gráfico
@@ -1090,7 +1109,7 @@ const DashboardCategory = forwardRef(
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
-            {customCharts['evolucao']?.map((chart) => (
+            {customCharts['evolution']?.map((chart) => (
               <div
                 key={chart.id}
                 className={`chart-card ${styles.chartCard} ${styles[theme]}`}
@@ -1099,13 +1118,13 @@ const DashboardCategory = forwardRef(
                 <div className={styles.customChartHeader}>
                   <h3>{chart.title}</h3>
                   <button
-                    onClick={() => handleRemoveChart(chart.id, 'evolucao')}
+                    onClick={() => handleRemoveChart(chart.id, 'evolution')}
                     className={styles.removeButton}
                   >
                     <X size={16} />
                   </button>
                 </div>
-                {renderCustomChart('evolucao', chart)}
+                {renderCustomChart('evolution', chart)}
               </div>
             ))}
           </div>
@@ -1116,7 +1135,7 @@ const DashboardCategory = forwardRef(
           <h2>
             Progresso de Metas
             <button
-              onClick={() => handleOpenModal('progresso')}
+              onClick={() => handleOpenModal('progress')}
               className={styles.customButton}
             >
               Customizar Gráfico
@@ -1152,7 +1171,7 @@ const DashboardCategory = forwardRef(
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            {customCharts['progresso']?.map((chart) => (
+            {customCharts['progress']?.map((chart) => (
               <div
                 key={chart.id}
                 className={`chart-card ${styles.chartCard} ${styles[theme]}`}
@@ -1161,13 +1180,13 @@ const DashboardCategory = forwardRef(
                 <div className={styles.customChartHeader}>
                   <h3>{chart.title}</h3>
                   <button
-                    onClick={() => handleRemoveChart(chart.id, 'progresso')}
+                    onClick={() => handleRemoveChart(chart.id, 'progress')}
                     className={styles.removeButton}
                   >
                     <X size={16} />
                   </button>
                 </div>
-                {renderCustomChart('progresso', chart)}
+                {renderCustomChart('progress', chart)}
               </div>
             ))}
           </div>
@@ -1179,6 +1198,13 @@ const DashboardCategory = forwardRef(
           onSubmit={handleSubmit}
           currentSection={currentSection}
           getDataOptions={getDataOptions}
+        />
+        <CustomSummaryModal
+          show={showSummaryModal}
+          onClose={handleCloseSummaryModal}
+          onSubmit={handleSummarySubmit}
+          fields={data?.customChartsData?.customFields?.filter(f => f.totalSum > 0) || []}
+          initialSelected={selectedCustomSummaries}
         />
       </div>
     );

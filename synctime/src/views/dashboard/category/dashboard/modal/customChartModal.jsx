@@ -1,5 +1,5 @@
 import { X, BarChart as BarChartIcon, LineChart as LineChartIcon, AreaChart as AreaChartIcon, PieChart as PieChartIcon, ScatterChart as ScatterChartIcon, Radar as RadarIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './customChartModal.module.css';
 import { useTheme } from './../../../../../hooks/useTheme';
 
@@ -21,10 +21,9 @@ const CustomChartModal = ({
     customFieldLabel: null
   });
 
-  if (!show) return null;
-
-  const initialDataSource = getDataOptions(currentSection)[0]?.value || '';
-  if (chartConfig.dataSource !== initialDataSource) {
+  useEffect(() => {
+    const options = getDataOptions(currentSection);
+    const initialDataSource = options[0]?.value || '';
     setChartConfig({
       title: '',
       chartType: 'BarChart',
@@ -34,7 +33,9 @@ const CustomChartModal = ({
       additionalMetrics: [],
       customFieldLabel: null
     });
-  }
+  }, [currentSection]);
+
+  if (!show) return null;
 
   const chartTypeOptions = [
     { value: 'BarChart', label: 'Barras', icon: BarChartIcon },
@@ -76,7 +77,7 @@ const CustomChartModal = ({
         <div className={`${styles.modalInner} ${styles[theme]}`}>
           <div className={`${styles.modalHeader} ${styles[theme]}`}>
             <h3 className={`${styles.modalTitle} ${styles[theme]}`}>
-              Criar Gráfico Customizado para {currentSection === 'categorias' ? 'Insights de Categorias' : currentSection === 'camposCustomizados' ? 'Insights de Campos Customizados' : currentSection === 'transacoes' ? 'Insights de Transações' : currentSection === 'evolucao' ? 'Evolução e Relações' : 'Progresso de Metas'}
+              Criar Gráfico Customizado para {currentSection === 'categories' ? 'Insights de Categorias' : currentSection === 'customFields' ? 'Insights de Campos Customizados' : currentSection === 'transactions' ? 'Insights de Transações' : currentSection === 'evolution' ? 'Evolução e Relações' : 'Progresso de Metas'}
             </h3>
             <button onClick={onClose} className={`${styles.closeButton} ${styles[theme]}`}>
               <X size={24} />
