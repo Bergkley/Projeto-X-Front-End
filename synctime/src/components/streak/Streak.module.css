@@ -120,6 +120,7 @@
   font-size: 2.25rem;
   font-weight: bold;
   margin: 0;
+  flex: 1;
   transition: color 0.3s ease;
 }
 
@@ -132,10 +133,49 @@
 }
 
 .titleFlame {
-  width: 4rem;
-  height: 4rem;
-  color: #fde047;
+  width: 3.5rem;
+  height: 3.5rem;
   flex-shrink: 0;
+  filter: drop-shadow(0 4px 6px rgba(253, 224, 71, 0.3));
+  transition: transform 0.3s ease;
+}
+
+.titleFlame:hover {
+  transform: scale(1.1);
+}
+
+/* Rank Button */
+.rankButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalContent.dark .rankButton:hover {
+  background-color: rgba(251, 146, 60, 0.1);
+}
+
+.modalContent.light .rankButton:hover {
+  background-color: rgba(251, 146, 60, 0.1);
+}
+
+.podiumIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #fb923c;
+  filter: drop-shadow(0 2px 4px rgba(251, 146, 60, 0.3));
+  transition: all 0.3s ease;
+}
+
+.rankButton:hover .podiumIcon {
+  transform: scale(1.15) translateY(-2px);
+  filter: drop-shadow(0 4px 8px rgba(251, 146, 60, 0.5));
 }
 
 /* Subtitle */
@@ -197,9 +237,10 @@
 
 .dayActive {
   font-size: 0.875rem;
-  font-weight: 500;
-  color: #fdba74;
+  font-weight: 700;
+  color: #fb923c;
   margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(251, 146, 60, 0.3);
 }
 
 /* Progress Bar */
@@ -227,6 +268,7 @@
   background: linear-gradient(to right, #facc15, #fb923c);
   border-radius: 9999px;
   transition: width 0.5s ease;
+  box-shadow: 0 0 20px rgba(251, 146, 60, 0.4);
 }
 
 /* Day Indicators */
@@ -253,27 +295,43 @@
 
 .dayCompleted {
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(249, 115, 22, 0.2);
+  transform: scale(1);
+}
+
+.dayCompleted:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(249, 115, 22, 0.3);
 }
 
 .modalContent.light .dayCompleted {
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .dayCurrent {
   background-color: white;
-  border: 4px solid #fb923c;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 3px solid #fb923c;
+  box-shadow: 0 4px 8px rgba(251, 146, 60, 0.3), 0 0 20px rgba(251, 146, 60, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 8px rgba(251, 146, 60, 0.3), 0 0 20px rgba(251, 146, 60, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(251, 146, 60, 0.4), 0 0 30px rgba(251, 146, 60, 0.6);
+  }
 }
 
 .modalContent.light .dayCurrent {
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .dayIncomplete {
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .modalContent.dark .dayIncomplete {
@@ -287,7 +345,7 @@
 .dayFlame {
   width: 1rem;
   height: 1rem;
-  color: #f97316;
+  filter: drop-shadow(0 2px 4px #fff);
 }
 
 /* Responsive */
@@ -311,6 +369,11 @@
   .titleFlame {
     width: 3rem;
     height: 3rem;
+  }
+
+  .podiumIcon {
+    width: 2rem;
+    height: 2rem;
   }
 
   .subtitle {

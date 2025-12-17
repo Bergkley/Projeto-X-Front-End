@@ -1,6 +1,9 @@
 import { Zap, X } from 'lucide-react';
+import { GiPodium } from "react-icons/gi";
 import styles from './Streak.module.css';
 import { useTheme } from '../../hooks/useTheme'; 
+import { useState } from 'react';
+import Ranking from '../rank/Ranking';
 
 const Streak = ({
   streakDays,
@@ -11,6 +14,7 @@ const Streak = ({
   getFlameColor,
 }) => {
   const { theme } = useTheme();
+  const [showRanking, setShowRanking] = useState(false);
 
   const currentDayIndex = new Date().getDay();
 
@@ -25,19 +29,23 @@ const Streak = ({
         </button>
 
         <div className={styles.modalBody}>
-          {/* Título */}
           <div className={styles.titleContainer}>
+            <Zap className={styles.titleFlame} color={getFlameColor()} fill={getFlameColor()} />
             <h2 className={styles.title}>{streakDays} dias de ofensiva</h2>
-            <Zap className={styles.titleFlame} color={getFlameColor()} />
+            <button 
+              onClick={() => setShowRanking(true)} 
+              className={styles.rankButton}
+              aria-label="Ver ranking"
+            >
+              <GiPodium className={styles.podiumIcon} />
+            </button>
           </div>
 
-          {/* Subtítulo */}
           <p className={styles.subtitle}>
             Você aumentou a sua ofensiva antes do meio-dia{' '}
             {completedDaysThisWeek} vezes essa semana!
           </p>
 
-          {/* Calendário Semanal */}
           <div className={styles.calendar}>
             <div className={styles.weekDays}>
               {weekDays.map((day, index) => (
@@ -51,14 +59,12 @@ const Streak = ({
               ))}
             </div>
 
-            {/* Barra de Progresso */}
             <div className={styles.progressBar}>
               <div
                 className={styles.progressFill}
                 style={{ width: `${(completedDaysThisWeek / 7) * 100}%` }}
               ></div>
 
-              {/* Indicadores dos dias */}
               <div className={styles.dayIndicators}>
                 {weekProgress.map((completed, index) => (
                   <div
@@ -71,7 +77,7 @@ const Streak = ({
                         : styles.dayIncomplete
                     }
                   >
-                    {completed && <Zap className={styles.dayFlame} />}
+                    {completed && <Zap className={styles.dayFlame} fill="#fff" />}
                   </div>
                 ))}
               </div>
@@ -79,6 +85,7 @@ const Streak = ({
           </div>
         </div>
       </div>
+      {showRanking && <Ranking onClose={() => setShowRanking(false)} />}
     </div>
   );
 };

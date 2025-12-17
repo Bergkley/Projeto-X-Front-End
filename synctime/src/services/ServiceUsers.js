@@ -35,6 +35,9 @@ class ServiceUSERS {
     return api.get(`/user/inbox`);
   }
   
+  getRanking(){
+    return api.get(`/user/rank`);
+  }
 }
 
 export default new ServiceUSERS();
