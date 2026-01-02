@@ -21,6 +21,7 @@ import useFlashMessage from '../../../../../../hooks/userFlashMessage';
 import { useTheme } from '../../../../../../hooks/useTheme';
 import { useButtonColors } from '../../../../../../hooks/useButtonColors';
 import errorFormMessage from '../../../../../../utils/errorFormMessage';
+import ServiceCategory from '../../../../../sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
 
 const TransactionForm = () => {
   const { id } = useParams();
@@ -34,6 +35,7 @@ const TransactionForm = () => {
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(!!id);
   const [customFields, setCustomFields] = useState([]);
+  const [category, setCategory] = useState(null);
 
   const {
     control,
@@ -51,11 +53,11 @@ const TransactionForm = () => {
 
   const formatCurrency = (value) => {
     if (!value) return '';
-    
+
     const numericValue = value.replace(/\D/g, '');
-    
+
     const numberValue = parseFloat(numericValue) / 100;
-    
+
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
@@ -64,13 +66,13 @@ const TransactionForm = () => {
 
   const parseCurrency = (value) => {
     if (!value) return '';
-    
+
     const numericValue = value
       .replace('R$', '')
       .replace(/\s/g, '')
       .replace(/\./g, '')
       .replace(',', '.');
-    
+
     return numericValue;
   };
 
@@ -96,6 +98,18 @@ const TransactionForm = () => {
   }, [dados?.categoryId, dados?.recordTypeId]);
 
   useEffect(() => {
+    const fetchCategory = async () => {
+      if (dados?.categoryId) {
+        const category = await ServiceCategory.getByIdCategory(
+          dados.categoryId
+        );
+        setCategory(category.data.data);
+      }
+    };
+    fetchCategory();
+  }, [dados?.categoryId]);
+
+  useEffect(() => {
     const fetchTransactionData = async () => {
       if (!id) return;
 
@@ -114,7 +128,7 @@ const TransactionForm = () => {
           const formData = {
             title: transactionData.title || '',
             description: transactionData.description || '',
-            amount: transactionData.amount 
+            amount: transactionData.amount
               ? formatCurrency((transactionData.amount * 100).toString())
               : '',
             transactionDate: transactionData.transaction_date || ''
@@ -156,7 +170,9 @@ const TransactionForm = () => {
       const payload = {
         title: data.title,
         description: data.description || undefined,
-        amount: data.amount ? parseFloat(parseCurrency(data.amount)) : undefined,
+        amount: data.amount
+          ? parseFloat(parseCurrency(data.amount))
+          : undefined,
         transactionDate: data.transactionDate,
         recordTypeId: dados.recordTypeId,
         monthlyRecordId: dados.monthlyRecordId,
@@ -228,11 +244,17 @@ const TransactionForm = () => {
         year: dados.year
       });
     } catch (error) {
-      console.error('Erro ao salvar transação:', error?.response?.data?.errors[0]);
+      console.error(
+        'Erro ao salvar transação:',
+        error?.response?.data?.errors[0]
+      );
       const errorMessage = id
         ? 'Erro ao atualizar transação'
         : 'Erro ao criar transação';
-      setFlashMessage(error?.response?.data?.errors[0] || errorMessage, 'error');
+      setFlashMessage(
+        error?.response?.data?.errors[0] || errorMessage,
+        'error'
+      );
     } finally {
       setLoading(false);
     }
@@ -341,47 +363,49 @@ const TransactionForm = () => {
           </Row>
 
           <Row className="mb-4">
-            <Col md={6}>
-              <div className={styles.fieldGroup}>
-                <Controller
-                  name="amount"
-                  control={control}
-                  rules={{
-                    required: 'Valor é obrigatório',
-                    validate: (value) => {
-                      const numericValue = parseFloat(parseCurrency(value));
-                      if (isNaN(numericValue) || numericValue <= 0) {
-                        return 'O valor deve ser maior que zero';
+            {category?.type === 'financeiro' && (
+              <Col md={6}>
+                <div className={styles.fieldGroup}>
+                  <Controller
+                    name="amount"
+                    control={control}
+                    rules={{
+                      required: 'Valor é obrigatório',
+                      validate: (value) => {
+                        const numericValue = parseFloat(parseCurrency(value));
+                        if (isNaN(numericValue) || numericValue <= 0) {
+                          return 'O valor deve ser maior que zero';
+                        }
+                        return true;
                       }
-                      return true;
-                    }
-                  }}
-                  render={({ field }) => (
-                    <>
-                      <label className={styles.label}>Valor *</label>
-                      <input
-                        {...field}
-                        type="text"
-                        placeholder="R$ 0,00"
-                        className={`${styles.input} ${
-                          errors.amount ? styles.error : ''
-                        }`}
-                        disabled={loading}
-                        onChange={(e) => {
-                          const formatted = formatCurrency(e.target.value);
-                          field.onChange(formatted);
-                        }}
-                      />
-                      <ErrorMessage
-                        errors={errors}
-                        name="amount"
-                        render={({ message }) => errorFormMessage(message)}
-                      />
-                    </>
-                  )}
-                />
-              </div>
-            </Col>
+                    }}
+                    render={({ field }) => (
+                      <>
+                        <label className={styles.label}>Valor *</label>
+                        <input
+                          {...field}
+                          type="text"
+                          placeholder="R$ 0,00"
+                          className={`${styles.input} ${
+                            errors.amount ? styles.error : ''
+                          }`}
+                          disabled={loading}
+                          onChange={(e) => {
+                            const formatted = formatCurrency(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
+                        <ErrorMessage
+                          errors={errors}
+                          name="amount"
+                          render={({ message }) => errorFormMessage(message)}
+                        />
+                      </>
+                    )}
+                  />
+                </div>
+              </Col>
+            )}
 
             <Col md={6}>
               <div className={styles.fieldGroup}>

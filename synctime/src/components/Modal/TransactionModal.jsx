@@ -1,29 +1,24 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import styles from './TransactionModal.module.css';
 import { Button } from 'reactstrap';
 import { useTheme } from '../../hooks/useTheme';
 import { useEmphasisColor } from '../../hooks/useEmphasisColor';
-import { useButtonColors } from '../../hooks/useButtonColors'; 
+import { useButtonColors } from '../../hooks/useButtonColors';
 import ServiceCustomFields from '../../views/sectionConfigSystem/Sections/General/CustomFields/services/ServiceCustomFields';
 import errorFormMessage from '../../utils/errorFormMessage';
 import CustomFieldsRenderModal from '../customFields/CustomFieldsRenderModal';
+import ServiceCategory from '../../views/sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
 
-
-const TransactionModal = ({ 
-  isOpen, 
-  onClose, 
-  record, 
-  onSave,
-  dados 
-}) => {
+const TransactionModal = ({ isOpen, onClose, record, onSave, dados }) => {
   const { theme } = useTheme();
   const { emphasisColor } = useEmphasisColor();
-  const { primaryButtonColor, secondaryButtonColor } = useButtonColors(); 
+  const { primaryButtonColor, secondaryButtonColor } = useButtonColors();
   const isEditMode = !!record?.id;
   const [customFields, setCustomFields] = useState([]);
   const [isLoadingCustomFields, setIsLoadingCustomFields] = useState(false);
+  const [category, setCategory] = useState(null);
 
   const {
     control,
@@ -41,11 +36,11 @@ const TransactionModal = ({
 
   const formatCurrency = (value) => {
     if (!value) return '';
-    
+
     const numericValue = value.replace(/\D/g, '');
-    
+
     const numberValue = parseFloat(numericValue) / 100;
-    
+
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
@@ -54,13 +49,13 @@ const TransactionModal = ({
 
   const parseCurrency = (value) => {
     if (!value) return '';
-    
+
     const numericValue = value
       .replace('R$', '')
       .replace(/\s/g, '')
       .replace(/\./g, '')
       .replace(',', '.');
-    
+
     return numericValue;
   };
 
@@ -101,7 +96,7 @@ const TransactionModal = ({
     if (isEditMode && record) {
       formData.title = record.title || '';
       formData.description = record.description || '';
-      formData.amount = record.amount 
+      formData.amount = record.amount
         ? formatCurrency((record.amount * 100).toString())
         : '';
       formData.transactionDate = record.transaction_date || '';
@@ -129,6 +124,18 @@ const TransactionModal = ({
 
     reset(formData);
   }, [isOpen, record, isEditMode, reset]);
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      if (dados?.categoryId) {
+        const category = await ServiceCategory.getByIdCategory(
+          dados.categoryId
+        );
+        setCategory(category.data.data);
+      }
+    };
+    fetchCategory();
+  }, [dados?.categoryId]);
 
   const onSubmit = async (data) => {
     const payload = {
@@ -207,26 +214,42 @@ const TransactionModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className={`${styles.modalBackdrop} ${styles[theme]}`} onClick={handleClose}>
-      <div className={`${styles.modalContent} ${styles[theme]}`} onClick={(e) => e.stopPropagation()}>
+    <div
+      className={`${styles.modalBackdrop} ${styles[theme]}`}
+      onClick={handleClose}
+    >
+      <div
+        className={`${styles.modalContent} ${styles[theme]}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={`${styles.modalHeader} ${styles[theme]}`}>
           <h2 className={`${styles.modalTitle} ${styles[theme]}`}>
             {isEditMode ? 'Editar Transação' : 'Nova Transação'}
           </h2>
-          <button className={`${styles.closeBtn} ${styles[theme]}`} onClick={handleClose}>
+          <button
+            className={`${styles.closeBtn} ${styles[theme]}`}
+            onClick={handleClose}
+          >
             <X size={24} />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className={`${styles.modalBody} ${styles[theme]}`}>
             <div className={styles.sectionHeader}>
-              <label className={`${styles.formLabel} ${styles[theme]}`}>Informações Básicas</label>
+              <label className={`${styles.formLabel} ${styles[theme]}`}>
+                Informações Básicas
+              </label>
             </div>
 
             {/* Título - Coluna 1 */}
             <div className={styles.formGroup}>
-              <label htmlFor="title" className={`${styles.formLabel} ${styles[theme]}`}>Título *</label>
+              <label
+                htmlFor="title"
+                className={`${styles.formLabel} ${styles[theme]}`}
+              >
+                Título *
+              </label>
               <Controller
                 name="title"
                 control={control}
@@ -237,11 +260,16 @@ const TransactionModal = ({
                       {...field}
                       type="text"
                       id="title"
-                      className={`${styles.formInput} ${styles[theme]} ${errors.title ? styles.error : ''}`}
+                      className={`${styles.formInput} ${styles[theme]} ${
+                        errors.title ? styles.error : ''
+                      }`}
                       placeholder="Digite o título da transação"
                       style={{
-                        '--focus-border-color': emphasisColor || 'rgb(20, 18, 129)',
-                        '--focus-shadow-color': emphasisColor ? `${emphasisColor}26` : 'rgba(102, 126, 234, 0.15)'
+                        '--focus-border-color':
+                          emphasisColor || 'rgb(20, 18, 129)',
+                        '--focus-shadow-color': emphasisColor
+                          ? `${emphasisColor}26`
+                          : 'rgba(102, 126, 234, 0.15)'
                       }}
                     />
                     <div className={styles.errorMessage}>
@@ -253,49 +281,67 @@ const TransactionModal = ({
             </div>
 
             {/* Valor - Coluna 2 */}
-            <div className={styles.formGroup}>
-              <label htmlFor="amount" className={`${styles.formLabel} ${styles[theme]}`}>Valor *</label>
-              <Controller
-                name="amount"
-                control={control}
-                rules={{
-                  required: 'Valor é obrigatório',
-                  validate: (value) => {
-                    const numericValue = parseFloat(parseCurrency(value));
-                    if (isNaN(numericValue) || numericValue <= 0) {
-                      return 'O valor deve ser maior que zero';
+            {category?.type === 'financeiro' && (
+              <div className={styles.formGroup}>
+                <label
+                  htmlFor="amount"
+                  className={`${styles.formLabel} ${styles[theme]}`}
+                >
+                  Valor *
+                </label>
+                <Controller
+                  name="amount"
+                  control={control}
+                  rules={{
+                    required: 'Valor é obrigatório',
+                    validate: (value) => {
+                      const numericValue = parseFloat(parseCurrency(value));
+                      if (isNaN(numericValue) || numericValue <= 0) {
+                        return 'O valor deve ser maior que zero';
+                      }
+                      return true;
                     }
-                    return true;
-                  }
-                }}
-                render={({ field }) => (
-                  <>
-                    <input
-                      {...field}
-                      type="text"
-                      id="amount"
-                      className={`${styles.formInput} ${styles[theme]} ${errors.amount ? styles.error : ''}`}
-                      placeholder="R$ 0,00"
-                      style={{
-                        '--focus-border-color': emphasisColor || 'rgb(20, 18, 129)',
-                        '--focus-shadow-color': emphasisColor ? `${emphasisColor}26` : 'rgba(102, 126, 234, 0.15)'
-                      }}
-                      onChange={(e) => {
-                        const formatted = formatCurrency(e.target.value);
-                        field.onChange(formatted);
-                      }}
-                    />
-                    <div className={styles.errorMessage}>
-                      {errors.amount && errorFormMessage(errors.amount.message)}
-                    </div>
-                  </>
-                )}
-              />
-            </div>
+                  }}
+                  render={({ field }) => (
+                    <>
+                      <input
+                        {...field}
+                        type="text"
+                        id="amount"
+                        className={`${styles.formInput} ${styles[theme]} ${
+                          errors.amount ? styles.error : ''
+                        }`}
+                        placeholder="R$ 0,00"
+                        style={{
+                          '--focus-border-color':
+                            emphasisColor || 'rgb(20, 18, 129)',
+                          '--focus-shadow-color': emphasisColor
+                            ? `${emphasisColor}26`
+                            : 'rgba(102, 126, 234, 0.15)'
+                        }}
+                        onChange={(e) => {
+                          const formatted = formatCurrency(e.target.value);
+                          field.onChange(formatted);
+                        }}
+                      />
+                      <div className={styles.errorMessage}>
+                        {errors.amount &&
+                          errorFormMessage(errors.amount.message)}
+                      </div>
+                    </>
+                  )}
+                />
+              </div>
+            )}
 
             {/* Descrição - Coluna 1 */}
             <div className={styles.formGroup}>
-              <label htmlFor="description" className={`${styles.formLabel} ${styles[theme]}`}>Descrição</label>
+              <label
+                htmlFor="description"
+                className={`${styles.formLabel} ${styles[theme]}`}
+              >
+                Descrição
+              </label>
               <Controller
                 name="description"
                 control={control}
@@ -307,8 +353,11 @@ const TransactionModal = ({
                     placeholder="Digite uma descrição para a transação..."
                     rows={3}
                     style={{
-                      '--focus-border-color': emphasisColor || 'rgb(20, 18, 129)',
-                      '--focus-shadow-color': emphasisColor ? `${emphasisColor}26` : 'rgba(102, 126, 234, 0.15)'
+                      '--focus-border-color':
+                        emphasisColor || 'rgb(20, 18, 129)',
+                      '--focus-shadow-color': emphasisColor
+                        ? `${emphasisColor}26`
+                        : 'rgba(102, 126, 234, 0.15)'
                     }}
                   />
                 )}
@@ -317,7 +366,12 @@ const TransactionModal = ({
 
             {/* Data - Coluna 2 */}
             <div className={styles.formGroup}>
-              <label htmlFor="transactionDate" className={`${styles.formLabel} ${styles[theme]}`}>Data da Transação *</label>
+              <label
+                htmlFor="transactionDate"
+                className={`${styles.formLabel} ${styles[theme]}`}
+              >
+                Data da Transação *
+              </label>
               <Controller
                 name="transactionDate"
                 control={control}
@@ -328,14 +382,20 @@ const TransactionModal = ({
                       {...field}
                       type="date"
                       id="transactionDate"
-                      className={`${styles.formInput} ${styles[theme]} ${errors.transactionDate ? styles.error : ''}`}
+                      className={`${styles.formInput} ${styles[theme]} ${
+                        errors.transactionDate ? styles.error : ''
+                      }`}
                       style={{
-                        '--focus-border-color': emphasisColor || 'rgb(20, 18, 129)',
-                        '--focus-shadow-color': emphasisColor ? `${emphasisColor}26` : 'rgba(102, 126, 234, 0.15)'
+                        '--focus-border-color':
+                          emphasisColor || 'rgb(20, 18, 129)',
+                        '--focus-shadow-color': emphasisColor
+                          ? `${emphasisColor}26`
+                          : 'rgba(102, 126, 234, 0.15)'
                       }}
                     />
                     <div className={styles.errorMessage}>
-                      {errors.transactionDate && errorFormMessage(errors.transactionDate.message)}
+                      {errors.transactionDate &&
+                        errorFormMessage(errors.transactionDate.message)}
                     </div>
                   </>
                 )}
@@ -345,7 +405,9 @@ const TransactionModal = ({
             {/* Campos Customizados - Ocupam toda a largura */}
             {isLoadingCustomFields ? (
               <div className={styles.customFieldsSection}>
-                <div className={styles.formGroup}>Carregando campos customizados...</div>
+                <div className={styles.formGroup}>
+                  Carregando campos customizados...
+                </div>
               </div>
             ) : customFields.length > 0 ? (
               <div className={styles.customFieldsSection}>
@@ -359,16 +421,16 @@ const TransactionModal = ({
           </div>
 
           <div className={`${styles.modalFooter} ${styles[theme]}`}>
-            <Button 
-              type="button" 
-              className={`${styles.btnCancel} ${styles[theme]}`} 
+            <Button
+              type="button"
+              className={`${styles.btnCancel} ${styles[theme]}`}
               onClick={handleClose}
               style={{ backgroundColor: secondaryButtonColor }}
             >
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className={`${styles.btnSave} ${styles[theme]}`}
               style={{ backgroundColor: primaryButtonColor }}
             >

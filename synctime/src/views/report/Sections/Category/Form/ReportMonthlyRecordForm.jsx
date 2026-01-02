@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
@@ -21,6 +21,8 @@ import errorFormMessage from '../../../../../utils/errorFormMessage';
 // 📡 Services
 import ServiceMonthlyRecord from '../services/ServiceMonthlyRecord';
 import StatusBadge from '../../../../../components/statusBadge/StatusBadge';
+import ServiceCategory from '../../../../sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
+
 
 const STATUS_CONFIG = {
   concluido: { 
@@ -74,6 +76,8 @@ const ReportMonthlyRecordForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(!!id);
+  const [category, setCategory] = useState(null);
+
 
   const {
     control,
@@ -178,6 +182,16 @@ const ReportMonthlyRecordForm = () => {
 
     fetchMonthlyRecordData();
   }, [id]);
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      if(dados?.categoryId) {
+        const category = await ServiceCategory.getByIdCategory(dados.categoryId);
+        setCategory(category.data.data);
+      }
+    };
+    fetchCategory();
+  }, [dados?.categoryId]);
 
   // Submit
   const onSubmit = async (data) => {
@@ -366,8 +380,7 @@ const ReportMonthlyRecordForm = () => {
                 />
               </div>
             </Col>
-
-            <Col md={6}>
+            {category?.type === 'financeiro' && ( <Col md={6}>
               <div className={styles.fieldGroup}>
                 <Controller
                   name="initial_balance"
@@ -390,7 +403,8 @@ const ReportMonthlyRecordForm = () => {
                   )}
                 />
               </div>
-            </Col>
+            </Col>)}
+           
           </Row>
 
           {/* Quarta Linha - Mês e Ano */}

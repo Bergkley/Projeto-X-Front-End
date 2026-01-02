@@ -41,7 +41,18 @@ const COLORS = [
 ];
 
 const DashboardCategory = forwardRef(
-  ({ data, loading, filters, chartRefs, onChartsRendered, setChartsReady }, ref) => {
+  (
+    {
+      data,
+      loading,
+      filters,
+      chartRefs,
+      onChartsRendered,
+      setChartsReady,
+      categories
+    },
+    ref
+  ) => {
     const { theme } = useTheme();
 
     const registeredCharts = useRef(0);
@@ -54,6 +65,19 @@ const DashboardCategory = forwardRef(
     const [customCharts, setCustomCharts] = useState({});
     const [selectedCustomSummaries, setSelectedCustomSummaries] = useState([]);
 
+    const isFinancialCategory = () => {
+      if (!filters?.categoryId || !categories || categories.length === 0) {
+        return true;
+      }
+
+      const selectedCategory = categories.find(
+        (cat) => cat.id === filters.categoryId
+      );
+      return selectedCategory?.type === 'financeiro';
+    };
+
+    const showFinancialMetrics = isFinancialCategory();
+
     useEffect(() => {
       chartRefs.current = [];
       registeredCharts.current = 0;
@@ -63,20 +87,22 @@ const DashboardCategory = forwardRef(
 
     useEffect(() => {
       if (data) {
-        let count = 3; 
-        count += (customCharts['categories']?.length || 0);
-        count += (data.customFieldValueCounts?.length || 0);
-        count += (customCharts['customFields']?.length || 0);
-        count += 4; 
-        count += (customCharts['transactions']?.length || 0);
-        count += 2; 
-        count += (customCharts['evolution']?.length || 0);
-        count += 1; 
-        count += (customCharts['progress']?.length || 0);
+        let count = 3;
+        count += customCharts['categories']?.length || 0;
+        count += data.customFieldValueCounts?.length || 0;
+        count += customCharts['customFields']?.length || 0;
+        count += 4;
+        count += customCharts['transactions']?.length || 0;
+        count += 2;
+        count += customCharts['evolution']?.length || 0;
+
+        if (showFinancialMetrics) {
+          count += 1;
+        }
+        count += customCharts['progress']?.length || 0;
 
         totalExpectedCharts.current = count;
-        
-        
+
         const fallbackTimer = setTimeout(() => {
           if (!hasCalledReady.current && onChartsRendered) {
             console.warn('⚠️ FALLBACK: Forçando onChartsRendered após timeout');
@@ -84,10 +110,10 @@ const DashboardCategory = forwardRef(
             onChartsRendered();
           }
         }, 5000);
-        
+
         return () => clearTimeout(fallbackTimer);
       }
-    }, [data, customCharts, onChartsRendered]);
+    }, [data, customCharts, onChartsRendered, showFinancialMetrics]);
 
     const addChartRef = (el) => {
       if (!el || chartRefs.current.includes(el)) {
@@ -99,8 +125,6 @@ const DashboardCategory = forwardRef(
 
       chartRefs.current.push(el);
       registeredCharts.current += 1;
-
-      
 
       if (
         totalExpectedCharts.current > 0 &&
@@ -125,7 +149,12 @@ const DashboardCategory = forwardRef(
     };
 
     const handleSubmit = (config) => {
-      if (!config.dataSource || !config.xAxis || !config.yAxis || !config.title) {
+      if (
+        !config.dataSource ||
+        !config.xAxis ||
+        !config.yAxis ||
+        !config.title
+      ) {
         alert('Preencha todos os campos obrigatórios.');
         return;
       }
@@ -134,8 +163,8 @@ const DashboardCategory = forwardRef(
         ...prev,
         [currentSection]: [
           ...(prev[currentSection] || []),
-          { ...config, id: Date.now() },
-        ],
+          { ...config, id: Date.now() }
+        ]
       }));
       setShowModal(false);
       setTimeout(() => {
@@ -147,10 +176,12 @@ const DashboardCategory = forwardRef(
       setChartsReady(false);
       setCustomCharts((prev) => ({
         ...prev,
-        [section]: prev[section].filter((c) => c.id !== id),
+        [section]: prev[section].filter((c) => c.id !== id)
       }));
       setTimeout(() => {
-        chartRefs.current = chartRefs.current.filter(node => node && document.body.contains(node));
+        chartRefs.current = chartRefs.current.filter(
+          (node) => node && document.body.contains(node)
+        );
         setChartsReady(true);
       }, 500);
     };
@@ -172,35 +203,85 @@ const DashboardCategory = forwardRef(
       switch (section) {
         case 'categories':
           return [
-            { value: 'distributionRecordType', label: 'Distribuição de Categorias por Record Type', fields: ['name', 'value'] },
-            { value: 'transactionCount', label: 'Distribuição de Contagem de Transações por Categoria', fields: ['name', 'count'] },
-            { value: 'categoryType', label: 'Contagem por Tipo de Categoria', fields: ['type', 'transactionCount', 'categoryCount'] },
+            {
+              value: 'distributionRecordType',
+              label: 'Distribuição de Categorias por Record Type',
+              fields: ['name', 'value']
+            },
+            {
+              value: 'transactionCount',
+              label: 'Distribuição de Contagem de Transações por Categoria',
+              fields: ['name', 'count']
+            },
+            {
+              value: 'categoryType',
+              label: 'Contagem por Tipo de Categoria',
+              fields: ['type', 'transactionCount', 'categoryCount']
+            }
           ];
         case 'customFields':
-          return data.customChartsData?.customFields?.flatMap((field) => {
-            const options = [
-              { value: field.label, label: `Contagem: ${field.label}`, fields: ['name', 'count'] }
-            ];
-            if (field.sums?.length > 0) { 
-              options.push({ value: `${field.label}_sum`, label: `Soma: ${field.label}`, fields: ['name', 'total'] });
-            }
-            return options;
-          }) || [];
+          return (
+            data.customChartsData?.customFields?.flatMap((field) => {
+              const options = [
+                {
+                  value: field.label,
+                  label: `Contagem: ${field.label}`,
+                  fields: ['name', 'count']
+                }
+              ];
+              if (field.sums?.length > 0) {
+                options.push({
+                  value: `${field.label}_sum`,
+                  label: `Soma: ${field.label}`,
+                  fields: ['name', 'total']
+                });
+              }
+              return options;
+            }) || []
+          );
         case 'transactions':
           return [
-            { value: 'transactionsByCategory', label: 'Transações por Categoria', fields: ['category', 'transactions'] },
-            { value: 'statusDistribution', label: 'Distribuição de Status', fields: ['name', 'count', 'percentage'] },
-            { value: 'dateHistogram', label: 'Histograma de Datas', fields: ['periodLabel', 'totalTransactions'] },
-            { value: 'valueHistogram', label: 'Histograma de Valores', fields: ['bin', 'count', 'totalAmount'] },
+            {
+              value: 'transactionsByCategory',
+              label: 'Transações por Categoria',
+              fields: ['category', 'transactions']
+            },
+            {
+              value: 'statusDistribution',
+              label: 'Distribuição de Status',
+              fields: ['name', 'count', 'percentage']
+            },
+            {
+              value: 'dateHistogram',
+              label: 'Histograma de Datas',
+              fields: ['periodLabel', 'totalTransactions']
+            },
+            {
+              value: 'valueHistogram',
+              label: 'Histograma de Valores',
+              fields: ['bin', 'count', 'totalAmount']
+            }
           ];
         case 'evolution':
           return [
-            { value: 'timeEvolution', label: 'Evolução Temporal', fields: ['periodLabel', 'totalAmount', 'totalTransactions'] },
-            { value: 'recordsVsAverage', label: 'Relação: Nº de Registros × Valor Médio', fields: ['recordsCount', 'averageAmount', 'totalAmount'] },
+            {
+              value: 'timeEvolution',
+              label: 'Evolução Temporal',
+              fields: ['periodLabel', 'totalAmount', 'totalTransactions']
+            },
+            {
+              value: 'recordsVsAverage',
+              label: 'Relação: Nº de Registros × Valor Médio',
+              fields: ['recordsCount', 'averageAmount', 'totalAmount']
+            }
           ];
         case 'progress':
           return [
-            { value: 'progressByRecord', label: 'Progresso por Registro', fields: ['title', 'initialBalance', 'currentTotal'] },
+            {
+              value: 'progressByRecord',
+              label: 'Progresso por Registro',
+              fields: ['title', 'initialBalance', 'currentTotal']
+            }
           ];
         default:
           return [];
@@ -222,7 +303,7 @@ const DashboardCategory = forwardRef(
             innerRadius: 85,
             outerRadius: 130,
             paddingAngle: 3,
-            cornerRadius: 12,
+            cornerRadius: 12
           };
         } else if (chart.dataSource === 'transactionCount') {
           chartData = customData.categories.transactionCount || [];
@@ -232,29 +313,41 @@ const DashboardCategory = forwardRef(
             innerRadius: 85,
             outerRadius: 130,
             paddingAngle: 3,
-            cornerRadius: 12,
+            cornerRadius: 12
           };
         } else if (chart.dataSource === 'categoryType') {
           chartData = customData.categories.categoryType || [];
           chartProps = {
             xDataKey: 'type',
             bars: [
-              { dataKey: 'transactionCount', fill: '#10b981', name: 'Transações' },
-              { dataKey: 'categoryCount', fill: '#3b82f6', name: 'Categorias' },
-            ],
+              {
+                dataKey: 'transactionCount',
+                fill: '#10b981',
+                name: 'Transações'
+              },
+              { dataKey: 'categoryCount', fill: '#3b82f6', name: 'Categorias' }
+            ]
           };
         }
       } else if (section === 'customFields') {
         const isSum = chart.dataSource.endsWith('_sum');
-        const label = isSum ? chart.dataSource.replace(/_sum$/, '') : chart.dataSource;
+        const label = isSum
+          ? chart.dataSource.replace(/_sum$/, '')
+          : chart.dataSource;
         const field = customData.customFields?.find((f) => f.label === label);
         if (field) {
-          chartData = isSum ? (field.sums || []).filter((d) => d.total > 0) : (field.data || []).filter((d) => d.count > 0);
+          chartData = isSum
+            ? (field.sums || []).filter((d) => d.total > 0)
+            : (field.data || []).filter((d) => d.count > 0);
           chartProps = {
             xDataKey: 'name',
             bars: [
-              { dataKey: isSum ? 'total' : 'count', fill: '#8b5cf6', name: isSum ? 'Soma' : 'Contagem' },
-            ],
+              {
+                dataKey: isSum ? 'total' : 'count',
+                fill: '#8b5cf6',
+                name: isSum ? 'Soma' : 'Contagem'
+              }
+            ]
           };
         }
       } else if (section === 'transactions') {
@@ -263,8 +356,12 @@ const DashboardCategory = forwardRef(
           chartProps = {
             xDataKey: 'category',
             bars: [
-              { dataKey: 'transactions', fill: '#10b981', name: 'Nº de Transações' },
-            ],
+              {
+                dataKey: 'transactions',
+                fill: '#10b981',
+                name: 'Nº de Transações'
+              }
+            ]
           };
         } else if (chart.dataSource === 'statusDistribution') {
           chartData = customData.transactions.statusDistribution || [];
@@ -274,15 +371,19 @@ const DashboardCategory = forwardRef(
             innerRadius: 85,
             outerRadius: 130,
             paddingAngle: 3,
-            cornerRadius: 12,
+            cornerRadius: 12
           };
         } else if (chart.dataSource === 'dateHistogram') {
           chartData = customData.transactions.dateHistogram || [];
           chartProps = {
             xDataKey: 'periodLabel',
             bars: [
-              { dataKey: 'totalTransactions', fill: '#ec4899', name: 'Transações' },
-            ],
+              {
+                dataKey: 'totalTransactions',
+                fill: '#ec4899',
+                name: 'Transações'
+              }
+            ]
           };
         } else if (chart.dataSource === 'valueHistogram') {
           chartData = customData.transactions.valueHistogram || [];
@@ -290,8 +391,8 @@ const DashboardCategory = forwardRef(
             xDataKey: 'bin',
             bars: [
               { dataKey: 'count', fill: '#f59e0b', name: 'Contagem' },
-              { dataKey: 'totalAmount', fill: '#ef4444', name: 'Valor Total' },
-            ],
+              { dataKey: 'totalAmount', fill: '#ef4444', name: 'Valor Total' }
+            ]
           };
         }
       } else if (section === 'evolution') {
@@ -300,9 +401,18 @@ const DashboardCategory = forwardRef(
           chartProps = {
             xDataKey: 'periodLabel',
             lines: [
-              { dataKey: 'totalAmount', stroke: '#3b82f6', name: 'Valor Total', area: true },
-              { dataKey: 'totalTransactions', stroke: '#10b981', name: 'Transações' },
-            ],
+              {
+                dataKey: 'totalAmount',
+                stroke: '#3b82f6',
+                name: 'Valor Total',
+                area: true
+              },
+              {
+                dataKey: 'totalTransactions',
+                stroke: '#10b981',
+                name: 'Transações'
+              }
+            ]
           };
         } else if (chart.dataSource === 'recordsVsAverage') {
           chartData = customData.evolution.recordsVsAverage || [];
@@ -311,7 +421,7 @@ const DashboardCategory = forwardRef(
             yDataKey: 'averageAmount',
             zDataKey: 'totalAmount',
             scatterName: 'Categorias',
-            fill: '#8b5cf6',
+            fill: '#8b5cf6'
           };
         }
       } else if (section === 'progress') {
@@ -322,9 +432,19 @@ const DashboardCategory = forwardRef(
             xType: 'number',
             yDataKey: 'title',
             bars: [
-              { dataKey: 'initialBalance', fill: '#06b6d4', name: 'Saldo Inicial', stackId: 'a' },
-              { dataKey: 'currentTotal', fill: '#10b981', name: 'Total Atual', stackId: 'a' },
-            ],
+              {
+                dataKey: 'initialBalance',
+                fill: '#06b6d4',
+                name: 'Saldo Inicial',
+                stackId: 'a'
+              },
+              {
+                dataKey: 'currentTotal',
+                fill: '#10b981',
+                name: 'Total Atual',
+                stackId: 'a'
+              }
+            ]
           };
         }
       }
@@ -365,7 +485,10 @@ const DashboardCategory = forwardRef(
       } else if (chart.chartType === 'BarChart') {
         return (
           <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={chartData} layout={chartProps.layout || 'horizontal'}>
+            <BarChart
+              data={chartData}
+              layout={chartProps.layout || 'horizontal'}
+            >
               <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
               <XAxis
                 type={chartProps.xType || 'category'}
@@ -442,9 +565,19 @@ const DashboardCategory = forwardRef(
               <YAxis tickFormatter={getYAxisFormatter(chart.yAxis)} />
               <Tooltip content={<CustomTooltip />} />
               <defs>
-                <linearGradient id="gradientPrimary" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient
+                  id="gradientPrimary"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
                   <stop offset="0%" stopColor={COLORS[0]} stopOpacity={0.9} />
-                  <stop offset="100%" stopColor={COLORS[0]} stopOpacity={0.05} />
+                  <stop
+                    offset="100%"
+                    stopColor={COLORS[0]}
+                    stopOpacity={0.05}
+                  />
                 </linearGradient>
               </defs>
               <Area
@@ -458,9 +591,23 @@ const DashboardCategory = forwardRef(
               {chart.additionalMetrics.map((metric, i) => (
                 <>
                   <defs>
-                    <linearGradient id={`gradient${i}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={COLORS[(i + 1) % COLORS.length]} stopOpacity={0.9} />
-                      <stop offset="100%" stopColor={COLORS[(i + 1) % COLORS.length]} stopOpacity={0.05} />
+                    <linearGradient
+                      id={`gradient${i}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor={COLORS[(i + 1) % COLORS.length]}
+                        stopOpacity={0.9}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={COLORS[(i + 1) % COLORS.length]}
+                        stopOpacity={0.05}
+                      />
                     </linearGradient>
                   </defs>
                   <Area
@@ -482,11 +629,7 @@ const DashboardCategory = forwardRef(
           <ResponsiveContainer width="100%" height={360}>
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                type="number"
-                dataKey={chart.xAxis}
-                name={chart.xAxis}
-              />
+              <XAxis type="number" dataKey={chart.xAxis} name={chart.xAxis} />
               <YAxis
                 type="number"
                 dataKey={chart.yAxis}
@@ -619,26 +762,38 @@ const DashboardCategory = forwardRef(
             <h3>Total de Transações</h3>
             <p>{formatNumber(summary.totalTransactions)}</p>
           </div>
-          <div className={`${styles.summaryCard} ${styles[theme]}`}>
-            <h3>Valor Total</h3>
-            <p>{formatCurrency(summary.totalAmount)}</p>
-          </div>
-          <div className={`${styles.summaryCard} ${styles[theme]}`}>
-            <h3>Média por Transação</h3>
-            <p>{formatCurrency(summary.averageTransactionAmount)}</p>
-          </div>
+
+          {showFinancialMetrics && (
+            <>
+              <div className={`${styles.summaryCard} ${styles[theme]}`}>
+                <h3>Valor Total</h3>
+                <p>{formatCurrency(summary.totalAmount)}</p>
+              </div>
+              <div className={`${styles.summaryCard} ${styles[theme]}`}>
+                <h3>Média por Transação</h3>
+                <p>{formatCurrency(summary.averageTransactionAmount)}</p>
+              </div>
+            </>
+          )}
+
           <div className={`${styles.summaryCard} ${styles[theme]}`}>
             <h3>Categorias Ativas</h3>
             <p>{summary.totalCategories}</p>
           </div>
-          {(data.customChartsData?.customFields || []).map((field, idx) => (
-            selectedCustomSummaries.includes(field.label) && field.totalSum > 0 && (
-              <div key={idx} className={`${styles.summaryCard} ${styles[theme]}`}>
-                <h3>Total de {field.label}</h3>
-                <p>{formatNumber(field.totalSum)}</p>
-              </div>
-            )
-          ))}
+
+          {(data.customChartsData?.customFields || []).map(
+            (field, idx) =>
+              selectedCustomSummaries.includes(field.label) &&
+              field.totalSum > 0 && (
+                <div
+                  key={idx}
+                  className={`${styles.summaryCard} ${styles[theme]}`}
+                >
+                  <h3>Total de {field.label}</h3>
+                  <p>{formatNumber(field.totalSum)}</p>
+                </div>
+              )
+          )}
         </div>
         <button
           onClick={handleOpenSummaryModal}
@@ -721,7 +876,9 @@ const DashboardCategory = forwardRef(
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie
-                    data={(transactionCountPieChart || []).filter((d) => d.count > 0)}
+                    data={(transactionCountPieChart || []).filter(
+                      (d) => d.count > 0
+                    )}
                     dataKey="count"
                     nameKey="name"
                     cx="50%"
@@ -817,8 +974,13 @@ const DashboardCategory = forwardRef(
                 >
                   <h3>Contagem: {field.label}</h3>
                   <ResponsiveContainer width="100%" height={360}>
-                    <BarChart data={(field.data || []).filter((d) => d.count > 0)}>
-                      <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
+                    <BarChart
+                      data={(field.data || []).filter((d) => d.count > 0)}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="4 4"
+                        strokeOpacity={0.3}
+                      />
                       <XAxis
                         dataKey="name"
                         angle={-15}
@@ -847,7 +1009,9 @@ const DashboardCategory = forwardRef(
                   <div className={styles.customChartHeader}>
                     <h3>{chart.title}</h3>
                     <button
-                      onClick={() => handleRemoveChart(chart.id, 'customFields')}
+                      onClick={() =>
+                        handleRemoveChart(chart.id, 'customFields')
+                      }
                       className={styles.removeButton}
                     >
                       <X size={16} />
@@ -1130,67 +1294,69 @@ const DashboardCategory = forwardRef(
           </div>
         </div>
 
-        {/* === 5. Progresso de Metas === */}
-        <div className={`${styles.section} ${styles[theme]}`}>
-          <h2>
-            Progresso de Metas
-            <button
-              onClick={() => handleOpenModal('progress')}
-              className={styles.customButton}
-            >
-              Customizar Gráfico
-            </button>
-          </h2>
-          <div className={styles.chartsGrid}>
-            <div
-              className={`chart-card ${styles.chartCard} ${styles[theme]}`}
-              ref={addChartRef}
-            >
-              <h3>Progresso por Registro</h3>
-              <ResponsiveContainer width="100%" height={360}>
-                <BarChart data={goalProgressData || []} layout="vertical">
-                  <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
-                  <XAxis type="number" tickFormatter={formatCurrency} />
-                  <YAxis dataKey="title" type="category" width={150} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                  <Bar
-                    dataKey="initialBalance"
-                    fill="#06b6d4"
-                    name="Saldo Inicial"
-                    stackId="a"
-                    radius={[8, 0, 0, 8]}
-                  />
-                  <Bar
-                    dataKey="currentTotal"
-                    fill="#10b981"
-                    name="Total Atual"
-                    stackId="a"
-                    radius={[0, 8, 8, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            {customCharts['progress']?.map((chart) => (
+        {/* ✅ === 5. Progresso de Metas (CONDICIONAL) === */}
+        {showFinancialMetrics && (
+          <div className={`${styles.section} ${styles[theme]}`}>
+            <h2>
+              Progresso de Metas
+              <button
+                onClick={() => handleOpenModal('progress')}
+                className={styles.customButton}
+              >
+                Customizar Gráfico
+              </button>
+            </h2>
+            <div className={styles.chartsGrid}>
               <div
-                key={chart.id}
                 className={`chart-card ${styles.chartCard} ${styles[theme]}`}
                 ref={addChartRef}
               >
-                <div className={styles.customChartHeader}>
-                  <h3>{chart.title}</h3>
-                  <button
-                    onClick={() => handleRemoveChart(chart.id, 'progress')}
-                    className={styles.removeButton}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                {renderCustomChart('progress', chart)}
+                <h3>Progresso por Registro</h3>
+                <ResponsiveContainer width="100%" height={360}>
+                  <BarChart data={goalProgressData || []} layout="vertical">
+                    <CartesianGrid strokeDasharray="4 4" strokeOpacity={0.3} />
+                    <XAxis type="number" tickFormatter={formatCurrency} />
+                    <YAxis dataKey="title" type="category" width={150} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend />
+                    <Bar
+                      dataKey="initialBalance"
+                      fill="#06b6d4"
+                      name="Saldo Inicial"
+                      stackId="a"
+                      radius={[8, 0, 0, 8]}
+                    />
+                    <Bar
+                      dataKey="currentTotal"
+                      fill="#10b981"
+                      name="Total Atual"
+                      stackId="a"
+                      radius={[0, 8, 8, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            ))}
+              {customCharts['progress']?.map((chart) => (
+                <div
+                  key={chart.id}
+                  className={`chart-card ${styles.chartCard} ${styles[theme]}`}
+                  ref={addChartRef}
+                >
+                  <div className={styles.customChartHeader}>
+                    <h3>{chart.title}</h3>
+                    <button
+                      onClick={() => handleRemoveChart(chart.id, 'progress')}
+                      className={styles.removeButton}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  {renderCustomChart('progress', chart)}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <CustomChartModal
           show={showModal}
@@ -1203,7 +1369,11 @@ const DashboardCategory = forwardRef(
           show={showSummaryModal}
           onClose={handleCloseSummaryModal}
           onSubmit={handleSummarySubmit}
-          fields={data?.customChartsData?.customFields?.filter(f => f.totalSum > 0) || []}
+          fields={
+            data?.customChartsData?.customFields?.filter(
+              (f) => f.totalSum > 0
+            ) || []
+          }
           initialSelected={selectedCustomSummaries}
         />
       </div>

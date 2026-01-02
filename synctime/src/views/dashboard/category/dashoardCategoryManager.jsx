@@ -213,7 +213,8 @@ const DashboardCategoryManager = () => {
         filters={filters}
         chartRefs={chartRefs}
         onChartsRendered={handleChartsRendered}
-        setChartsReady={setChartsReady} 
+        setChartsReady={setChartsReady}
+        categories={categories}
       />
     </div>
   );

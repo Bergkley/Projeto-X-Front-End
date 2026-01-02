@@ -20,6 +20,7 @@ import Pagination from '../../../../components/pagination/Pagination';
 import TableHeaderWithFilter from '../../../../components/header/TableHeaderWithFilter/TableHeaderWithFilter';
 import ServiceMonthlyRecord from './services/ServiceMonthlyRecord';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import ServiceCategory from '../../../sectionConfigSystem/Sections/Report/Category/services/ServiceCategory';
 
 const ReportMonthlyRecordList = () => {
   const { id: idCategory } = useParams();
@@ -37,6 +38,8 @@ const ReportMonthlyRecordList = () => {
   const [recordToDelete, setRecordToDelete] = useState(null);
   const [activeFilters, setActiveFilters] = useState([]);
   const [status, setStatus] = useState('');
+  const [category, setCategory] = useState(null);
+
 
   const [sortBy, setSortBy] = useState('');
   const [order, setOrder] = useState('');
@@ -96,6 +99,18 @@ const ReportMonthlyRecordList = () => {
     fetchMonthlyRecords();
   }, [currentPage, sortBy, order, activeFilters, idCategory]);
 
+    useEffect(() => {
+      const fetchCategory = async () => {
+        if (idCategory) {
+          const category = await ServiceCategory.getByIdCategory(
+            idCategory
+          );
+          setCategory(category.data.data);
+        }
+      };
+      fetchCategory();
+    }, [idCategory]);
+
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const formatMonthYear = (month, year) => {
@@ -137,6 +152,8 @@ const ReportMonthlyRecordList = () => {
     return statusMap[status] || status;
   };
 
+  const isCategoryFinancial = category?.type === 'financeiro';
+
   const columns = [
     {
       key: 'title',
@@ -169,11 +186,11 @@ const ReportMonthlyRecordList = () => {
         return row.goal;
       }
     },
-    {
+    ...(isCategoryFinancial ? [{
       key: 'initial_balance',
       label: 'Saldo Inicial',
       render: (row) => formatCurrency(row.initial_balance)
-    },
+    }] : []),
     {
       key: 'status',
       label: 'Status',

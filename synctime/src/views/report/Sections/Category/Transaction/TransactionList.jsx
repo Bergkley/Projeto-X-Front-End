@@ -50,6 +50,8 @@ const TransactionList = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
 
+  const [categoryInfo, setCategoryInfo] = useState(null);
+
   const effectiveTableKey = `${TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS}_${
     idCategory || categoryId || 'general'
   }`;
@@ -63,10 +65,16 @@ const TransactionList = () => {
     year
   };
 
+  const isFinancialCategory = () => {
+    return categoryInfo?.type === 'financeiro';
+  };
+
+  const showFinancialColumns = isFinancialCategory();
+
   const filterColumnsBase = [
     { id: 'title', label: 'Título', type: 'text' },
     { id: 'description', label: 'Descrição', type: 'text' },
-    { id: 'amount', label: 'Valor', type: 'number' },
+    ...(showFinancialColumns ? [{ id: 'amount', label: 'Valor', type: 'number' }] : []),
     { id: 'transaction_date', label: 'Data da Transação', type: 'date' },
     { id: 'created_at', label: 'Data de Criação', type: 'date' },
     { id: 'updated_at', label: 'Última Atualização', type: 'date' }
@@ -132,6 +140,24 @@ const TransactionList = () => {
       setFlashMessage('Erro na exportação', 'error');
     }
   };
+
+  useEffect(() => {
+    const fetchCategoryInfo = async () => {
+      const catId = idCategory || categoryId;
+      if (catId) {
+        try {
+          const response = await ServiceCategory.getByIdCategory(catId);
+          if (response.data.status === 'OK' && response.data.data) {
+            setCategoryInfo(response.data.data);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar informações da categoria:', error);
+        }
+      }
+    };
+
+    fetchCategoryInfo();
+  }, [idCategory, categoryId]);
 
   useEffect(() => {
     if (recordTypeId && categoryId) {
@@ -207,11 +233,15 @@ const TransactionList = () => {
       label: 'Descrição',
       render: (row) => row.description || '-'
     },
-    {
-      key: 'amount',
-      label: 'Saldo Inicial',
-      render: (row) => formatCurrency(row.amount)
-    },
+    ...(showFinancialColumns
+      ? [
+          {
+            key: 'amount',
+            label: 'Saldo Inicial',
+            render: (row) => formatCurrency(row.amount)
+          }
+        ]
+      : []),
     {
       key: 'transaction_date',
       label: 'Data da Transação',
@@ -531,7 +561,10 @@ const TransactionList = () => {
             onUpdateRecord={editTransactionRecord}
             tableKey={TABLE_CONFIG_KEYS.TRANSACTIONS_RECORDS}
           />
-          <TableFooter numRecords={transactionRecords.length} totalAmount={totalAmount} />
+          <TableFooter 
+            numRecords={transactionRecords.length} 
+            totalAmount={showFinancialColumns ? totalAmount : undefined} 
+          />
         </>
       )}
 
