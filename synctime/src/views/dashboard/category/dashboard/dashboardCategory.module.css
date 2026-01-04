@@ -258,18 +258,91 @@
 }
 
 .customButton {
-  background: hsl(var(--primary), #3b82f6);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 10px 20px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.customButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.customButton:hover::before {
+  left: 100%;
 }
 
 .customButton:hover {
-  background: hsl(var(--primary) 80%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.customButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.customButton.dark {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+}
+
+.customButton.dark:hover {
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.5);
+}
+
+.addSummaryButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  margin-bottom: 24px;
+}
+
+.addSummaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.addSummaryButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.addSummaryButton.dark {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.4);
+}
+
+.addSummaryButton.dark:hover {
+  box-shadow: 0 6px 20px rgba(4, 120, 87, 0.5);
 }
 
 .modalOverlay {
@@ -334,6 +407,13 @@
 .closeButton {
   color: #6b7280;
   transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .closeButton:hover {
@@ -425,6 +505,8 @@
   border-width: 2px;
   transition: all 0.2s;
   font-size: 0.875rem;
+  cursor: pointer;
+  background: none;
 }
 
 .chartTypeButton.light {
@@ -559,6 +641,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  cursor: pointer;
 }
 
 .removeButton:hover {
@@ -578,6 +662,7 @@
   transition: all 0.2s;
   font-weight: 500;
   font-size: 0.875rem;
+  cursor: pointer;
 }
 
 .cancelButton.light {
@@ -606,6 +691,7 @@
   transition: all 0.2s;
   font-weight: 500;
   font-size: 0.875rem;
+  cursor: pointer;
 }
 
 .submitButton.light {
@@ -636,6 +722,19 @@
 .submitButton.dark:disabled {
   background: #6b7280;
   cursor: not-allowed;
+}
+
+.container {
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.container.light {
+  background: var(--bg-primary, #f9fafb);
+}
+
+.container.dark {
+  background: var(--bg-primary, #0f172a);
 }
 
 /* Media queries para responsividade */
@@ -675,6 +774,8 @@
 
   .section h2 {
     font-size: 1.4rem;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .table th, .table td {

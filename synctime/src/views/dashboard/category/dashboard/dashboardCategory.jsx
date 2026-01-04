@@ -797,10 +797,10 @@ const DashboardCategory = forwardRef(
         </div>
         <button
           onClick={handleOpenSummaryModal}
-          className={styles.customButton}
+          className={`${styles.addSummaryButton} ${styles[theme]}`}
         >
+          <Plus size={18} />
           Adicionar Totais Custom
-          <Plus size={16} style={{ marginLeft: '8px' }} />
         </button>
 
         {/* === 1. Insights de Categorias === */}
@@ -809,8 +809,9 @@ const DashboardCategory = forwardRef(
             Insights de Categorias
             <button
               onClick={() => handleOpenModal('categories')}
-              className={styles.customButton}
+              className={`${styles.customButton} ${styles[theme]}`}
             >
+              <Plus size={16} />
               Customizar Gráfico
             </button>
           </h2>
@@ -960,8 +961,9 @@ const DashboardCategory = forwardRef(
               Insights de Campos Customizados
               <button
                 onClick={() => handleOpenModal('customFields')}
-                className={styles.customButton}
+                className={`${styles.customButton} ${styles[theme]}`}
               >
+                <Plus size={16} />
                 Customizar Gráfico
               </button>
             </h2>
@@ -1030,8 +1032,9 @@ const DashboardCategory = forwardRef(
             Insights de Transações
             <button
               onClick={() => handleOpenModal('transactions')}
-              className={styles.customButton}
+              className={`${styles.customButton} ${styles[theme]}`}
             >
+              <Plus size={16} />
               Customizar Gráfico
             </button>
           </h2>
@@ -1181,8 +1184,9 @@ const DashboardCategory = forwardRef(
             Evolução e Relações
             <button
               onClick={() => handleOpenModal('evolution')}
-              className={styles.customButton}
+              className={`${styles.customButton} ${styles[theme]}`}
             >
+              <Plus size={16} />
               Customizar Gráfico
             </button>
           </h2>
@@ -1294,15 +1298,16 @@ const DashboardCategory = forwardRef(
           </div>
         </div>
 
-        {/* ✅ === 5. Progresso de Metas (CONDICIONAL) === */}
+        {/* === 5. Progresso de Metas (CONDICIONAL) === */}
         {showFinancialMetrics && (
           <div className={`${styles.section} ${styles[theme]}`}>
             <h2>
               Progresso de Metas
               <button
                 onClick={() => handleOpenModal('progress')}
-                className={styles.customButton}
+                className={`${styles.customButton} ${styles[theme]}`}
               >
+                <Plus size={16} />
                 Customizar Gráfico
               </button>
             </h2>
